@@ -1,2 +1,2 @@
 # CAENDigitizer
-CAEN digitizer hand classes
+CAEN digitizer handling classes
