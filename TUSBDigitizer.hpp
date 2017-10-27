@@ -12,7 +12,8 @@
 class TUSBDigitizer : public TDigitizer
 {
  public:
-  TUSBDigitizer(int link);
+  // TUSBDigitizer();
+  explicit TUSBDigitizer(int link);
   ~TUSBDigitizer();
 
  private:

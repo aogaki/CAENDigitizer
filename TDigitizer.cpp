@@ -2,7 +2,17 @@
 
 #include "TDigitizer.hpp"
 
-TDigitizer::TDigitizer() {}
+TDigitizer::TDigitizer()
+    : fHandler(0),
+      fpReadoutBuffer(nullptr),
+      fpEventPtr(nullptr),
+      fpEventStd(nullptr),
+      fMaxBufferSize(0),
+      fBufferSize(0),
+      fNEvents(0),
+      fReadSize(0)
+{
+}
 
 TDigitizer::~TDigitizer()
 {
@@ -123,7 +133,163 @@ void TDigitizer::GetNEvents()
   PrintError(err, "GetNEvents");
 }
 
-void TDigitizer::PrintError(CAEN_DGTZ_ErrorCode err, std::string funcName)
+void TDigitizer::GetEventInfo()
+{
+  CAEN_DGTZ_EventInfo_t eveInfo;
+  auto err = CAEN_DGTZ_GetEventInfo(fHandler, fpReadoutBuffer, fBufferSize,
+                                    fNEvents, &eveInfo, &fpEventPtr);
+  PrintError(err, "GetEventInfo");
+  // Something about printing the eveInfo NYI
+}
+
+void TDigitizer::DecodeEvent()
+{
+  auto err = CAEN_DGTZ_DecodeEvent(fHandler, fpEventPtr, (void **)&fpEventStd);
+  PrintError(err, "DecodeEvent");
+}
+
+void TDigitizer::AllocateEvent()
+{
+  auto err = CAEN_DGTZ_AllocateEvent(fHandler, (void **)&fpEventStd);
+  PrintError(err, "AllocateEvent");
+}
+
+void TDigitizer::FreeEvent()
+{
+  auto err = CAEN_DGTZ_FreeEvent(fHandler, (void **)&fpEventStd);
+  PrintError(err, "FreeEvent");
+}
+
+void TDigitizer::Calibrate()
+{
+  auto err = CAEN_DGTZ_Calibrate(fHandler);
+  PrintError(err, "Calibrate");
+}
+
+uint32_t TDigitizer::ReadTemperature(int32_t ch)
+{
+  uint32_t temp;
+  auto err = CAEN_DGTZ_ReadTemperature(fHandler, ch, &temp);
+  PrintError(err, "ReadTemperature");
+
+  return temp;
+}
+
+void TDigitizer::SendSWTrigger()
+{
+  auto err = CAEN_DGTZ_SendSWtrigger(fHandler);
+  PrintError(err, "SendSWTrigger");
+}
+
+void TDigitizer::SetSWTriggerMode(CAEN_DGTZ_TriggerMode_t mode)
+{
+  auto err = CAEN_DGTZ_SetSWTriggerMode(fHandler, mode);
+  PrintError(err, "SetSWTriggerMode");
+}
+
+CAEN_DGTZ_TriggerMode_t TDigitizer::GetSWTriggerMode()
+{
+  CAEN_DGTZ_TriggerMode_t mode;
+  auto err = CAEN_DGTZ_GetSWTriggerMode(fHandler, &mode);
+  PrintError(err, "GetSWTriggerMode");
+
+  return mode;
+}
+
+void TDigitizer::SetExtTriggerInputMode(CAEN_DGTZ_TriggerMode_t mode)
+{
+  auto err = CAEN_DGTZ_SetExtTriggerInputMode(fHandler, mode);
+  PrintError(err, "SetExtTriggerMode");
+}
+
+CAEN_DGTZ_TriggerMode_t TDigitizer::GetExtTriggerInputMode()
+{
+  CAEN_DGTZ_TriggerMode_t mode;
+  auto err = CAEN_DGTZ_GetExtTriggerInputMode(fHandler, &mode);
+  PrintError(err, "GetExtTriggerMode");
+
+  return mode;
+}
+
+void TDigitizer::SetChannelSelfTrigger(CAEN_DGTZ_TriggerMode_t mode,
+                                       uint32_t chMask)
+{
+  auto err = CAEN_DGTZ_SetChannelSelfTrigger(fHandler, mode, chMask);
+  PrintError(err, "SetChannelSelfTrigger");
+}
+
+CAEN_DGTZ_TriggerMode_t TDigitizer::GetChannelSelfTrigger(uint32_t ch)
+{
+  CAEN_DGTZ_TriggerMode_t mode;
+  auto err = CAEN_DGTZ_GetChannelSelfTrigger(fHandler, ch, &mode);
+  PrintError(err, "GetChannelSelfTrigger");
+
+  return mode;
+}
+
+void TDigitizer::SetChannelTriggerThreshold(uint32_t ch, uint32_t th)
+{
+  auto err = CAEN_DGTZ_SetChannelTriggerThreshold(fHandler, ch, th);
+  PrintError(err, "SetChannelTriggerThreshold");
+}
+
+uint32_t TDigitizer::GetChannelTriggerThreshold(uint32_t ch)
+{
+  uint32_t th;
+  auto err = CAEN_DGTZ_GetChannelTriggerThreshold(fHandler, ch, &th);
+  PrintError(err, "GetChannelTriggerThreshold");
+
+  return th;
+}
+
+void TDigitizer::SetRunSynchronizationMode(CAEN_DGTZ_RunSyncMode_t mode)
+{
+  auto err = CAEN_DGTZ_SetRunSynchronizationMode(fHandler, mode);
+  PrintError(err, "SetRunSynchronizationMode");
+}
+
+CAEN_DGTZ_RunSyncMode_t TDigitizer::GetRunSynchronizationMode()
+{
+  CAEN_DGTZ_RunSyncMode_t mode;
+  auto err = CAEN_DGTZ_GetRunSynchronizationMode(fHandler, &mode);
+  PrintError(err, "GetRunSynchronizationMode");
+
+  return mode;
+}
+
+void TDigitizer::SetIOLevel(CAEN_DGTZ_IOLevel_t level)
+{
+  auto err = CAEN_DGTZ_SetIOLevel(fHandler, level);
+  PrintError(err, "SetIOLevel");
+}
+
+CAEN_DGTZ_IOLevel_t TDigitizer::GetIOLevel()
+{
+  CAEN_DGTZ_IOLevel_t level;
+  auto err = CAEN_DGTZ_GetIOLevel(fHandler, &level);
+  PrintError(err, "GetIOLevel");
+
+  return level;
+}
+
+void TDigitizer::SetTriggerPolarity(CAEN_DGTZ_TriggerPolarity_t pol,
+                                    uint32_t ch)
+{
+  auto err = CAEN_DGTZ_SetTriggerPolarity(fHandler, ch, pol);
+  PrintError(err, "SetTriggerPolarity");
+}
+
+CAEN_DGTZ_TriggerPolarity_t TDigitizer::GetTriggerPolarity(uint32_t ch)
+{
+  CAEN_DGTZ_TriggerPolarity_t pol;
+  auto err = CAEN_DGTZ_GetTriggerPolarity(fHandler, ch, &pol);
+  PrintError(err, "GetTriggerPolarity");
+
+  return pol;
+}
+
+void TDigitizer::PrintError(const CAEN_DGTZ_ErrorCode &err,
+                            const std::string &funcName)
 {
   if (err < 0) {  // 0 is success
     std::cout << "in " << funcName << ", error code = " << err << std::endl;
