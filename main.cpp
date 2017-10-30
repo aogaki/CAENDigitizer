@@ -13,6 +13,12 @@ int main()
 
   digi->SetMaxNEventsBLT(1024);
   digi->MallocReadoutBuffer();
-  for (int i = 0; i < 1000; i++) digi->ReadData();
+  digi->SWStartAcquisition();
+  for (int i = 0; i < 1000; i++) {
+    digi->SendSWTrigger();
+    digi->ReadData();
+  }
+  digi->SWStopAcquisition();
+
   delete digi;
 }

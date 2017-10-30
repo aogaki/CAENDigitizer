@@ -7,6 +7,18 @@
 #include <string>
 
 #include <CAENDigitizer.h>
+#include <CAENDigitizerType.h>
+
+// class TZSParams
+// {
+//  public:
+//   TZSParams() : fWeight(CAEN_DGTZ_ZS_FINE), fThreshold(0), fNSamples(0){};
+//   ~TZSParams(){};
+//
+//   CAEN_DGTZ_ThresholdWeight_t fWeight;
+//   int32_t fThreshold;
+//   int32_t fNSamples;
+// };
 
 class TDigitizer
 {
@@ -14,6 +26,7 @@ class TDigitizer
   TDigitizer();
   virtual ~TDigitizer();
 
+  // This class inculdes all CAENDigitizer Library functions.
   // If functions are only for the one type or family,
   // Those functions are implemented in sub classes.
   // Its should be protected and used from UI class's public functions.
@@ -75,8 +88,38 @@ class TDigitizer
   void SetTriggerPolarity(CAEN_DGTZ_TriggerPolarity_t pol, uint32_t ch);
   CAEN_DGTZ_TriggerPolarity_t GetTriggerPolarity(uint32_t ch);
 
+  // Acquisition functions
+  void SetChannelEnableMask(uint32_t mask);
+  uint32_t GetChannelEnableMask();
+
+  void SWStartAcquisition();
+  void SWStopAcquisition();
+
+  void SetRecordLength(uint32_t size);
+  uint32_t GetRecordLength();
+
+  void SetPostTriggerSize(uint32_t percent);
+  uint32_t GetPostTriggerSize();
+
+  void SetAcquisitionMode(CAEN_DGTZ_AcqMode_t mode);
+  CAEN_DGTZ_AcqMode_t GetAcquisitionMode();
+
+  void SetChannelDCOffset(uint32_t ch, uint32_t offset);
+  uint32_t GetChannelDCOffset(uint32_t ch);
+
+  void SetZeroSuppressionMode(CAEN_DGTZ_ZS_Mode_t mode);
+  CAEN_DGTZ_ZS_Mode_t GetZeroSuppressionMode();
+
+  void SetChannelZSParams(uint32_t ch, CAEN_DGTZ_ThresholdWeight_t weight,
+                          int32_t threshold, int32_t nSamples);
+  void GetChannelZSParams(uint32_t ch, CAEN_DGTZ_ThresholdWeight_t &weight,
+                          int32_t &threshold, int32_t &nSamples);
+
+  void SetAnalogMonOutput(CAEN_DGTZ_AnalogMonitorOutputMode_t mode);
+  CAEN_DGTZ_AnalogMonitorOutputMode_t GetAnalogMonOutput();
+
  private:
-  int fHandler{0};
+  int fHandler{-1};  // What is the possible region of handler?
   char *fpReadoutBuffer{nullptr};
   char *fpEventPtr{nullptr};
   CAEN_DGTZ_UINT16_EVENT_t *fpEventStd{nullptr};  // for void **Eve
@@ -86,6 +129,7 @@ class TDigitizer
   uint32_t fReadSize{0};
 
   void PrintError(const CAEN_DGTZ_ErrorCode &err, const std::string &funcName);
+  void HandlerCheck();
 };
 
 #endif

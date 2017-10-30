@@ -3,7 +3,7 @@
 #include "TDigitizer.hpp"
 
 TDigitizer::TDigitizer()
-    : fHandler(0),
+    : fHandler(-1),
       fpReadoutBuffer(nullptr),
       fpEventPtr(nullptr),
       fpEventStd(nullptr),
@@ -25,6 +25,7 @@ void TDigitizer::Open(CAEN_DGTZ_ConnectionType type, int link, int node,
 {
   auto err = CAEN_DGTZ_OpenDigitizer(type, link, node, VMEadd, &fHandler);
   PrintError(err, "OpenDigitizer");
+  HandlerCheck();
 }
 
 void TDigitizer::Close()
@@ -288,6 +289,140 @@ CAEN_DGTZ_TriggerPolarity_t TDigitizer::GetTriggerPolarity(uint32_t ch)
   return pol;
 }
 
+void TDigitizer::SetChannelEnableMask(uint32_t mask)
+{
+  auto err = CAEN_DGTZ_SetChannelEnableMask(fHandler, mask);
+  PrintError(err, "SetChannelEnableMask");
+}
+
+uint32_t TDigitizer::GetChannelEnableMask()
+{
+  uint32_t mask;
+  auto err = CAEN_DGTZ_GetChannelEnableMask(fHandler, &mask);
+  PrintError(err, "GetChannelEnableMask");
+
+  return mask;
+}
+
+void TDigitizer::SWStartAcquisition()
+{
+  auto err = CAEN_DGTZ_SWStartAcquisition(fHandler);
+  PrintError(err, "SWStartAcquisition");
+}
+
+void TDigitizer::SWStopAcquisition()
+{
+  auto err = CAEN_DGTZ_SWStopAcquisition(fHandler);
+  PrintError(err, "SWStopAcquisition");
+}
+
+void TDigitizer::SetRecordLength(uint32_t size)
+{
+  auto err = CAEN_DGTZ_SetRecordLength(fHandler, size);
+  PrintError(err, "SetRecordLength");
+}
+
+uint32_t TDigitizer::GetRecordLength()
+{
+  uint32_t size;
+  auto err = CAEN_DGTZ_GetRecordLength(fHandler, &size);
+  PrintError(err, "GetRecordLength");
+
+  return size;
+}
+
+void TDigitizer::SetPostTriggerSize(uint32_t percent)
+{
+  auto err = CAEN_DGTZ_SetPostTriggerSize(fHandler, percent);
+  PrintError(err, "SetPostTriggerSize");
+}
+
+uint32_t TDigitizer::GetPostTriggerSize()
+{
+  uint32_t percent;
+  auto err = CAEN_DGTZ_GetPostTriggerSize(fHandler, &percent);
+  PrintError(err, "GetPostTriggerSize");
+
+  return percent;
+}
+
+void TDigitizer::SetAcquisitionMode(CAEN_DGTZ_AcqMode_t mode)
+{
+  auto err = CAEN_DGTZ_SetAcquisitionMode(fHandler, mode);
+  PrintError(err, "SetAcquisitionMode");
+}
+
+CAEN_DGTZ_AcqMode_t TDigitizer::GetAcquisitionMode()
+{
+  CAEN_DGTZ_AcqMode_t mode;
+  auto err = CAEN_DGTZ_GetAcquisitionMode(fHandler, &mode);
+  PrintError(err, "GetAcquisitionMode");
+
+  return mode;
+}
+
+void TDigitizer::SetChannelDCOffset(uint32_t ch, uint32_t offset)
+{
+  auto err = CAEN_DGTZ_SetChannelDCOffset(fHandler, ch, offset);
+  PrintError(err, "SetChannelDCOffset");
+}
+
+uint32_t TDigitizer::GetChannelDCOffset(uint32_t ch)
+{
+  uint32_t offset;
+  auto err = CAEN_DGTZ_GetChannelDCOffset(fHandler, ch, &offset);
+  PrintError(err, "GetChannelDCOffset");
+
+  return offset;
+}
+
+void TDigitizer::SetZeroSuppressionMode(CAEN_DGTZ_ZS_Mode_t mode)
+{
+  auto err = CAEN_DGTZ_SetZeroSuppressionMode(fHandler, mode);
+  PrintError(err, "SetZeroSuppressionMode");
+}
+
+CAEN_DGTZ_ZS_Mode_t TDigitizer::GetZeroSuppressionMode()
+{
+  CAEN_DGTZ_ZS_Mode_t mode;
+  auto err = CAEN_DGTZ_GetZeroSuppressionMode(fHandler, &mode);
+  PrintError(err, "GetZeroSuppressionMode");
+
+  return mode;
+}
+
+void TDigitizer::SetChannelZSParams(uint32_t ch,
+                                    CAEN_DGTZ_ThresholdWeight_t weight,
+                                    int32_t threshold, int32_t nSamples)
+{
+  auto err =
+      CAEN_DGTZ_SetChannelZSParams(fHandler, ch, weight, threshold, nSamples);
+  PrintError(err, "SetChannelZSParams");
+}
+void TDigitizer::GetChannelZSParams(uint32_t ch,
+                                    CAEN_DGTZ_ThresholdWeight_t &weight,
+                                    int32_t &threshold, int32_t &nSamples)
+{
+  auto err = CAEN_DGTZ_GetChannelZSParams(fHandler, ch, &weight, &threshold,
+                                          &nSamples);
+  PrintError(err, "GetChannelZSParams");
+}
+
+void TDigitizer::SetAnalogMonOutput(CAEN_DGTZ_AnalogMonitorOutputMode_t mode)
+{
+  auto err = CAEN_DGTZ_SetAnalogMonOutput(fHandler, mode);
+  PrintError(err, "SetAnalogMonOutput");
+}
+
+CAEN_DGTZ_AnalogMonitorOutputMode_t TDigitizer::GetAnalogMonOutput()
+{
+  CAEN_DGTZ_AnalogMonitorOutputMode_t mode;
+  auto err = CAEN_DGTZ_GetAnalogMonOutput(fHandler, &mode);
+  PrintError(err, "GetAnalogMonOutput");
+
+  return mode;
+}
+
 void TDigitizer::PrintError(const CAEN_DGTZ_ErrorCode &err,
                             const std::string &funcName)
 {
@@ -296,4 +431,10 @@ void TDigitizer::PrintError(const CAEN_DGTZ_ErrorCode &err,
     // CAEN_DGTZ_CloseDigitizer(fHandler);
     // throw err;
   }
+}
+
+void TDigitizer::HandlerCheck()
+{
+  // NYI
+  std::cout << "Handler: " << fHandler << std::endl;
 }
