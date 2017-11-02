@@ -24,7 +24,11 @@ class TDigitizer
 {
  public:
   TDigitizer();
+  TDigitizer(CAEN_DGTZ_ConnectionType type, int link, int node = 0,
+             uint32_t VMEadd = 0);
   virtual ~TDigitizer();
+
+  virtual void Initialize() = 0;
 
   // This class inculdes all CAENDigitizer Library functions.
   // If functions are only for the one type or family,
@@ -118,7 +122,7 @@ class TDigitizer
   void SetAnalogMonOutput(CAEN_DGTZ_AnalogMonitorOutputMode_t mode);
   CAEN_DGTZ_AnalogMonitorOutputMode_t GetAnalogMonOutput();
 
- private:
+ protected:
   int fHandler{-1};  // What is the possible region of handler?
   char *fpReadoutBuffer{nullptr};
   char *fpEventPtr{nullptr};

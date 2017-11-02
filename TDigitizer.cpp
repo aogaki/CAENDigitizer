@@ -14,12 +14,14 @@ TDigitizer::TDigitizer()
 {
 }
 
-TDigitizer::~TDigitizer()
-{
-  FreeReadoutBuffer();
-  Close();
-}
+TDigitizer::~TDigitizer() { Close(); }
 
+TDigitizer::TDigitizer(CAEN_DGTZ_ConnectionType type, int link, int node,
+                       uint32_t VMEadd)
+    : TDigitizer()
+{
+  Open(type, link, node, VMEadd);
+}
 void TDigitizer::Open(CAEN_DGTZ_ConnectionType type, int link, int node,
                       uint32_t VMEadd)
 {
