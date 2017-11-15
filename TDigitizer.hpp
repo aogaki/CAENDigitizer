@@ -30,6 +30,8 @@ class TDigitizer
 
   virtual void Initialize() = 0;
 
+  void ReadEvents();
+
   // This class inculdes all CAENDigitizer Library functions.
   // If functions are only for the one type or family,
   // Those functions are implemented in sub classes.
@@ -58,8 +60,8 @@ class TDigitizer
   void FreeReadoutBuffer();
 
   void ReadData();
-  void GetNEvents();
-  void GetEventInfo();
+  void GetNumEvents();
+  void GetEventInfo(int32_t nEve);
   void DecodeEvent();
   void AllocateEvent();
   void FreeEvent();
@@ -124,13 +126,14 @@ class TDigitizer
 
  protected:
   int fHandler{-1};  // What is the possible region of handler?
-  char *fpReadoutBuffer{nullptr};
-  char *fpEventPtr{nullptr};
-  CAEN_DGTZ_UINT16_EVENT_t *fpEventStd{nullptr};  // for void **Eve
-  uint32_t fMaxBufferSize{0};
-  uint32_t fBufferSize{0};
-  uint32_t fNEvents{0};
-  uint32_t fReadSize{0};
+  char *fpReadoutBuffer;
+  char *fpEventPtr;
+  CAEN_DGTZ_EventInfo_t fEventInfo;
+  CAEN_DGTZ_UINT16_EVENT_t *fpEventStd;  // for void **Eve
+  uint32_t fMaxBufferSize;
+  uint32_t fBufferSize;
+  uint32_t fNEvents;
+  uint32_t fReadSize;
 
   void PrintError(const CAEN_DGTZ_ErrorCode &err, const std::string &funcName);
   void HandlerCheck();

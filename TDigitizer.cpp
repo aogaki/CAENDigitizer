@@ -16,6 +16,16 @@ TDigitizer::TDigitizer()
 
 TDigitizer::~TDigitizer() { Close(); }
 
+void TDigitizer::ReadEvents()
+{
+  ReadData();
+  GetNumEvents();
+  for (int32_t i = 0; i < fNEvents; i++) {
+    GetEventInfo(i);
+    DecodeEvent();
+  }
+}
+
 TDigitizer::TDigitizer(CAEN_DGTZ_ConnectionType type, int link, int node,
                        uint32_t VMEadd)
     : TDigitizer()
@@ -128,27 +138,36 @@ void TDigitizer::ReadData()
   PrintError(err, "ReadData");
 }
 
-void TDigitizer::GetNEvents()
+void TDigitizer::GetNumEvents()
 {
   // Check size == 0 or not?
   auto err =
       CAEN_DGTZ_GetNumEvents(fHandler, fpReadoutBuffer, fBufferSize, &fNEvents);
-  PrintError(err, "GetNEvents");
+  PrintError(err, "GetNumEvents");
+  std::cout << fNEvents << " Events" << std::endl;
 }
 
-void TDigitizer::GetEventInfo()
+void TDigitizer::GetEventInfo(int32_t nEve)
 {
-  CAEN_DGTZ_EventInfo_t eveInfo;
   auto err = CAEN_DGTZ_GetEventInfo(fHandler, fpReadoutBuffer, fBufferSize,
-                                    fNEvents, &eveInfo, &fpEventPtr);
+                                    nEve, &fEventInfo, &fpEventPtr);
   PrintError(err, "GetEventInfo");
-  // Something about printing the eveInfo NYI
+  // Something about printing the fpEventInfo NYI
+  // std::cout << "Event number:\t" << nEve << '\n'
+  //           << "Event size:\t" << fEventInfo.EventSize << '\n'
+  //           << "Board ID:\t" << fEventInfo.BoardId << '\n'
+  //           << "Pattern:\t" << fEventInfo.Pattern << '\n'
+  //           << "Ch mask:\t" << fEventInfo.ChannelMask << '\n'
+  //           << "Event counter:\t" << fEventInfo.EventCounter << '\n'
+  //           << "Trigger time tag:\t" << fEventInfo.TriggerTimeTag <<
+  //           std::endl;
 }
 
 void TDigitizer::DecodeEvent()
 {
   auto err = CAEN_DGTZ_DecodeEvent(fHandler, fpEventPtr, (void **)&fpEventStd);
   PrintError(err, "DecodeEvent");
+  std::cout << fpEventStd->ChSize[0] << std::endl;
 }
 
 void TDigitizer::AllocateEvent()

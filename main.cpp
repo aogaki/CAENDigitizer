@@ -13,10 +13,17 @@ int main()
 
   digi->SetMaxNEventsBLT(1024);
   digi->MallocReadoutBuffer();
+  digi->AllocateEvent();
   digi->SWStartAcquisition();
-  for (int i = 0; i < 100; i++) {
-    digi->SendSWTrigger();
-    digi->ReadData();
+  digi->SetSWTriggerMode(
+      CAEN_DGTZ_TriggerMode_t::CAEN_DGTZ_TRGMODE_ACQ_AND_EXTOUT);
+  std::cout << digi->GetSWTriggerMode() << std::endl;
+
+  for (int i = 0; i < 10; i++) {
+    for (int j = 0; j < 100; j++) digi->SendSWTrigger();
+
+    digi->ReadEvents();
+    // sleep(0.5);
   }
   digi->SWStopAcquisition();
 
