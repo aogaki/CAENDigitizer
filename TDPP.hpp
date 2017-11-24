@@ -1,9 +1,9 @@
 #ifndef TDPP_hpp
 #define TDPP_hpp 1
 
-#include "TDigitizer.hpp"
+#include "TDigitizerCommand.hpp"
 
-class TDPP : public TDigitizer
+class TDPP : public TDigitizerCommand
 {
  public:
   TDPP();

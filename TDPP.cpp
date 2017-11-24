@@ -1,9 +1,9 @@
 #include "TDPP.hpp"
 
-TDPP::TDPP() : TDigitizer() {}
+TDPP::TDPP() : TDigitizerCommand() {}
 
 TDPP::TDPP(CAEN_DGTZ_ConnectionType type, int link, int node, uint32_t VMEadd)
-    : TDigitizer(type, link, node, VMEadd)
+    : TDigitizerCommand(type, link, node, VMEadd)
 {
 }
 

@@ -1,6 +1,8 @@
 CMakeCache.txt
 CMakeFiles/
 cmake_install.cmake
+compile_commands.json
 digi
 Makefile
 *~
+

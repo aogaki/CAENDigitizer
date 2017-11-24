@@ -3,7 +3,8 @@
 cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
 project(digi)
 
-add_definitions("-std=c++11 -march=native -mtune=native")    
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+add_definitions("-std=c++11 -march=native -mtune=native")
 include(FindROOT.cmake)
 
 #----------------------------------------------------------------------------
