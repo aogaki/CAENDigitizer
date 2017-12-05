@@ -58,7 +58,8 @@ int main(int argc, char **argv)
     digi->ReadEvents();
 
     auto charge = digi->GetCharge();
-    for (auto &q : *charge) hisCharge->Fill(q);
+    for (auto &q : *charge)
+      hisCharge->Fill(q);
 
     canvas->cd();
     hisCharge->Draw();

@@ -65,10 +65,10 @@ TDigitizer::~TDigitizer()
 void TDigitizer::SetParameters()
 {
   // Reading parameter functions should be implemented!!!!!!!
-  fRecordLength = 512;
+  fRecordLength = 256;
   fBLTEvents = 1024;
   fVpp = 2.;
-  fVth = -0.005;
+  fVth = -0.002;
   fPolarity = CAEN_DGTZ_TriggerOnFallingEdge;
   // fTriggerMode = CAEN_DGTZ_TRGMODE_ACQ_AND_EXTOUT;
   fPostTriggerSize = 50;
