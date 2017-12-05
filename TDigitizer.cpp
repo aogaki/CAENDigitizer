@@ -32,8 +32,13 @@ TDigitizer::TDigitizer()
 {
   fCanvas = new TCanvas();
   fGraph = new TGraph();
+<<<<<<< HEAD
   fGraph->SetMinimum(7500);
   fGraph->SetMaximum(8500);
+=======
+  fGraph->SetMaximum(10000);
+  fGraph->SetMinimum(0);
+>>>>>>> 5ee266d4c9699d754227343fcc61edb7aaeddfcd
 
   SetParameters();
 }
@@ -67,7 +72,11 @@ void TDigitizer::SetParameters()
   fRecordLength = 512;
   fBLTEvents = 1024;
   fVpp = 2.;
+<<<<<<< HEAD
   fVth = -0.005;
+=======
+  fVth = -0.01;
+>>>>>>> 5ee266d4c9699d754227343fcc61edb7aaeddfcd
   fPolarity = CAEN_DGTZ_TriggerOnFallingEdge;
   // fTriggerMode = CAEN_DGTZ_TRGMODE_ACQ_AND_EXTOUT;
   fPostTriggerSize = 50;
@@ -130,7 +139,7 @@ void TDigitizer::ReadEvents()
     uint32_t sumCharge = 0.;
     for (uint32_t i = 0; i < chSize; i++) {
       fGraph->SetPoint(i, i, (fpEventStd->DataChannel[0])[i]);
-      sumCharge += fpEventStd->DataChannel[0][i] - fBaseLine;
+      sumCharge += fBaseLine - fpEventStd->DataChannel[0][i];
     }
     fCharge->push_back(sumCharge);
 

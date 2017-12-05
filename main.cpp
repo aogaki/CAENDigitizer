@@ -47,7 +47,7 @@ int main(int argc, char **argv)
 
   digi->StartAcquisition();
 
-  TH1D *hisCharge = new TH1D("hisCharge", "test", 100000, 0, 100000);
+  TH1D *hisCharge = new TH1D("hisCharge", "test", 20000, 0, 200000);
   TCanvas *canvas = new TCanvas();
   hisCharge->Draw();
 
