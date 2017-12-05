@@ -32,6 +32,8 @@ TDigitizer::TDigitizer()
 {
   fCanvas = new TCanvas();
   fGraph = new TGraph();
+  fGraph->SetMinimum(7500);
+  fGraph->SetMaximum(8500);
 
   SetParameters();
 }
@@ -62,13 +64,13 @@ TDigitizer::~TDigitizer()
 void TDigitizer::SetParameters()
 {
   // Reading parameter functions should be implemented!!!!!!!
-  fRecordLength = 4096;
+  fRecordLength = 512;
   fBLTEvents = 1024;
   fVpp = 2.;
-  fVth = 0.001;
-  // fPolarity = CAEN_DGTZ_TriggerOnFallingEdge;
+  fVth = -0.005;
+  fPolarity = CAEN_DGTZ_TriggerOnFallingEdge;
   // fTriggerMode = CAEN_DGTZ_TRGMODE_ACQ_AND_EXTOUT;
-  fPostTriggerSize = 80;
+  fPostTriggerSize = 50;
 
   fCharge = new std::vector<uint32_t>;
   fCharge->reserve(fBLTEvents * 4);
@@ -80,6 +82,7 @@ void TDigitizer::Initialize()
 {
   CAEN_DGTZ_ErrorCode err;
 
+  Reset();
   AcquisitionConfig();
   TriggerConfig();
 
@@ -137,14 +140,16 @@ void TDigitizer::ReadEvents()
       fTimeOffset += 0xFFFFFFFF;
     }
     fPreviousTime = timeStamp;
+    timeStamp *= fTSample;
     fTime->push_back(timeStamp);
     std::cout << "time:\t" << fEventInfo.TriggerTimeTag << "\t" << timeStamp
               << std::endl;
   }
-
-  fCanvas->cd();
-  fGraph->Draw("AL");
-  fCanvas->Update();
+  if (fGraph->GetN() > 0) {
+    fCanvas->cd();
+    fGraph->Draw("AL");
+    fCanvas->Update();
+  }
 }
 
 void TDigitizer::GetBoardInfo()
@@ -233,9 +238,12 @@ void TDigitizer::TriggerConfig()
 
   // Set the trigger threshold
   // The unit of its are V
-  uint32_t thVal = ((1 << fNBits) / 2) * (1. - (fVth / (fVpp / 2)));
+  int32_t th = ((1 << fNBits) / 2) * ((fVth / (fVpp / 2)));
+  uint32_t thVal = fBaseLine;
+  if (thVal == 0) thVal = ((1 << fNBits) / 2);
+  thVal += th;
   std::cout << "Vth:\t" << thVal << std::endl;
-  // thVal = 8172;
+
   for (uint32_t iCh = 0; iCh < fNChs; iCh++) {
     // Think about multiple channel setting
     err = CAEN_DGTZ_SetChannelTriggerThreshold(fHandler, iCh, thVal);
@@ -399,9 +407,20 @@ void TDigitizer::StopAcquisition()
 
 void TDigitizer::GetBaseLine()
 {
-  TH1D *his = new TH1D("his", "test", 20000, 0.5, 20000.5);
+  BoardCalibration();
+
+  AcquisitionConfig();
 
   CAEN_DGTZ_ErrorCode err;
+
+  err = CAEN_DGTZ_SetMaxNumEventsBLT(fHandler, fBLTEvents);
+  PrintError(err, "SetMaxNEventsBLT");
+  err = CAEN_DGTZ_MallocReadoutBuffer(fHandler, &fpReadoutBuffer,
+                                      &fMaxBufferSize);
+  PrintError(err, "MallocReadoutBuffer");
+
+  TH1D *his = new TH1D("his", "test", 20000, 0.5, 20000.5);
+
   err = CAEN_DGTZ_SWStartAcquisition(fHandler);
   PrintError(err, "StartAcquisition");
 

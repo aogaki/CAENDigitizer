@@ -35,37 +35,6 @@ int kbhit(void)
   return 0;
 }
 
-// int main(int argc, char **argv)
-// {
-//   TApplication app("testApp", &argc, argv);
-//
-//   int link = 0;
-//   auto digi = new TTestDigi(CAEN_DGTZ_USB, link);
-//
-//   digi->Initialize();
-//
-//   digi->SWStartAcquisition();
-//
-//   for (int i = 0; true; i++) {
-//     // if (i > 10) break;
-//     std::cout << i << std::endl;
-//
-//     digi->ReadEvents();
-//
-//     if (kbhit()) break;
-//
-//     usleep(10000);
-//   }
-//
-//   digi->SWStopAcquisition();
-//
-//   delete digi;
-//
-//   // app.Run();
-//
-//   return 0;
-// }
-
 int main(int argc, char **argv)
 {
   TApplication app("testApp", &argc, argv);
@@ -73,9 +42,8 @@ int main(int argc, char **argv)
   int link = 0;
   auto digi = new TDigitizer(CAEN_DGTZ_USB, link);
 
-  digi->Initialize();
-
   digi->GetBaseLine();
+  digi->Initialize();
 
   digi->StartAcquisition();
 
