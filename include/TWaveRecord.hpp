@@ -32,8 +32,6 @@ class TWaveRecord : public TDigitizer
   void StartAcquisition();
   void StopAcquisition();
 
-  void GetBaseLine();
-
   const std::vector<int32_t> *GetCharge() { return fCharge; };
   const std::vector<uint64_t> *GetTime() { return fTime; };
 

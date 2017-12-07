@@ -1,7 +1,5 @@
 #include <iostream>
 
-#include <TH1.h>
-
 #include "TWaveRecord.hpp"
 
 TWaveRecord::TWaveRecord()
@@ -43,7 +41,6 @@ TWaveRecord::TWaveRecord(CAEN_DGTZ_ConnectionType type, int link, int node,
   Open(type, link, node, VMEadd);
   Reset();
   GetBoardInfo();
-  GetBaseLine();
 
   fPlotWaveformFlag = plotWaveform;
   if (fPlotWaveformFlag) {
@@ -73,10 +70,10 @@ TWaveRecord::~TWaveRecord()
 void TWaveRecord::SetParameters()
 {
   // Reading parameter functions should be implemented!!!!!!!
-  fRecordLength = 256;
-  fBLTEvents = 10;
+  fRecordLength = 1024;
+  fBLTEvents = 1024;
   fVpp = 2.;
-  fVth = -0.003;
+  fVth = -0.03;
   fPolarity = CAEN_DGTZ_TriggerOnFallingEdge;
   // fTriggerMode = CAEN_DGTZ_TRGMODE_ACQ_AND_EXTOUT;
   fPostTriggerSize = 50;
@@ -139,10 +136,10 @@ void TWaveRecord::ReadEvents()
     int32_t sumCharge = 0.;
     // for (uint32_t i = 0; i < chSize; i++) {
     // const uint32_t start = 0;
-    const uint32_t start = 50;
+    const uint32_t start = 400;
     // const uint32_t stop = chSize;
-    const uint32_t stop = 100;
-    const uint32_t baseSample = 20;
+    const uint32_t stop = 600;
+    const uint32_t baseSample = 256;
     fBaseLine = 0;
     for (uint32_t i = 0; i < baseSample; i++) {
       fBaseLine += fpEventStd->DataChannel[0][i];
@@ -430,58 +427,6 @@ void TWaveRecord::StopAcquisition()
 
   err = CAEN_DGTZ_FreeEvent(fHandler, (void **)&fpEventStd);
   PrintError(err, "FreeEvent");
-}
-
-void TWaveRecord::GetBaseLine()
-{
-  BoardCalibration();
-
-  AcquisitionConfig();
-
-  CAEN_DGTZ_ErrorCode err;
-
-  err = CAEN_DGTZ_SetMaxNumEventsBLT(fHandler, fBLTEvents);
-  PrintError(err, "SetMaxNEventsBLT");
-  err = CAEN_DGTZ_MallocReadoutBuffer(fHandler, &fpReadoutBuffer,
-                                      &fMaxBufferSize);
-  PrintError(err, "MallocReadoutBuffer");
-
-  TH1D *his = new TH1D("his", "test", 20000, 0.5, 20000.5);
-
-  err = CAEN_DGTZ_SWStartAcquisition(fHandler);
-  PrintError(err, "StartAcquisition");
-
-  for (int i = 0; i < 1000; i++) CAEN_DGTZ_SendSWtrigger(fHandler);
-
-  err = CAEN_DGTZ_ReadData(fHandler, CAEN_DGTZ_SLAVE_TERMINATED_READOUT_MBLT,
-                           fpReadoutBuffer, &fBufferSize);
-  PrintError(err, "ReadData");
-
-  err =
-      CAEN_DGTZ_GetNumEvents(fHandler, fpReadoutBuffer, fBufferSize, &fNEvents);
-  PrintError(err, "GetNumEvents");
-
-  for (int32_t iEve = 0; iEve < fNEvents; iEve++) {
-    err = CAEN_DGTZ_GetEventInfo(fHandler, fpReadoutBuffer, fBufferSize, iEve,
-                                 &fEventInfo, &fpEventPtr);
-    PrintError(err, "GetEventInfo");
-
-    err = CAEN_DGTZ_DecodeEvent(fHandler, fpEventPtr, (void **)&fpEventStd);
-    PrintError(err, "DecodeEvent");
-
-    const UInt_t chSize = fpEventStd->ChSize[0];
-    for (UInt_t iSample = 0; iSample < chSize; iSample++)
-      his->Fill(fpEventStd->DataChannel[0][iSample]);
-  }
-
-  err = CAEN_DGTZ_SWStopAcquisition(fHandler);
-  PrintError(err, "StopAcquisition");
-
-  // fBaseLine = his->GetMean();
-  fBaseLine = his->GetMaximumBin();
-  std::cout << "Base line:\t" << fBaseLine << std::endl;
-
-  delete his;
 }
 
 void TWaveRecord::PrintError(const CAEN_DGTZ_ErrorCode &err,
