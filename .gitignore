@@ -5,4 +5,6 @@ compile_commands.json
 digi
 Makefile
 *~
+.*
+*.log
 

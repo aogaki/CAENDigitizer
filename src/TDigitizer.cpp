@@ -66,14 +66,14 @@ void TDigitizer::SetParameters()
 {
   // Reading parameter functions should be implemented!!!!!!!
   fRecordLength = 256;
-  fBLTEvents = 1024;
+  fBLTEvents = 10;
   fVpp = 2.;
-  fVth = -0.002;
+  fVth = -0.003;
   fPolarity = CAEN_DGTZ_TriggerOnFallingEdge;
   // fTriggerMode = CAEN_DGTZ_TRGMODE_ACQ_AND_EXTOUT;
   fPostTriggerSize = 50;
 
-  fCharge = new std::vector<uint32_t>;
+  fCharge = new std::vector<int32_t>;
   fCharge->reserve(fBLTEvents * 4);
   fTime = new std::vector<uint64_t>;
   fTime->reserve(fBLTEvents * 4);
@@ -128,11 +128,25 @@ void TDigitizer::ReadEvents()
     PrintError(err, "DecodeEvent");
 
     const uint32_t chSize = fpEventStd->ChSize[0];
-    uint32_t sumCharge = 0.;
-    for (uint32_t i = 0; i < chSize; i++) {
-      fGraph->SetPoint(i, i, (fpEventStd->DataChannel[0])[i]);
-      sumCharge += fBaseLine - fpEventStd->DataChannel[0][i];
+    int32_t sumCharge = 0.;
+    //for (uint32_t i = 0; i < chSize; i++) {
+    //const uint32_t start = 0;
+    const uint32_t start = 50;
+    //const uint32_t stop = chSize;
+    const uint32_t stop = 100;
+    const uint32_t baseSample = 20;
+    fBaseLine = 0;
+    for (uint32_t i = 0; i < baseSample; i++) {
+      fBaseLine += fpEventStd->DataChannel[0][i];
     }
+    fBaseLine /= baseSample;
+
+    for (uint32_t i = start; i < stop; i++) {
+      fGraph->SetPoint(i - start, i, (fpEventStd->DataChannel[0])[i]);
+      sumCharge += (fBaseLine - fpEventStd->DataChannel[0][i]);
+      //std::cout << fBaseLine <<"\t"<< fpEventStd->DataChannel[0][i] << std::endl;
+    }
+    std::cout << sumCharge << std::endl;
     fCharge->push_back(sumCharge);
 
     uint64_t timeStamp = fEventInfo.TriggerTimeTag + fTimeOffset;
@@ -143,8 +157,8 @@ void TDigitizer::ReadEvents()
     fPreviousTime = timeStamp;
     timeStamp *= fTSample;
     fTime->push_back(timeStamp);
-    std::cout << "time:\t" << fEventInfo.TriggerTimeTag << "\t" << timeStamp
-              << std::endl;
+    //std::cout << "time:\t" << fEventInfo.TriggerTimeTag << "\t" << timeStamp
+    //<< std::endl;
   }
   if (fGraph->GetN() > 0) {
     fCanvas->cd();
@@ -451,7 +465,8 @@ void TDigitizer::GetBaseLine()
   err = CAEN_DGTZ_SWStopAcquisition(fHandler);
   PrintError(err, "StopAcquisition");
 
-  fBaseLine = his->GetMean();
+  //fBaseLine = his->GetMean();
+  fBaseLine = his->GetMaximumBin();
   std::cout << "Base line:\t" << fBaseLine << std::endl;
 
   delete his;

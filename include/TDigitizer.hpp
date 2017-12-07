@@ -32,7 +32,7 @@ class TDigitizer
 
   void GetBaseLine();
 
-  const std::vector<uint32_t> *GetCharge() { return fCharge; };
+  const std::vector<int32_t> *GetCharge() { return fCharge; };
   const std::vector<uint64_t> *GetTime() { return fTime; };
 
  protected:
@@ -65,7 +65,7 @@ class TDigitizer
   uint32_t fPostTriggerSize;
 
   // Charge and time
-  std::vector<uint32_t> *fCharge;
+  std::vector<int32_t> *fCharge;
   std::vector<uint64_t> *fTime;
   uint64_t fTimeOffset;
   uint64_t fPreviousTime;
