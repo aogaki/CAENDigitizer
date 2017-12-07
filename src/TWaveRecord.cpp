@@ -153,7 +153,6 @@ void TWaveRecord::ReadEvents()
       // std::cout << fBaseLine <<"\t"<< fpEventStd->DataChannel[0][i] <<
       // std::endl;
     }
-    std::cout << sumCharge << std::endl;
     fCharge->push_back(sumCharge);
 
     uint64_t timeStamp = fEventInfo.TriggerTimeTag + fTimeOffset;
