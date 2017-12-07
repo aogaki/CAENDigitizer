@@ -11,7 +11,7 @@
 #define SAMPLEREADER_H
 
 #include "DaqComponentBase.h"
-#include "TDigitizer.hpp"
+#include "TWaveRecord.hpp"
 
 #include <daqmw/Sock.h>
 
@@ -63,7 +63,7 @@ class SampleReader : public DAQMW::DaqComponentBase
   int m_srcPort;
   std::string m_srcAddr;
 
-  TDigitizer *fDigitizer;
+  TWaveRecord *fDigitizer;
 };
 
 extern "C" {
