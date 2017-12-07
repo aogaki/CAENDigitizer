@@ -2,9 +2,9 @@
 
 #include <TH1.h>
 
-#include "TDigitizer.hpp"
+#include "TWaveRecord.hpp"
 
-TDigitizer::TDigitizer()
+TWaveRecord::TWaveRecord()
     : fHandler(-1),
       fpReadoutBuffer(nullptr),
       fpEventPtr(nullptr),
@@ -28,27 +28,33 @@ TDigitizer::TDigitizer()
       fCharge(nullptr),
       fTime(nullptr),
       fTimeOffset(0),
-      fPreviousTime(0)
+      fPreviousTime(0),
+      fPlotWaveformFlag(false),
+      fCanvas(nullptr),
+      fGraph(nullptr)
 {
-  fCanvas = new TCanvas();
-  fGraph = new TGraph();
-
-  fGraph->SetMinimum(7500);
-  fGraph->SetMaximum(8500);
-
   SetParameters();
 }
 
-TDigitizer::TDigitizer(CAEN_DGTZ_ConnectionType type, int link, int node,
-                       uint32_t VMEadd)
-    : TDigitizer()
+TWaveRecord::TWaveRecord(CAEN_DGTZ_ConnectionType type, int link, int node,
+                         uint32_t VMEadd, bool plotWaveform)
+    : TWaveRecord()
 {
   Open(type, link, node, VMEadd);
   Reset();
   GetBoardInfo();
+  GetBaseLine();
+
+  fPlotWaveformFlag = plotWaveform;
+  if (fPlotWaveformFlag) {
+    fCanvas = new TCanvas();
+    fGraph = new TGraph();
+    fGraph->SetMinimum(7500);
+    fGraph->SetMaximum(8500);
+  }
 }
 
-TDigitizer::~TDigitizer()
+TWaveRecord::~TWaveRecord()
 {
   auto err = CAEN_DGTZ_FreeReadoutBuffer(&fpReadoutBuffer);
   PrintError(err, "FreeReadoutBuffer");
@@ -58,11 +64,13 @@ TDigitizer::~TDigitizer()
   delete fCharge;
   delete fTime;
 
-  delete fCanvas;
-  delete fGraph;
+  if (fPlotWaveformFlag) {
+    delete fCanvas;
+    delete fGraph;
+  }
 }
 
-void TDigitizer::SetParameters()
+void TWaveRecord::SetParameters()
 {
   // Reading parameter functions should be implemented!!!!!!!
   fRecordLength = 256;
@@ -79,7 +87,7 @@ void TDigitizer::SetParameters()
   fTime->reserve(fBLTEvents * 4);
 }
 
-void TDigitizer::Initialize()
+void TWaveRecord::Initialize()
 {
   CAEN_DGTZ_ErrorCode err;
 
@@ -96,7 +104,7 @@ void TDigitizer::Initialize()
   BoardCalibration();
 }
 
-void TDigitizer::ReadEvents()
+void TWaveRecord::ReadEvents()
 {
   CAEN_DGTZ_ErrorCode err;
   err = CAEN_DGTZ_ReadData(fHandler, CAEN_DGTZ_SLAVE_TERMINATED_READOUT_MBLT,
@@ -129,10 +137,10 @@ void TDigitizer::ReadEvents()
 
     const uint32_t chSize = fpEventStd->ChSize[0];
     int32_t sumCharge = 0.;
-    //for (uint32_t i = 0; i < chSize; i++) {
-    //const uint32_t start = 0;
+    // for (uint32_t i = 0; i < chSize; i++) {
+    // const uint32_t start = 0;
     const uint32_t start = 50;
-    //const uint32_t stop = chSize;
+    // const uint32_t stop = chSize;
     const uint32_t stop = 100;
     const uint32_t baseSample = 20;
     fBaseLine = 0;
@@ -142,9 +150,11 @@ void TDigitizer::ReadEvents()
     fBaseLine /= baseSample;
 
     for (uint32_t i = start; i < stop; i++) {
-      fGraph->SetPoint(i - start, i, (fpEventStd->DataChannel[0])[i]);
+      if (fPlotWaveformFlag)
+        fGraph->SetPoint(i - start, i, (fpEventStd->DataChannel[0])[i]);
       sumCharge += (fBaseLine - fpEventStd->DataChannel[0][i]);
-      //std::cout << fBaseLine <<"\t"<< fpEventStd->DataChannel[0][i] << std::endl;
+      // std::cout << fBaseLine <<"\t"<< fpEventStd->DataChannel[0][i] <<
+      // std::endl;
     }
     std::cout << sumCharge << std::endl;
     fCharge->push_back(sumCharge);
@@ -157,17 +167,19 @@ void TDigitizer::ReadEvents()
     fPreviousTime = timeStamp;
     timeStamp *= fTSample;
     fTime->push_back(timeStamp);
-    //std::cout << "time:\t" << fEventInfo.TriggerTimeTag << "\t" << timeStamp
+    // std::cout << "time:\t" << fEventInfo.TriggerTimeTag << "\t" << timeStamp
     //<< std::endl;
   }
-  if (fGraph->GetN() > 0) {
-    fCanvas->cd();
-    fGraph->Draw("AL");
-    fCanvas->Update();
+  if (fPlotWaveformFlag) {
+    if (fGraph->GetN() > 0) {
+      fCanvas->cd();
+      fGraph->Draw("AL");
+      fCanvas->Update();
+    }
   }
 }
 
-void TDigitizer::GetBoardInfo()
+void TWaveRecord::GetBoardInfo()
 {
   CAEN_DGTZ_BoardInfo_t info;
   auto err = CAEN_DGTZ_GetInfo(fHandler, &info);
@@ -229,7 +241,7 @@ void TDigitizer::GetBoardInfo()
   }
 }
 
-void TDigitizer::AcquisitionConfig()
+void TWaveRecord::AcquisitionConfig()
 {
   CAEN_DGTZ_ErrorCode err;
 
@@ -247,7 +259,7 @@ void TDigitizer::AcquisitionConfig()
   PrintError(err, "SetRecordLength");
 }
 
-void TDigitizer::TriggerConfig()
+void TWaveRecord::TriggerConfig()
 {
   CAEN_DGTZ_ErrorCode err;
 
@@ -285,7 +297,7 @@ void TDigitizer::TriggerConfig()
   std::cout << "Polarity:\t" << pol << std::endl;
 }
 
-void TDigitizer::BoardCalibration()
+void TWaveRecord::BoardCalibration()
 {
   if ((fDigitizerModel == 730) || (fDigitizerModel == 725)) {
     // Copy from digiTes
@@ -318,8 +330,8 @@ void TDigitizer::BoardCalibration()
   }
 }
 
-void TDigitizer::Open(CAEN_DGTZ_ConnectionType type, int link, int node,
-                      uint32_t VMEadd)
+void TWaveRecord::Open(CAEN_DGTZ_ConnectionType type, int link, int node,
+                       uint32_t VMEadd)
 {
   auto err = CAEN_DGTZ_OpenDigitizer(type, link, node, VMEadd, &fHandler);
   PrintError(err, "OpenDigitizer");
@@ -330,14 +342,14 @@ void TDigitizer::Open(CAEN_DGTZ_ConnectionType type, int link, int node,
   }
 }
 
-void TDigitizer::Close()
+void TWaveRecord::Close()
 {
   auto err = CAEN_DGTZ_CloseDigitizer(fHandler);
   PrintError(err, "CloseDigitizer");
 }
 
-CAEN_DGTZ_ErrorCode TDigitizer::WriteSPIRegister(uint32_t ch, uint32_t address,
-                                                 uint32_t value)
+CAEN_DGTZ_ErrorCode TWaveRecord::WriteSPIRegister(uint32_t ch, uint32_t address,
+                                                  uint32_t value)
 {
   uint32_t SPIBusy = 1;
   int32_t ret = CAEN_DGTZ_Success;
@@ -364,8 +376,8 @@ CAEN_DGTZ_ErrorCode TDigitizer::WriteSPIRegister(uint32_t ch, uint32_t address,
   return CAEN_DGTZ_Success;
 }
 
-CAEN_DGTZ_ErrorCode TDigitizer::ReadSPIRegister(uint32_t ch, uint32_t address,
-                                                uint32_t &value)
+CAEN_DGTZ_ErrorCode TWaveRecord::ReadSPIRegister(uint32_t ch, uint32_t address,
+                                                 uint32_t &value)
 {  // Copy from digiTES
   uint32_t SPIBusy = 1;
   int32_t ret = CAEN_DGTZ_Success;
@@ -391,13 +403,13 @@ CAEN_DGTZ_ErrorCode TDigitizer::ReadSPIRegister(uint32_t ch, uint32_t address,
   return CAEN_DGTZ_Success;
 }
 
-void TDigitizer::Reset()
+void TWaveRecord::Reset()
 {
   auto err = CAEN_DGTZ_Reset(fHandler);
   PrintError(err, "Reset");
 }
 
-void TDigitizer::StartAcquisition()
+void TWaveRecord::StartAcquisition()
 {
   CAEN_DGTZ_ErrorCode err;
   err = CAEN_DGTZ_SWStartAcquisition(fHandler);
@@ -410,7 +422,7 @@ void TDigitizer::StartAcquisition()
   fPreviousTime = 0;
 }
 
-void TDigitizer::StopAcquisition()
+void TWaveRecord::StopAcquisition()
 {
   CAEN_DGTZ_ErrorCode err;
   err = CAEN_DGTZ_SWStopAcquisition(fHandler);
@@ -420,7 +432,7 @@ void TDigitizer::StopAcquisition()
   PrintError(err, "FreeEvent");
 }
 
-void TDigitizer::GetBaseLine()
+void TWaveRecord::GetBaseLine()
 {
   BoardCalibration();
 
@@ -465,15 +477,15 @@ void TDigitizer::GetBaseLine()
   err = CAEN_DGTZ_SWStopAcquisition(fHandler);
   PrintError(err, "StopAcquisition");
 
-  //fBaseLine = his->GetMean();
+  // fBaseLine = his->GetMean();
   fBaseLine = his->GetMaximumBin();
   std::cout << "Base line:\t" << fBaseLine << std::endl;
 
   delete his;
 }
 
-void TDigitizer::PrintError(const CAEN_DGTZ_ErrorCode &err,
-                            const std::string &funcName)
+void TWaveRecord::PrintError(const CAEN_DGTZ_ErrorCode &err,
+                             const std::string &funcName)
 {
   if (err < 0) {  // 0 is success
     std::cout << "In " << funcName << ", error code = " << err << std::endl;

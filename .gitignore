@@ -7,4 +7,5 @@ Makefile
 *~
 .*
 *.log
-
+*.o
+autogen

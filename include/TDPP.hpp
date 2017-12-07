@@ -1,27 +1,35 @@
 #ifndef TDPP_hpp
 #define TDPP_hpp 1
 
-#include "TDigitizerCommand.hpp"
+#include "TDigitizer.hpp"
 
-class TDPP : public TDigitizerCommand
+class TDPP : public TDigitizer
 {
  public:
   TDPP();
   TDPP(CAEN_DGTZ_ConnectionType type, int link, int node = 0,
-       uint32_t VMEadd = 0);
+       uint32_t VMEadd = 0, bool plotWaveform = false);
   ~TDPP();
 
-  // NYI
-  void Initialize(){};
+  void Initialize();
 
-  // DPP functions
-  void SetDPPPreTriggerSize(int ch, uint32_t samples);
-  uint32_t GetDPPPreTriggerSize(int ch);
+  void ReadEvents();
 
-  void SetChannelPulsePolarity(int ch, CAEN_DGTZ_PulsePolarity_t pol);
-  CAEN_DGTZ_PulsePolarity_t GetChannelPulsePolarity(int ch);
+  void BoardCalibration();
+
+  void StartAcquisition();
+  void StopAcquisition();
+
+  const std::vector<int32_t> *GetCharge() { return fCharge; };
+  const std::vector<uint64_t> *GetTime() { return fTime; };
 
  private:
+  std::vector<int32_t> *fCharge;
+  std::vector<uint64_t> *fTime;
+
+  void SetParameters();
+
+  void Reset();
 };
 
 #endif

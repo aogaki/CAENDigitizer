@@ -1,40 +1,26 @@
+#include <iostream>
+
 #include "TDPP.hpp"
 
-TDPP::TDPP() : TDigitizerCommand() {}
+TDPP::TDPP() : TDigitizer() { SetParameters(); }
 
-TDPP::TDPP(CAEN_DGTZ_ConnectionType type, int link, int node, uint32_t VMEadd)
-    : TDigitizerCommand(type, link, node, VMEadd)
+TDPP::TDPP(CAEN_DGTZ_ConnectionType type, int link, int node, uint32_t VMEadd,
+           bool plotWaveform)
+    : TDPP()
 {
 }
 
 TDPP::~TDPP() {}
 
-void TDPP::SetDPPPreTriggerSize(int ch, uint32_t samples)
-{
-  auto err = CAEN_DGTZ_SetDPPPreTriggerSize(fHandler, ch, samples);
-  PrintError(err, "SetDPPPreTriggerSize");
-}
+void TDPP::SetParameters() {}
 
-uint32_t TDPP::GetDPPPreTriggerSize(int ch)
-{
-  uint32_t samples;
-  auto err = CAEN_DGTZ_GetDPPPreTriggerSize(fHandler, ch, &samples);
-  PrintError(err, "GetDPPPreTriggerSize");
+void TDPP::Reset() {}
 
-  return samples;
-}
+void TDPP::Initialize() {}
 
-void TDPP::SetChannelPulsePolarity(int ch, CAEN_DGTZ_PulsePolarity_t pol)
-{
-  auto err = CAEN_DGTZ_SetChannelPulsePolarity(fHandler, ch, pol);
-  PrintError(err, "SetChannelPulsePolarity");
-}
+void TDPP::ReadEvents() {}
 
-CAEN_DGTZ_PulsePolarity_t TDPP::GetChannelPulsePolarity(int ch)
-{
-  CAEN_DGTZ_PulsePolarity_t pol;
-  auto err = CAEN_DGTZ_GetChannelPulsePolarity(fHandler, ch, &pol);
-  PrintError(err, "GetChannelPulsePolarity");
+void TDPP::BoardCalibration() {}
 
-  return pol;
-}
+void TDPP::StartAcquisition() {}
+void TDPP::StopAcquisition() {}

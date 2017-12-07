@@ -15,7 +15,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}
                     ${CMAKE_CURRENT_SOURCE_DIR}/include
                     ${ROOT_INCLUDE_DIR})
 link_directories(${ROOT_LIBRARY_DIR})
-file(GLOB sources ${PROJECT_SOURCE_DIR}/src/*.cpp ${PROJECT_SOURCE_DIR}/*.cpp)
+file(GLOB sources ${PROJECT_SOURCE_DIR}/src/*.cpp)
 file(GLOB headers ${PROJECT_SOURCE_DIR}/include/*.hpp)
 
 #----------------------------------------------------------------------------
@@ -23,3 +23,5 @@ file(GLOB headers ${PROJECT_SOURCE_DIR}/include/*.hpp)
 #
 add_executable(digi main.cpp ${sources} ${headers})
 target_link_libraries(digi ${ROOT_LIBRARIES} CAENDigitizer)
+add_executable(dpp dpp.cpp ${sources} ${headers})
+target_link_libraries(dpp ${ROOT_LIBRARIES} CAENDigitizer)

@@ -6,7 +6,7 @@
 #include <TCanvas.h>
 #include <TH1.h>
 
-#include "TWaveRecord.hpp"
+#include "TDPP.hpp"
 
 int kbhit(void)
 {
@@ -39,35 +39,7 @@ int main(int argc, char **argv)
   TApplication app("testApp", &argc, argv);
 
   int link = 0;
-  TDigitizer *digi = new TWaveRecord(CAEN_DGTZ_USB, link, 0, 0, true);
-
-  digi->Initialize();
-
-  digi->StartAcquisition();
-
-  TH1D *hisCharge = new TH1D("hisCharge", "test", 20000, 0, 200000);
-  TCanvas *canvas = new TCanvas();
-  hisCharge->Draw();
-
-  for (int i = 0; true; i++) {
-    // if (i > 10) break;
-    std::cout << i << std::endl;
-
-    digi->ReadEvents();
-
-    auto charge = digi->GetCharge();
-    for (auto &q : *charge) hisCharge->Fill(q);
-
-    canvas->cd();
-    hisCharge->Draw();
-    canvas->Update();
-
-    if (kbhit()) break;
-
-    usleep(10000);
-  }
-
-  digi->StopAcquisition();
+  auto digi = new TDPP(CAEN_DGTZ_USB, link, 0, 0, true);
 
   delete digi;
 
