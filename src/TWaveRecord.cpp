@@ -120,20 +120,25 @@ void TWaveRecord::ReadEvents()
     err = CAEN_DGTZ_GetEventInfo(fHandler, fpReadoutBuffer, fBufferSize, iEve,
                                  &fEventInfo, &fpEventPtr);
     PrintError(err, "GetEventInfo");
-    std::cout << "Event number:\t" << iEve << '\n'
-              << "Event size:\t" << fEventInfo.EventSize << '\n'
-              << "Board ID:\t" << fEventInfo.BoardId << '\n'
-              << "Pattern:\t" << fEventInfo.Pattern << '\n'
-              << "Ch mask:\t" << fEventInfo.ChannelMask << '\n'
-              << "Event counter:\t" << fEventInfo.EventCounter << '\n'
-              << "Trigger time tag:\t" << fEventInfo.TriggerTimeTag
-              << std::endl;
+    // std::cout << "Event number:\t" << iEve << '\n'
+    //           << "Event size:\t" << fEventInfo.EventSize << '\n'
+    //           << "Board ID:\t" << fEventInfo.BoardId << '\n'
+    //           << "Pattern:\t" << fEventInfo.Pattern << '\n'
+    //           << "Ch mask:\t" << fEventInfo.ChannelMask << '\n'
+    //           << "Event counter:\t" << fEventInfo.EventCounter << '\n'
+    //           << "Trigger time tag:\t" << fEventInfo.TriggerTimeTag
+    //           << std::endl;
     // std::cout << "Trigger time tag:\t" << fEventInfo.TriggerTimeTag
     //           << std::endl;
 
     err = CAEN_DGTZ_DecodeEvent(fHandler, fpEventPtr, (void **)&fpEventStd);
     PrintError(err, "DecodeEvent");
 
+    std::cout << "ch check" << std::endl;
+    for (int iCh = 0; iCh < fNChs; iCh++) {
+      const uint32_t chSize = fpEventStd->ChSize[iCh];
+      std::cout << chSize << std::endl;
+    }
     const uint32_t chSize = fpEventStd->ChSize[0];
     int32_t sumCharge = 0.;
     // for (uint32_t i = 0; i < chSize; i++) {
