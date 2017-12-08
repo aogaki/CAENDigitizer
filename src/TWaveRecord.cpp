@@ -3,18 +3,13 @@
 #include "TWaveRecord.hpp"
 
 TWaveRecord::TWaveRecord()
-    : fHandler(-1),
-      fpReadoutBuffer(nullptr),
+    : fpReadoutBuffer(nullptr),
       fpEventPtr(nullptr),
       fpEventStd(nullptr),
       fMaxBufferSize(0),
       fBufferSize(0),
       fNEvents(0),
       fReadSize(0),
-      fDigitizerModel(0),
-      fNChs(0),
-      fTSample(0),
-      fNBits(0),
       fBLTEvents(0),
       fRecordLength(0),
       fBaseLine(0),
@@ -29,7 +24,8 @@ TWaveRecord::TWaveRecord()
       fPreviousTime(0),
       fPlotWaveformFlag(false),
       fCanvas(nullptr),
-      fGraph(nullptr)
+      fGraph(nullptr),
+      fData(nullptr)
 {
   SetParameters();
 }
@@ -60,6 +56,7 @@ TWaveRecord::~TWaveRecord()
 
   delete fCharge;
   delete fTime;
+  delete fData;
 
   if (fPlotWaveformFlag) {
     delete fCanvas;
@@ -70,7 +67,7 @@ TWaveRecord::~TWaveRecord()
 void TWaveRecord::SetParameters()
 {
   // Reading parameter functions should be implemented!!!!!!!
-  fRecordLength = 1024;
+  fRecordLength = 4096;
   fBLTEvents = 1024;
   fVpp = 2.;
   fVth = -0.03;
@@ -82,6 +79,9 @@ void TWaveRecord::SetParameters()
   fCharge->reserve(fBLTEvents * 4);
   fTime = new std::vector<uint64_t>;
   fTime->reserve(fBLTEvents * 4);
+
+  fData = new std::vector<TStdData>;
+  fData->reserve(fBLTEvents * 4);
 }
 
 void TWaveRecord::Initialize()
@@ -111,21 +111,23 @@ void TWaveRecord::ReadEvents()
   err =
       CAEN_DGTZ_GetNumEvents(fHandler, fpReadoutBuffer, fBufferSize, &fNEvents);
   PrintError(err, "GetNumEvents");
-  std::cout << fNEvents << " Events" << std::endl;
+  // std::cout << fNEvents << " Events" << std::endl;
 
   fCharge->clear();
+  fTime->clear();
+  fData->clear();
   for (int32_t iEve = 0; iEve < fNEvents; iEve++) {
     err = CAEN_DGTZ_GetEventInfo(fHandler, fpReadoutBuffer, fBufferSize, iEve,
                                  &fEventInfo, &fpEventPtr);
     PrintError(err, "GetEventInfo");
-    // std::cout << "Event number:\t" << iEve << '\n'
-    //           << "Event size:\t" << fEventInfo.EventSize << '\n'
-    //           << "Board ID:\t" << fEventInfo.BoardId << '\n'
-    //           << "Pattern:\t" << fEventInfo.Pattern << '\n'
-    //           << "Ch mask:\t" << fEventInfo.ChannelMask << '\n'
-    //           << "Event counter:\t" << fEventInfo.EventCounter << '\n'
-    //           << "Trigger time tag:\t" << fEventInfo.TriggerTimeTag
-    //           << std::endl;
+    std::cout << "Event number:\t" << iEve << '\n'
+              << "Event size:\t" << fEventInfo.EventSize << '\n'
+              << "Board ID:\t" << fEventInfo.BoardId << '\n'
+              << "Pattern:\t" << fEventInfo.Pattern << '\n'
+              << "Ch mask:\t" << fEventInfo.ChannelMask << '\n'
+              << "Event counter:\t" << fEventInfo.EventCounter << '\n'
+              << "Trigger time tag:\t" << fEventInfo.TriggerTimeTag
+              << std::endl;
     // std::cout << "Trigger time tag:\t" << fEventInfo.TriggerTimeTag
     //           << std::endl;
 
@@ -135,10 +137,10 @@ void TWaveRecord::ReadEvents()
     const uint32_t chSize = fpEventStd->ChSize[0];
     int32_t sumCharge = 0.;
     // for (uint32_t i = 0; i < chSize; i++) {
-    // const uint32_t start = 0;
-    const uint32_t start = 400;
-    // const uint32_t stop = chSize;
-    const uint32_t stop = 600;
+    const uint32_t start = 0;
+    // const uint32_t start = 400;
+    const uint32_t stop = chSize;
+    // const uint32_t stop = 600;
     const uint32_t baseSample = 256;
     fBaseLine = 0;
     for (uint32_t i = 0; i < baseSample; i++) {
@@ -172,68 +174,6 @@ void TWaveRecord::ReadEvents()
       fGraph->Draw("AL");
       fCanvas->Update();
     }
-  }
-}
-
-void TWaveRecord::GetBoardInfo()
-{
-  CAEN_DGTZ_BoardInfo_t info;
-  auto err = CAEN_DGTZ_GetInfo(fHandler, &info);
-  PrintError(err, "GetInfo");
-
-  fNChs = info.Channels;
-
-  std::cout << "Model name:\t" << info.ModelName << "\n"
-            << "Model number:\t" << info.Model << "\n"
-            << "No. channels:\t" << info.Channels << "\n"
-            << "Format factor:\t" << info.FormFactor << "\n"
-            << "Family code:\t" << info.FamilyCode << "\n"
-            << "Firmware revision of the FPGA on the mother board (ROC):\t"
-            << info.ROC_FirmwareRel << "\n"
-            << "Firmware revision of the FPGA on the daughter board (AMC):\t"
-            << info.AMC_FirmwareRel << "\n"
-            << "Serial number:\t" << info.SerialNumber << "\n"
-            << "PCB revision:\t" << info.PCB_Revision << "\n"
-            << "No. bits of the ADC:\t" << info.ADC_NBits << "\n"
-            << "Device handler of CAENComm:\t" << info.CommHandle << "\n"
-            << "Device handler of CAENVME:\t" << info.VMEHandle << "\n"
-            << "License number:\t" << info.License << std::endl;
-
-  // Copy from digites
-  if (info.FamilyCode == 5) {
-    fDigitizerModel = 751;
-    fTSample = 1;
-    fNBits = 10;
-  } else if (info.FamilyCode == 7) {
-    fDigitizerModel = 780;
-    fTSample = 10;
-    fNBits = 14;
-  } else if (info.FamilyCode == 13) {
-    fDigitizerModel = 781;
-    fTSample = 10;
-    fNBits = 14;
-  } else if (info.FamilyCode == 0) {
-    fDigitizerModel = 724;
-    fTSample = 10;
-    fNBits = 14;
-  } else if (info.FamilyCode == 11) {
-    fDigitizerModel = 730;
-    fTSample = 2;
-    fNBits = 14;
-  } else if (info.FamilyCode == 14) {
-    fDigitizerModel = 725;
-    fTSample = 4;
-    fNBits = 14;
-  } else if (info.FamilyCode == 3) {
-    fDigitizerModel = 720;
-    fTSample = 4;
-    fNBits = 12;
-  } else if (info.FamilyCode == 999) {  // temporary code for Hexagon
-    fDigitizerModel = 5000;
-    fTSample = 10;
-    fNBits = 14;
-  } else {
-    PrintError(err, "Check Family code @ GetBoardInfo");
   }
 }
 
@@ -293,118 +233,6 @@ void TWaveRecord::TriggerConfig()
   std::cout << "Polarity:\t" << pol << std::endl;
 }
 
-void TWaveRecord::BoardCalibration()
-{
-  if ((fDigitizerModel == 730) || (fDigitizerModel == 725)) {
-    // Copy from digiTes
-    // Honestly, I do not know what is this.
-    uint32_t lock, ctrl;
-    int ret = 0;
-    for (uint32_t iCh = 0; iCh < fNChs; iCh++) {
-      // enter engineering functions
-      ret |= WriteSPIRegister(iCh, 0x7A, 0x59);
-      ret |= WriteSPIRegister(iCh, 0x7A, 0x1A);
-      ret |= WriteSPIRegister(iCh, 0x7A, 0x11);
-      ret |= WriteSPIRegister(iCh, 0x7A, 0xAC);
-
-      // read lock value
-      ret |= ReadSPIRegister(iCh, 0xA7, lock);
-      // write lock value
-      ret |= WriteSPIRegister(iCh, 0xA5, lock);
-
-      // enable lock
-      ret |= ReadSPIRegister(iCh, 0xA4, ctrl);
-      ctrl |= 0x4;  // set bit 2
-      ret |= WriteSPIRegister(iCh, 0xA4, ctrl);
-
-      ret |= ReadSPIRegister(iCh, 0xA4, ctrl);
-      // return ret;
-    }
-  } else if (fDigitizerModel == 751) {
-    auto err = CAEN_DGTZ_Calibrate(fHandler);
-    PrintError(err, "Calibrate");
-  }
-}
-
-void TWaveRecord::Open(CAEN_DGTZ_ConnectionType type, int link, int node,
-                       uint32_t VMEadd)
-{
-  auto err = CAEN_DGTZ_OpenDigitizer(type, link, node, VMEadd, &fHandler);
-  PrintError(err, "OpenDigitizer");
-
-  if (err != CAEN_DGTZ_Success) {
-    std::cout << "Can not open the device!" << std::endl;
-    exit(0);
-  }
-}
-
-void TWaveRecord::Close()
-{
-  auto err = CAEN_DGTZ_CloseDigitizer(fHandler);
-  PrintError(err, "CloseDigitizer");
-}
-
-CAEN_DGTZ_ErrorCode TWaveRecord::WriteSPIRegister(uint32_t ch, uint32_t address,
-                                                  uint32_t value)
-{
-  uint32_t SPIBusy = 1;
-  int32_t ret = CAEN_DGTZ_Success;
-
-  uint32_t SPIBusyAddr = 0x1088 + (ch << 8);
-  uint32_t addressingRegAddr = 0x80B4;
-  uint32_t valueRegAddr = 0x10B8 + (ch << 8);
-
-  while (SPIBusy) {
-    if ((ret = CAEN_DGTZ_ReadRegister(fHandler, SPIBusyAddr, &SPIBusy)) !=
-        CAEN_DGTZ_Success)
-      return CAEN_DGTZ_CommError;
-    SPIBusy = (SPIBusy >> 2) & 0x1;
-    if (!SPIBusy) {
-      if ((ret = CAEN_DGTZ_WriteRegister(fHandler, addressingRegAddr,
-                                         address)) != CAEN_DGTZ_Success)
-        return CAEN_DGTZ_CommError;
-      if ((ret = CAEN_DGTZ_WriteRegister(fHandler, valueRegAddr, value)) !=
-          CAEN_DGTZ_Success)
-        return CAEN_DGTZ_CommError;
-    }
-    usleep(1000);
-  }
-  return CAEN_DGTZ_Success;
-}
-
-CAEN_DGTZ_ErrorCode TWaveRecord::ReadSPIRegister(uint32_t ch, uint32_t address,
-                                                 uint32_t &value)
-{  // Copy from digiTES
-  uint32_t SPIBusy = 1;
-  int32_t ret = CAEN_DGTZ_Success;
-  uint32_t SPIBusyAddr = 0x1088 + (ch << 8);
-  uint32_t addressingRegAddr = 0x80B4;
-  uint32_t valueRegAddr = 0x10B8 + (ch << 8);
-
-  while (SPIBusy) {
-    if ((ret = CAEN_DGTZ_ReadRegister(fHandler, SPIBusyAddr, &SPIBusy)) !=
-        CAEN_DGTZ_Success)
-      return CAEN_DGTZ_CommError;
-    SPIBusy = (SPIBusy >> 2) & 0x1;
-    if (!SPIBusy) {
-      if ((ret = CAEN_DGTZ_WriteRegister(fHandler, addressingRegAddr,
-                                         address)) != CAEN_DGTZ_Success)
-        return CAEN_DGTZ_CommError;
-      if ((ret = CAEN_DGTZ_ReadRegister(fHandler, valueRegAddr, &value)) !=
-          CAEN_DGTZ_Success)
-        return CAEN_DGTZ_CommError;
-    }
-    usleep(1000);
-  }
-  return CAEN_DGTZ_Success;
-}
-
-void TWaveRecord::Reset()
-{
-  auto err = CAEN_DGTZ_Reset(fHandler);
-  PrintError(err, "Reset");
-}
-
 void TWaveRecord::StartAcquisition()
 {
   CAEN_DGTZ_ErrorCode err;
@@ -426,14 +254,4 @@ void TWaveRecord::StopAcquisition()
 
   err = CAEN_DGTZ_FreeEvent(fHandler, (void **)&fpEventStd);
   PrintError(err, "FreeEvent");
-}
-
-void TWaveRecord::PrintError(const CAEN_DGTZ_ErrorCode &err,
-                             const std::string &funcName)
-{
-  if (err < 0) {  // 0 is success
-    std::cout << "In " << funcName << ", error code = " << err << std::endl;
-    // CAEN_DGTZ_CloseDigitizer(fHandler);
-    // throw err;
-  }
 }

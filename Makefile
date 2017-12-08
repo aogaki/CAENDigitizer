@@ -220,6 +220,36 @@ src/TDPP.cpp.s:
 	$(MAKE) -f CMakeFiles/dpp.dir/build.make CMakeFiles/dpp.dir/src/TDPP.cpp.s
 .PHONY : src/TDPP.cpp.s
 
+src/TDigitizer.o: src/TDigitizer.cpp.o
+
+.PHONY : src/TDigitizer.o
+
+# target to build an object file
+src/TDigitizer.cpp.o:
+	$(MAKE) -f CMakeFiles/digi.dir/build.make CMakeFiles/digi.dir/src/TDigitizer.cpp.o
+	$(MAKE) -f CMakeFiles/dpp.dir/build.make CMakeFiles/dpp.dir/src/TDigitizer.cpp.o
+.PHONY : src/TDigitizer.cpp.o
+
+src/TDigitizer.i: src/TDigitizer.cpp.i
+
+.PHONY : src/TDigitizer.i
+
+# target to preprocess a source file
+src/TDigitizer.cpp.i:
+	$(MAKE) -f CMakeFiles/digi.dir/build.make CMakeFiles/digi.dir/src/TDigitizer.cpp.i
+	$(MAKE) -f CMakeFiles/dpp.dir/build.make CMakeFiles/dpp.dir/src/TDigitizer.cpp.i
+.PHONY : src/TDigitizer.cpp.i
+
+src/TDigitizer.s: src/TDigitizer.cpp.s
+
+.PHONY : src/TDigitizer.s
+
+# target to generate assembly for a file
+src/TDigitizer.cpp.s:
+	$(MAKE) -f CMakeFiles/digi.dir/build.make CMakeFiles/digi.dir/src/TDigitizer.cpp.s
+	$(MAKE) -f CMakeFiles/dpp.dir/build.make CMakeFiles/dpp.dir/src/TDigitizer.cpp.s
+.PHONY : src/TDigitizer.cpp.s
+
 src/TDigitizerCommand.o: src/TDigitizerCommand.cpp.o
 
 .PHONY : src/TDigitizerCommand.o
@@ -359,6 +389,9 @@ help:
 	@echo "... src/TDPP.o"
 	@echo "... src/TDPP.i"
 	@echo "... src/TDPP.s"
+	@echo "... src/TDigitizer.o"
+	@echo "... src/TDigitizer.i"
+	@echo "... src/TDigitizer.s"
 	@echo "... src/TDigitizerCommand.o"
 	@echo "... src/TDigitizerCommand.i"
 	@echo "... src/TDigitizerCommand.s"

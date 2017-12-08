@@ -86,7 +86,6 @@ int SampleReader::daq_configure()
   parse_params(paramList);
 
   fDigitizer = new TWaveRecord(CAEN_DGTZ_USB, 0);
-  fDigitizer->GetBaseLine();
   fDigitizer->Initialize();
 
   return 0;

@@ -17,7 +17,7 @@
           <hostAddr>192.168.167.202</hostAddr>
           <hostPort>50000</hostPort>
           <instName>SampleReader0.rtc</instName>
-          <execPath>/home/aogaki/DAQ/test/Components/SampleReaderComp</execPath>
+          <execPath>/home/aogaki/DAQ/CAENDigitizer/test/Components/SampleReaderComp</execPath>
           <confFile>/tmp/daqmw/rtc.conf</confFile>
           <startOrd>4</startOrd>
           <inPorts>

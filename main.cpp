@@ -39,13 +39,13 @@ int main(int argc, char **argv)
   TApplication app("testApp", &argc, argv);
 
   int link = 0;
-  TDigitizer *digi = new TWaveRecord(CAEN_DGTZ_USB, link, 0, 0, true);
+  TDigitizer *digi = new TWaveRecord(CAEN_DGTZ_USB, link, 0, 0, false);
 
   digi->Initialize();
 
   digi->StartAcquisition();
 
-  TH1D *hisCharge = new TH1D("hisCharge", "test", 20000, 0, 200000);
+  TH1D *hisCharge = new TH1D("hisCharge", "test", 200000, 0, 200000);
   TCanvas *canvas = new TCanvas();
   hisCharge->Draw();
 
@@ -53,6 +53,7 @@ int main(int argc, char **argv)
     // if (i > 10) break;
     std::cout << i << std::endl;
 
+    for (int j = 0; j < 512; j++) digi->SendSWTrigger();
     digi->ReadEvents();
 
     auto charge = digi->GetCharge();

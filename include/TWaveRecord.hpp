@@ -14,6 +14,7 @@
 #include <CAENDigitizerType.h>
 
 #include "TDigitizer.hpp"
+#include "TStdData.hpp"
 
 class TWaveRecord : public TDigitizer
 {
@@ -27,23 +28,14 @@ class TWaveRecord : public TDigitizer
 
   void ReadEvents();
 
-  void BoardCalibration();
-
   void StartAcquisition();
   void StopAcquisition();
 
   const std::vector<int32_t> *GetCharge() { return fCharge; };
   const std::vector<uint64_t> *GetTime() { return fTime; };
+  const std::vector<TStdData> *GetData() { return fData; };
 
  protected:
-  int fHandler{-1};  // What is the possible region of handler?
-
-  // For board information
-  int fDigitizerModel;
-  uint32_t fNChs;
-  int fTSample;  // This means time step length in ns
-  int fNBits;    // ADC, Waveform resolution
-
   // For event readout
   char *fpReadoutBuffer;
   char *fpEventPtr;
@@ -70,6 +62,8 @@ class TWaveRecord : public TDigitizer
   uint64_t fTimeOffset;
   uint64_t fPreviousTime;
 
+  std::vector<TStdData> *fData;
+
   // Plotting wave form
   bool fPlotWaveformFlag;
   TCanvas *fCanvas;
@@ -77,25 +71,8 @@ class TWaveRecord : public TDigitizer
 
   virtual void SetParameters();
 
-  virtual void Open(CAEN_DGTZ_ConnectionType type, int link, int node,
-                    uint32_t VMEadd);
-  virtual void Close();
-
-  virtual void Reset();
-
-  virtual void GetBoardInfo();
-
   virtual void AcquisitionConfig();
   virtual void TriggerConfig();
-
-  void PrintError(const CAEN_DGTZ_ErrorCode &err, const std::string &funcName);
-
-  // Those SPI register functions are copy from digiTES
-  CAEN_DGTZ_ErrorCode ReadSPIRegister(uint32_t ch, uint32_t address,
-                                      uint32_t &data);
-
-  CAEN_DGTZ_ErrorCode WriteSPIRegister(uint32_t ch, uint32_t address,
-                                       uint32_t data);
 };
 
 #endif
