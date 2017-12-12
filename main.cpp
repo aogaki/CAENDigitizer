@@ -70,11 +70,12 @@ int main(int argc, char **argv)
         hisCharge->Fill(q.ADC);
         for (int i = 0; i < kNSamples; i++)
           grWave->SetPoint(i, i, q.Waveform[i]);
-        canvas2->cd();
-        grWave->Draw("AL");
-        canvas2->Update();
       }
     }
+    canvas2->cd();
+    grWave->Draw("AL");
+    canvas2->Update();
+
     canvas->cd();
     hisCharge->Draw();
     canvas->Update();
