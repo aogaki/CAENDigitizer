@@ -254,7 +254,6 @@ int SampleMonitor::fill_data(const unsigned char *mydata, const int size)
 {
   for (int i = 0; i < size / int(ONE_EVENT_SIZE); i++) {
     decode_data(mydata);
-    std::cout << m_sampleData.data << std::endl;
     m_hist->Fill(m_sampleData.data);
 
     mydata += ONE_EVENT_SIZE;
