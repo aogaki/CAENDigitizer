@@ -7,7 +7,7 @@ SRCS += ../../src/TDigitizer.cpp
 SRCS += $(COMP_NAME).cpp
 SRCS += $(COMP_NAME)Comp.cpp
 
-LDFLAGS  += -L/usr/lib/daqmw
+LDFLAGS  += -L/usr/lib/daqmw -L/usr/lib64/daqmw
 LDLIBS += -lSock
 LDLIBS += -lCAENDigitizer
 LDFLAGS += $(shell root-config --glibs)
