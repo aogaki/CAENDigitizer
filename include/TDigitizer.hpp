@@ -7,9 +7,6 @@
 #include <string>
 #include <vector>
 
-#include <TCanvas.h>
-#include <TGraph.h>
-
 #include <CAENDigitizer.h>
 #include <CAENDigitizerType.h>
 
@@ -28,9 +25,6 @@ class TDigitizer
 
   virtual void StartAcquisition() = 0;
   virtual void StopAcquisition() = 0;
-
-  virtual const std::vector<int32_t> *GetCharge() = 0;
-  virtual const std::vector<uint64_t> *GetTime() = 0;
 
  protected:
   int fHandler;

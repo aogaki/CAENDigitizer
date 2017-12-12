@@ -7,9 +7,6 @@
 #include <string>
 #include <vector>
 
-#include <TCanvas.h>
-#include <TGraph.h>
-
 #include <CAENDigitizer.h>
 #include <CAENDigitizerType.h>
 
@@ -21,7 +18,7 @@ class TWaveRecord : public TDigitizer
  public:
   TWaveRecord();
   TWaveRecord(CAEN_DGTZ_ConnectionType type, int link, int node = 0,
-              uint32_t VMEadd = 0, bool plotWaveform = false);
+              uint32_t VMEadd = 0);
   virtual ~TWaveRecord();
 
   void Initialize();
@@ -31,8 +28,6 @@ class TWaveRecord : public TDigitizer
   void StartAcquisition();
   void StopAcquisition();
 
-  const std::vector<int32_t> *GetCharge() { return fCharge; };
-  const std::vector<uint64_t> *GetTime() { return fTime; };
   const std::vector<TStdData> *GetData() { return fData; };
 
  protected:
@@ -63,11 +58,6 @@ class TWaveRecord : public TDigitizer
   uint64_t fPreviousTime;
 
   std::vector<TStdData> *fData;
-
-  // Plotting wave form
-  bool fPlotWaveformFlag;
-  TCanvas *fCanvas;
-  TGraph *fGraph;
 
   virtual void SetParameters();
 

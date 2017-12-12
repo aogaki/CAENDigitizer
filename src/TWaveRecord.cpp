@@ -18,33 +18,20 @@ TWaveRecord::TWaveRecord()
       fTriggerMode(CAEN_DGTZ_TRGMODE_ACQ_ONLY),
       fPolarity(CAEN_DGTZ_TriggerOnRisingEdge),
       fPostTriggerSize(50),
-      fCharge(nullptr),
-      fTime(nullptr),
       fTimeOffset(0),
       fPreviousTime(0),
-      fPlotWaveformFlag(false),
-      fCanvas(nullptr),
-      fGraph(nullptr),
       fData(nullptr)
 {
   SetParameters();
 }
 
 TWaveRecord::TWaveRecord(CAEN_DGTZ_ConnectionType type, int link, int node,
-                         uint32_t VMEadd, bool plotWaveform)
+                         uint32_t VMEadd)
     : TWaveRecord()
 {
   Open(type, link, node, VMEadd);
   Reset();
   GetBoardInfo();
-
-  fPlotWaveformFlag = plotWaveform;
-  if (fPlotWaveformFlag) {
-    fCanvas = new TCanvas();
-    fGraph = new TGraph();
-    fGraph->SetMinimum(7500);
-    fGraph->SetMaximum(8500);
-  }
 }
 
 TWaveRecord::~TWaveRecord()
@@ -54,14 +41,7 @@ TWaveRecord::~TWaveRecord()
   Reset();
   Close();
 
-  delete fCharge;
-  delete fTime;
   delete fData;
-
-  if (fPlotWaveformFlag) {
-    delete fCanvas;
-    delete fGraph;
-  }
 }
 
 void TWaveRecord::SetParameters()
@@ -75,13 +55,8 @@ void TWaveRecord::SetParameters()
   // fTriggerMode = CAEN_DGTZ_TRGMODE_ACQ_AND_EXTOUT;
   fPostTriggerSize = 50;
 
-  fCharge = new std::vector<int32_t>;
-  fCharge->reserve(fBLTEvents * 4);
-  fTime = new std::vector<uint64_t>;
-  fTime->reserve(fBLTEvents * 4);
-
   fData = new std::vector<TStdData>;
-  fData->reserve(fBLTEvents * 4);
+  fData->reserve(fBLTEvents * 32);  // 32 means nothing.  minimum is No. chs
 }
 
 void TWaveRecord::Initialize()
@@ -113,9 +88,8 @@ void TWaveRecord::ReadEvents()
   PrintError(err, "GetNumEvents");
   // std::cout << fNEvents << " Events" << std::endl;
 
-  fCharge->clear();
-  fTime->clear();
   fData->clear();
+  TStdData data;
   for (int32_t iEve = 0; iEve < fNEvents; iEve++) {
     err = CAEN_DGTZ_GetEventInfo(fHandler, fpReadoutBuffer, fBufferSize, iEve,
                                  &fEventInfo, &fpEventPtr);
@@ -128,56 +102,53 @@ void TWaveRecord::ReadEvents()
     //           << "Event counter:\t" << fEventInfo.EventCounter << '\n'
     //           << "Trigger time tag:\t" << fEventInfo.TriggerTimeTag
     //           << std::endl;
-    // std::cout << "Trigger time tag:\t" << fEventInfo.TriggerTimeTag
-    //           << std::endl;
 
     err = CAEN_DGTZ_DecodeEvent(fHandler, fpEventPtr, (void **)&fpEventStd);
     PrintError(err, "DecodeEvent");
 
-    std::cout << "ch check" << std::endl;
     for (int iCh = 0; iCh < fNChs; iCh++) {
       const uint32_t chSize = fpEventStd->ChSize[iCh];
-      std::cout << chSize << std::endl;
-    }
-    const uint32_t chSize = fpEventStd->ChSize[0];
-    int32_t sumCharge = 0.;
-    // for (uint32_t i = 0; i < chSize; i++) {
-    const uint32_t start = 0;
-    // const uint32_t start = 400;
-    const uint32_t stop = chSize;
-    // const uint32_t stop = 600;
-    const uint32_t baseSample = 256;
-    fBaseLine = 0;
-    for (uint32_t i = 0; i < baseSample; i++) {
-      fBaseLine += fpEventStd->DataChannel[0][i];
-    }
-    fBaseLine /= baseSample;
+      // if (chSize != kNSamples) {
+      //   std::cout << "No. samples of wave form error" << std::endl;
+      // }
 
-    for (uint32_t i = start; i < stop; i++) {
-      if (fPlotWaveformFlag)
-        fGraph->SetPoint(i - start, i, (fpEventStd->DataChannel[0])[i]);
-      sumCharge += (fBaseLine - fpEventStd->DataChannel[0][i]);
-      // std::cout << fBaseLine <<"\t"<< fpEventStd->DataChannel[0][i] <<
-      // std::endl;
-    }
-    fCharge->push_back(sumCharge);
+      int32_t sumCharge = 0.;
+      // for (uint32_t i = 0; i < chSize; i++) {
+      const uint32_t start = 0;
+      // const uint32_t start = 400;
+      const uint32_t stop = chSize;
+      // const uint32_t stop = 600;
+      const uint32_t baseSample = 256;
+      fBaseLine = 0;
+      for (uint32_t i = 0; i < baseSample; i++) {
+        fBaseLine += fpEventStd->DataChannel[iCh][i];
+      }
+      fBaseLine /= baseSample;
 
-    uint64_t timeStamp = fEventInfo.TriggerTimeTag + fTimeOffset;
-    if (timeStamp < fPreviousTime) {
-      timeStamp += 0xFFFFFFFF;
-      fTimeOffset += 0xFFFFFFFF;
-    }
-    fPreviousTime = timeStamp;
-    timeStamp *= fTSample;
-    fTime->push_back(timeStamp);
-    // std::cout << "time:\t" << fEventInfo.TriggerTimeTag << "\t" << timeStamp
-    //<< std::endl;
-  }
-  if (fPlotWaveformFlag) {
-    if (fGraph->GetN() > 0) {
-      fCanvas->cd();
-      fGraph->Draw("AL");
-      fCanvas->Update();
+      for (uint32_t i = start; i < stop; i++) {
+        sumCharge += (fBaseLine - fpEventStd->DataChannel[iCh][i]);
+        // std::cout << fBaseLine <<"\t"<< fpEventStd->DataChannel[iCh][i] <<
+        // std::endl;
+      }
+
+      uint64_t timeStamp = fEventInfo.TriggerTimeTag + fTimeOffset;
+      if (timeStamp < fPreviousTime) {
+        timeStamp += 0xFFFFFFFF;
+        fTimeOffset += 0xFFFFFFFF;
+      }
+      fPreviousTime = timeStamp;
+      timeStamp *= fTSample;
+
+      data.ModNumber = 0;  // fModNumber is needed.
+      data.ChNumber = iCh;
+      data.ADC = sumCharge;
+      data.TimeStamp = timeStamp;
+      for (uint32_t i = 0; i < kNSamples; i++)
+        data.Waveform[i] = fpEventStd->DataChannel[iCh][i];
+      fData->push_back(data);
+      // std::cout << "time:\t" << fEventInfo.TriggerTimeTag << "\t" <<
+      // timeStamp
+      //<< std::endl;
     }
   }
 }
