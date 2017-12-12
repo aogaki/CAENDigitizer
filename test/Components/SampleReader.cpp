@@ -182,14 +182,19 @@ int SampleReader::daq_resume()
 int SampleReader::read_data_from_detectors()
 {
   fDigitizer->ReadEvents();
-  const std::vector<int> *charge = fDigitizer->GetCharge();
-  const unsigned int nHit = charge->size();
+  constexpr uint32_t kNCh = 8;
+  // const std::vector<int> *charge = fDigitizer->GetCharge();
+  auto data = fDigitizer->GetData();
+  const unsigned int nHit = data->size() / kNCh;
   std::cout << nHit << std::endl;
   int received_data_size = nHit * sizeof(int);
 
-  //unsigned int buf[nHit];  // Generating everytime? Suck my ball!
+  // unsigned int buf[nHit];  // Generating everytime? Suck my ball!
   int buf[nHit];  // Generating everytime? Suck my ball!
-  for (int i = 0; i < nHit; i++) buf[i] = htonl((*charge)[i]);
+  // for (int i = 0; i < nHit; i++) buf[i] = htonl((*charge)[i]);
+  for (int i = 0; i < nHit; i++) {
+    buf[i] = htonl((*data)[i * kNCh].ADC);
+  }
   memcpy(&m_data[0], buf, received_data_size);
   std::cout << "end read data" << std::endl;
   return received_data_size;
