@@ -65,6 +65,7 @@ int main(int argc, char **argv)
     // auto charge = digi->GetCharge();
     // for (auto &q : *charge) hisCharge->Fill(q);
     auto data = digi->GetData();
+    std::cout << data->size() << std::endl;
     for (auto &q : *data) {
       if (q.ChNumber == 0) {
         hisCharge->Fill(q.ADC);
