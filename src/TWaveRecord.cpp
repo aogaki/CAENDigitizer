@@ -53,7 +53,7 @@ void TWaveRecord::SetParameters()
   fVth = -0.03;
   fPolarity = CAEN_DGTZ_TriggerOnFallingEdge;
   // fTriggerMode = CAEN_DGTZ_TRGMODE_ACQ_AND_EXTOUT;
-  fPostTriggerSize = 50;
+  fPostTriggerSize = 90;
 
   fData = new std::vector<TStdData>;
   fData->reserve(fBLTEvents * 32);  // 32 means nothing.  minimum is No. chs
@@ -114,10 +114,10 @@ void TWaveRecord::ReadEvents()
 
       int32_t sumCharge = 0.;
       // for (uint32_t i = 0; i < chSize; i++) {
-      const uint32_t start = 0;
-      // const uint32_t start = 400;
-      const uint32_t stop = chSize;
-      // const uint32_t stop = 600;
+      //const uint32_t start = 0;
+      const uint32_t start = (chSize * (100 - fPostTriggerSize) / 100) - (chSize * 0.04);
+      //const uint32_t stop = chSize;
+      const uint32_t stop = (chSize * (100 - fPostTriggerSize) / 100) + (chSize * 0.04);
       const uint32_t baseSample = 256;
       fBaseLine = 0;
       for (uint32_t i = 0; i < baseSample; i++) {
@@ -178,7 +178,7 @@ void TWaveRecord::TriggerConfig()
   // Set the trigger threshold
   // The unit of its are V
   int32_t th = ((1 << fNBits) / 2) * ((fVth / (fVpp / 2)));
-  uint32_t thVal = fBaseLine;
+  uint32_t thVal = (1 << fNBits) / 2;
   if (thVal == 0) thVal = ((1 << fNBits) / 2);
   thVal += th;
   std::cout << "Vth:\t" << thVal << std::endl;
