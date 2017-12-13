@@ -51,7 +51,7 @@ void TWaveRecord::SetParameters()
   fRecordLength = 4096;
   fBLTEvents = 1024;
   fVpp = 2.;
-  fVth = -0.03;
+  fVth = -0.003;
   fPolarity = CAEN_DGTZ_TriggerOnFallingEdge;
   // fTriggerMode = CAEN_DGTZ_TRGMODE_ACQ_AND_EXTOUT;
   fPostTriggerSize = 80;
@@ -137,18 +137,19 @@ void TWaveRecord::ReadEvents()
         // std::endl;
       }
 
-      uint64_t timeStamp = fEventInfo.TriggerTimeTag + fTimeOffset;
-      if (timeStamp < fPreviousTime) {
-        timeStamp += 0xFFFFFFFF;
-        fTimeOffset += 0xFFFFFFFF;
-      }
-      fPreviousTime = timeStamp;
-      timeStamp *= fTSample;
+      // uint64_t timeStamp = fEventInfo.TriggerTimeTag + fTimeOffset;
+      // if (timeStamp < fPreviousTime) {
+      //   timeStamp += 0xFFFFFFFF;
+      //   fTimeOffset += 0xFFFFFFFF;
+      // }
+      // fPreviousTime = timeStamp;
+      // timeStamp *= fTSample;
 
       data.ModNumber = 0;  // fModNumber is needed.
       data.ChNumber = iCh;
       data.ADC = sumCharge;
-      data.TimeStamp = timeStamp;
+      // data.TimeStamp = timeStamp;
+      data.TimeStamp = fEventInfo.TriggerTimeTag;
       for (uint32_t i = 0; i < kNSamples; i++)
         data.Waveform[i] = fpEventStd->DataChannel[iCh][i];
       fData->push_back(data);

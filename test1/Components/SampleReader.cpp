@@ -183,24 +183,33 @@ int SampleReader::daq_resume()
 int SampleReader::read_data_from_detectors()
 {
   fDigitizer->ReadEvents();
-  constexpr uint32_t kNCh = 8;
-  // const std::vector<int> *charge = fDigitizer->GetCharge();
   auto data = fDigitizer->GetData();
   const unsigned int nHit = data->size();
   int received_data_size = nHit * ONE_HIT_SIZE;
 
   unsigned char buf[ONE_HIT_SIZE];
   for (unsigned int iHit = 0; iHit < nHit; iHit++) {
+    int index = 0;
+    buf[index++] = (*data)[iHit].ModNumber;
+    buf[index++] = (*data)[iHit].ChNumber;
+
+    unsigned int time = htonl((*data)[iHit].TimeStamp);
+    memcpy(&buf[index], &time, sizeof(time));
+    index += sizeof(time);
+
+    int adc = htonl((*data)[iHit].ADC);
+    memcpy(&buf[index], &adc, sizeof(adc));
+    index += sizeof(adc);
+
+    for (int i = 0; i < kNSamples; i++) {
+      unsigned short pulse = htons((*data)[iHit].Waveform[i]);
+      memcpy(&buf[index], &pulse, sizeof(pulse));
+      index += sizeof(pulse);
+    }
+
+    memcpy(&m_data[iHit * ONE_HIT_SIZE], buf, ONE_HIT_SIZE);
   }
 
-  // unsigned int buf[nHit];  // Generating everytime? Suck my ball!
-  int buf[nHit];  // Generating everytime? Suck my ball!
-  // for (int i = 0; i < nHit; i++) buf[i] = htonl((*charge)[i]);
-  for (int i = 0; i < nHit; i++) {
-    buf[i] = htonl((*data)[i * kNCh].ADC);
-  }
-  memcpy(&m_data[0], buf, received_data_size);
-  std::cout << "end read data" << std::endl;
   return received_data_size;
 }
 

@@ -17,7 +17,7 @@
           <hostAddr>192.168.167.202</hostAddr>
           <hostPort>50000</hostPort>
           <instName>SampleReader0.rtc</instName>
-          <execPath>/home/aogaki/DAQ/CAENDigitizer/test/Components/SampleReaderComp</execPath>
+          <execPath>/home/aogaki/DAQ/CAENDigitizer/test1/Components/SampleReaderComp</execPath>
           <confFile>/tmp/daqmw/rtc.conf</confFile>
           <startOrd>4</startOrd>
           <inPorts>
@@ -34,7 +34,7 @@
           <hostAddr>192.168.163.199</hostAddr>
           <hostPort>50000</hostPort>
           <instName>SampleDispatcher0.rtc</instName>
-          <execPath>/home/aogaki/DAQ/CAENDigitizer/test/Components/SampleDispatcherComp</execPath>
+          <execPath>/home/aogaki/DAQ/CAENDigitizer/test1/Components/SampleDispatcherComp</execPath>
           <confFile>/tmp/daqmw/rtc.conf</confFile>
           <startOrd>3</startOrd>
           <inPorts>
@@ -51,7 +51,7 @@
           <hostAddr>192.168.163.199</hostAddr>
           <hostPort>50000</hostPort>
           <instName>SampleMonitor0.rtc</instName>
-          <execPath>/home/aogaki/DAQ/CAENDigitizer/test/Components/SampleMonitorComp</execPath>
+          <execPath>/home/aogaki/DAQ/CAENDigitizer/test1/Components/SampleMonitorComp</execPath>
           <confFile>/tmp/daqmw/rtc.conf</confFile>
           <startOrd>2</startOrd>
           <inPorts>
@@ -67,7 +67,7 @@
           <hostAddr>192.168.163.199</hostAddr>
           <hostPort>50000</hostPort>
           <instName>SampleLogger0.rtc</instName>
-          <execPath>/home/aogaki/DAQ/CAENDigitizer/test/Components/SampleLoggerComp</execPath>
+          <execPath>/home/aogaki/DAQ/CAENDigitizer/test1/Components/SampleLoggerComp</execPath>
           <confFile>/tmp/daqmw/rtc.conf</confFile>
           <startOrd>1</startOrd>
           <inPorts>

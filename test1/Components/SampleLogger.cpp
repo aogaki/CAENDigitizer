@@ -219,11 +219,11 @@ int SampleLogger::daq_run()
 
 int SampleLogger::fill_data(const unsigned char *mydata, const int size)
 {
-  for (int i = 0; i < size / int(ONE_EVENT_SIZE); i++) {
+  for (int i = 0; i < size / int(ONE_HIT_SIZE); i++) {
     decode_data(mydata);
-    fADC = m_sampleData.data;
+    fADC = m_sampleData.ADC;
     fTree->Fill();  // Stupid!
-    mydata += ONE_EVENT_SIZE;
+    mydata += ONE_HIT_SIZE;
   }
 
   return 0;
@@ -231,12 +231,23 @@ int SampleLogger::fill_data(const unsigned char *mydata, const int size)
 
 int SampleLogger::decode_data(const unsigned char *mydata)
 {
-  m_sampleData.magic = mydata[0];
-  m_sampleData.format_ver = mydata[1];
-  m_sampleData.module_num = mydata[2];
-  m_sampleData.reserved = mydata[3];
-  unsigned int netdata = *(unsigned int *)&mydata[4];
-  m_sampleData.data = ntohl(netdata);
+  unsigned int index = 0;
+  m_sampleData.ModNumber = mydata[index++];
+  m_sampleData.ChNumber = mydata[index++];
+
+  unsigned int timeStamp = *(unsigned int *)&mydata[index];
+  m_sampleData.TimeStamp = ntohl(timeStamp);
+  index += sizeof(timeStamp);
+
+  unsigned int adc = *(unsigned int *)&mydata[index];
+  m_sampleData.ADC = ntohl(adc);
+  index += sizeof(adc);
+
+  for (int i = 0; i < kNSamples; i++) {
+    unsigned short pulse = *(unsigned short *)&mydata[index];
+    m_sampleData.Waveform[i] = ntohs(pulse);
+    index += sizeof(pulse);
+  }
 }
 
 extern "C" {
