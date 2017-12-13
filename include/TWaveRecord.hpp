@@ -50,6 +50,7 @@ class TWaveRecord : public TDigitizer
   CAEN_DGTZ_TriggerMode_t fTriggerMode;
   CAEN_DGTZ_TriggerPolarity_t fPolarity;
   uint32_t fPostTriggerSize;
+  int32_t fGateSize;
 
   // Charge and time
   std::vector<int32_t> *fCharge;

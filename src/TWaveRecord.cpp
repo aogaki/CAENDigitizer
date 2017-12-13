@@ -18,6 +18,7 @@ TWaveRecord::TWaveRecord()
       fTriggerMode(CAEN_DGTZ_TRGMODE_ACQ_ONLY),
       fPolarity(CAEN_DGTZ_TriggerOnRisingEdge),
       fPostTriggerSize(50),
+      fGateSize(0),
       fTimeOffset(0),
       fPreviousTime(0),
       fData(nullptr)
@@ -53,7 +54,8 @@ void TWaveRecord::SetParameters()
   fVth = -0.03;
   fPolarity = CAEN_DGTZ_TriggerOnFallingEdge;
   // fTriggerMode = CAEN_DGTZ_TRGMODE_ACQ_AND_EXTOUT;
-  fPostTriggerSize = 90;
+  fPostTriggerSize = 80;
+  fGateSize = 400;  // ns
 
   fData = new std::vector<TStdData>;
   fData->reserve(fBLTEvents * 32);  // 32 means nothing.  minimum is No. chs
@@ -114,11 +116,15 @@ void TWaveRecord::ReadEvents()
 
       int32_t sumCharge = 0.;
       // for (uint32_t i = 0; i < chSize; i++) {
-      //const uint32_t start = 0;
-      const uint32_t start = (chSize * (100 - fPostTriggerSize) / 100) - (chSize * 0.04);
-      //const uint32_t stop = chSize;
-      const uint32_t stop = (chSize * (100 - fPostTriggerSize) / 100) + (chSize * 0.04);
-      const uint32_t baseSample = 256;
+      // const uint32_t start = 0;
+      int32_t start = (chSize * (100 - fPostTriggerSize) / 100) -
+                      (fGateSize / fTSample / 2);
+      if (start < 0) start = 0;
+      // const uint32_t stop = chSize;
+      int32_t stop = (chSize * (100 - fPostTriggerSize) / 100) +
+                     (fGateSize / fTSample / 2);
+      uint32_t baseSample = 256;
+      if (baseSample > start) baseSample = start - 1;
       fBaseLine = 0;
       for (uint32_t i = 0; i < baseSample; i++) {
         fBaseLine += fpEventStd->DataChannel[iCh][i];

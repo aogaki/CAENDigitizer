@@ -21,8 +21,8 @@ class TStdData
 
   uint8_t ModNumber;
   uint8_t ChNumber;
-  uint64_t TimeStamp;
-  uint32_t ADC;
+  uint32_t TimeStamp;
+  int32_t ADC;
   uint16_t Waveform[kNSamples];
 };
 

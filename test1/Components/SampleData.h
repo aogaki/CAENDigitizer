@@ -1,14 +1,15 @@
 #ifndef SampleData_h
 #define SampleData_h 1
 
-const int ONE_EVENT_SIZE = 8;
+const int ONE_HIT_SIZE = 8202;
+constexpr int kNSamples = 4096;
 
 struct SampleData {
-  unsigned char magic;
-  unsigned char format_ver;
-  unsigned char module_num;
-  unsigned char reserved;
-  int data;
+  unsigned char ModNumber;
+  unsigned char ChNumber;
+  unsigned int TimeStamp;
+  int ADC;
+  unsigned short Waveform[kNSamples];
 };
 
 #endif

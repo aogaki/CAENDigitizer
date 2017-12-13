@@ -7,6 +7,7 @@
  *
  */
 
+#include "SampleData.h"
 #include "SampleReader.h"
 
 using DAQMW::FatalType::DATAPATH_DISCONNECTED;
@@ -185,9 +186,12 @@ int SampleReader::read_data_from_detectors()
   constexpr uint32_t kNCh = 8;
   // const std::vector<int> *charge = fDigitizer->GetCharge();
   auto data = fDigitizer->GetData();
-  const unsigned int nHit = data->size() / kNCh;
-  std::cout << nHit << std::endl;
-  int received_data_size = nHit * sizeof(int);
+  const unsigned int nHit = data->size();
+  int received_data_size = nHit * ONE_HIT_SIZE;
+
+  unsigned char buf[ONE_HIT_SIZE];
+  for (unsigned int iHit = 0; iHit < nHit; iHit++) {
+  }
 
   // unsigned int buf[nHit];  // Generating everytime? Suck my ball!
   int buf[nHit];  // Generating everytime? Suck my ball!
