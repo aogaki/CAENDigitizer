@@ -275,12 +275,13 @@ int SampleMonitor::decode_data(const unsigned char *mydata)
   unsigned int adc = *(unsigned int *)&mydata[index];
   m_sampleData.ADC = ntohl(adc);
   index += sizeof(adc);
-
+  /*
   for (int i = 0; i < kNSamples; i++) {
     unsigned short pulse = *(unsigned short *)&mydata[index];
     m_sampleData.Waveform[i] = ntohs(pulse);
     index += sizeof(pulse);
   }
+  */
 }
 
 extern "C" {

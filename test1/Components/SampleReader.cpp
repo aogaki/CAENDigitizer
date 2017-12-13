@@ -200,13 +200,13 @@ int SampleReader::read_data_from_detectors()
     int adc = htonl((*data)[iHit].ADC);
     memcpy(&buf[index], &adc, sizeof(adc));
     index += sizeof(adc);
-
+    /*
     for (int i = 0; i < kNSamples; i++) {
       unsigned short pulse = htons((*data)[iHit].Waveform[i]);
       memcpy(&buf[index], &pulse, sizeof(pulse));
       index += sizeof(pulse);
     }
-
+    */
     memcpy(&m_data[iHit * ONE_HIT_SIZE], buf, ONE_HIT_SIZE);
   }
 
