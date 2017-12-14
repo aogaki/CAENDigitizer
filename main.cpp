@@ -59,7 +59,7 @@ int main(int argc, char **argv)
     // if (i > 10) break;
     std::cout << i << std::endl;
 
-    for (int j = 0; j < 10; j++) digi->SendSWTrigger();
+    //for (int j = 0; j < 10; j++) digi->SendSWTrigger();
     digi->ReadEvents();
 
     // auto charge = digi->GetCharge();
