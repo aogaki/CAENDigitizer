@@ -54,7 +54,7 @@ class SampleReader : public DAQMW::DaqComponentBase
 
   DAQMW::Sock *m_sock;
 
-  unsigned char m_data[BUFFER_SIZE];  // 1024 = BLT, 8 = ch
+  unsigned char m_data[BUFFER_SIZE];
   unsigned int m_recv_byte_size;
 
   BufferStatus m_out_status;
