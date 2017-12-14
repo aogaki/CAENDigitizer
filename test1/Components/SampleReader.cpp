@@ -265,7 +265,8 @@ int SampleReader::daq_run()
   if (m_out_status ==
       BUF_SUCCESS) {  // previous OutPort.write() successfully done
     m_recv_byte_size = read_data_from_detectors();
-    std::cout << m_recv_byte_size << std::endl;
+    std::cout << m_recv_byte_size << "\t" << ONE_HIT_SIZE << "\t"
+              << m_recv_byte_size / ONE_HIT_SIZE << std::endl;
     if (m_recv_byte_size > 0) {
       set_data(m_recv_byte_size);  // set data to OutPort Buffer
       if (write_OutPort() < 0) {
