@@ -180,38 +180,6 @@ int SampleReader::daq_resume()
   return 0;
 }
 
-int SampleReader::read_data_from_detectors()
-{
-  fDigitizer->ReadEvents();
-  auto data = fDigitizer->GetData();
-  const unsigned int nHit = data->size();
-  int received_data_size = nHit * ONE_HIT_SIZE;
-
-  unsigned char buf[ONE_HIT_SIZE];
-  for (unsigned int iHit = 0; iHit < nHit; iHit++) {
-    int index = 0;
-    buf[index++] = (*data)[iHit].ModNumber;
-    buf[index++] = (*data)[iHit].ChNumber;
-
-    unsigned int time = htonl((*data)[iHit].TimeStamp);
-    memcpy(&buf[index], &time, sizeof(time));
-    index += sizeof(time);
-
-    int adc = htonl((*data)[iHit].ADC);
-    memcpy(&buf[index], &adc, sizeof(adc));
-    index += sizeof(adc);
-
-    for (int i = 0; i < kNSamples; i++) {
-      unsigned short pulse = htons((*data)[iHit].Waveform[i]);
-      memcpy(&buf[index], &pulse, sizeof(pulse));
-      index += sizeof(pulse);
-    }
-    memcpy(&m_data[iHit * ONE_HIT_SIZE], buf, ONE_HIT_SIZE);
-  }
-
-  return received_data_size;
-}
-
 int SampleReader::set_data(unsigned int data_byte_size)
 {
   unsigned char header[8];
@@ -262,18 +230,47 @@ int SampleReader::daq_run()
     return 0;
   }
 
-  if (m_out_status ==
-      BUF_SUCCESS) {  // previous OutPort.write() successfully done
-    m_recv_byte_size = read_data_from_detectors();
-    std::cout << m_recv_byte_size << "\t" << ONE_HIT_SIZE << "\t"
-              << m_recv_byte_size / ONE_HIT_SIZE << std::endl;
-    if (m_recv_byte_size > 0) {
-      set_data(m_recv_byte_size);  // set data to OutPort Buffer
-      if (write_OutPort() < 0) {
-        ;                    // Timeout. do nothing.
-      } else {               // OutPort write successfully done
-        inc_sequence_num();  // increase sequence num.
-        inc_total_data_size(m_recv_byte_size);  // increase total data byte size
+  if (m_out_status == BUF_SUCCESS) {
+    // previous OutPort.write() successfully done
+    // Stupid! rewrite it!
+    fDigitizer->ReadEvents();
+    auto data = fDigitizer->GetData();
+    const unsigned int nHit = data->size();
+    unsigned char buf[ONE_HIT_SIZE];
+    for (unsigned int iHit = 0, iData = 0; iHit < nHit; iHit++) {
+      int index = 0;
+      buf[index++] = (*data)[iHit].ModNumber;
+      buf[index++] = (*data)[iHit].ChNumber;
+
+      unsigned int time = htonl((*data)[iHit].TimeStamp);
+      memcpy(&buf[index], &time, sizeof(time));
+      index += sizeof(time);
+
+      int adc = htonl((*data)[iHit].ADC);
+      memcpy(&buf[index], &adc, sizeof(adc));
+      index += sizeof(adc);
+
+      for (int i = 0; i < kNSamples; i++) {
+        unsigned short pulse = htons((*data)[iHit].Waveform[i]);
+        memcpy(&buf[index], &pulse, sizeof(pulse));
+        index += sizeof(pulse);
+      }
+      memcpy(&m_data[iData * ONE_HIT_SIZE], buf, ONE_HIT_SIZE);
+      iData++;
+      m_recv_byte_size += ONE_HIT_SIZE;
+
+      constexpr int sizeTh = 2000000 - ONE_HIT_SIZE;  // 2M is limit
+      if (m_recv_byte_size > sizeTh) {
+        set_data(m_recv_byte_size);  // set data to OutPort Buffer
+        if (write_OutPort() < 0) {
+          ;                    // Timeout. do nothing.
+        } else {               // OutPort write successfully done
+          inc_sequence_num();  // increase sequence num.
+          inc_total_data_size(
+              m_recv_byte_size);  // increase total data byte size
+          m_recv_byte_size = 0;
+          iData = 0;
+        }
       }
     }
   }

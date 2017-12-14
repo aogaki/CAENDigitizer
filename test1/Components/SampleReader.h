@@ -10,6 +10,8 @@
 #ifndef SAMPLEREADER_H
 #define SAMPLEREADER_H
 
+#include <vector>
+
 #include "DaqComponentBase.h"
 #include "TWaveRecord.hpp"
 
@@ -48,7 +50,7 @@ class SampleReader : public DAQMW::DaqComponentBase
   int daq_resume();
 
   int parse_params(::NVList *list);
-  int read_data_from_detectors();
+  // int read_data_from_detectors();
   int set_data(unsigned int data_byte_size);
   int write_OutPort();
 
