@@ -45,7 +45,7 @@ SampleLogger::SampleLogger(RTC::Manager *manager)
       m_InPort("samplelogger_in", m_in_data),
       m_in_status(BUF_SUCCESS),
 
-      m_debug(false),
+      m_debug(true),
       fFile(nullptr),
       fTree(nullptr)
 {
@@ -120,8 +120,13 @@ int SampleLogger::daq_start()
   m_in_status = BUF_SUCCESS;
 
   fFile = new TFile("/tmp/daqmw/test.root", "RECREATE");
-  fTree = new TTree("ADC", "test data");
-  fTree->Branch("ADC", &fADC, "ADC/I");
+  fTree = new TTree("StdFirmwareData", "test data");
+  fTree->Branch("ModNumber", &m_sampleData.ModNumber, "ModNumber/b");
+  fTree->Branch("ChNumber", &m_sampleData.ChNumber, "ChNumber/b");
+  fTree->Branch("TimeStamp", &m_sampleData.TimeStamp, "TimeStamp/i");
+  fTree->Branch("ADC", &m_sampleData.ADC, "ADC/I");
+  fTree->Branch("NSamples", (int *)&kNSamples, "NSamples/I");
+  fTree->Branch("Waveform", m_sampleData.Waveform, "Waveform[NSamples]/s");
 
   return 0;
 }
@@ -221,8 +226,7 @@ int SampleLogger::fill_data(const unsigned char *mydata, const int size)
 {
   for (int i = 0; i < size / int(ONE_HIT_SIZE); i++) {
     decode_data(mydata);
-    fADC = m_sampleData.ADC;
-    fTree->Fill();  // Stupid!
+    fTree->Fill();
     mydata += ONE_HIT_SIZE;
   }
 
@@ -242,13 +246,12 @@ int SampleLogger::decode_data(const unsigned char *mydata)
   unsigned int adc = *(unsigned int *)&mydata[index];
   m_sampleData.ADC = ntohl(adc);
   index += sizeof(adc);
-  /*
+
   for (int i = 0; i < kNSamples; i++) {
     unsigned short pulse = *(unsigned short *)&mydata[index];
     m_sampleData.Waveform[i] = ntohs(pulse);
     index += sizeof(pulse);
   }
-  */
 }
 
 extern "C" {

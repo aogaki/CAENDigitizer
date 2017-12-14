@@ -57,12 +57,11 @@ class SampleLogger : public DAQMW::DaqComponentBase
 
   TFile *fFile;
   TTree *fTree;
-  Int_t fADC;
 
   int decode_data(const unsigned char *mydata);
   int fill_data(const unsigned char *mydata, const int size);
 
-  unsigned char m_recv_data[4096];
+  unsigned char m_recv_data[BUFFER_SIZE];
   unsigned int m_event_byte_size;
   struct SampleData m_sampleData;
 };

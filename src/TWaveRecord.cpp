@@ -48,10 +48,10 @@ TWaveRecord::~TWaveRecord()
 void TWaveRecord::SetParameters()
 {
   // Reading parameter functions should be implemented!!!!!!!
-  fRecordLength = 4096;
-  fBLTEvents = 1024;
+  fRecordLength = kNSamples;
+  fBLTEvents = 10;
   fVpp = 2.;
-  fVth = -0.03;
+  fVth = -0.003;
   fPolarity = CAEN_DGTZ_TriggerOnFallingEdge;
   // fTriggerMode = CAEN_DGTZ_TRGMODE_ACQ_AND_EXTOUT;
   fPostTriggerSize = 80;

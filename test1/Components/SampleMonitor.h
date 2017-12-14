@@ -12,6 +12,7 @@
 
 #include <TApplication.h>
 #include <TCanvas.h>
+#include <TGraph.h>
 #include <TH1.h>
 #include <TStyle.h>
 
@@ -61,13 +62,16 @@ class SampleMonitor : public DAQMW::DaqComponentBase
   int decode_data(const unsigned char *mydata);
   int fill_data(const unsigned char *mydata, const int size);
 
-  TCanvas *m_canvas;
-  TH1D *m_hist;
+  TCanvas *fHisCanvas;
+  TH1D *fHis;
+  TCanvas *fGrCanvas;
+  TGraph *fGr;
+
   int m_bin;
   double m_min;
   double m_max;
   int m_monitor_update_rate;
-  unsigned char m_recv_data[4096];
+  unsigned char m_recv_data[BUFFER_SIZE];
   unsigned int m_event_byte_size;
   struct SampleData m_sampleData;
 };

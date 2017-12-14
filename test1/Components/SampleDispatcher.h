@@ -11,6 +11,7 @@
 #define SAMPLEDISPATCHER_H
 
 #include "DaqComponentBase.h"
+#include "SampleData.h"
 
 using namespace RTC;
 
@@ -54,9 +55,8 @@ class SampleDispatcher : public DAQMW::DaqComponentBase
   int reset_InPort();
   unsigned int read_InPort();
 
-  static const int SEND_BUFFER_SIZE = 4096;
-  unsigned char m_data[SEND_BUFFER_SIZE];
-  unsigned char m_recv_data[SEND_BUFFER_SIZE];
+  unsigned char m_data[BUFFER_SIZE];
+  unsigned char m_recv_data[BUFFER_SIZE];
   unsigned int m_recv_byte_size;
 
   BufferStatus m_out_status1;

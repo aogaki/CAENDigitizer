@@ -50,7 +50,7 @@ SampleDispatcher::SampleDispatcher(RTC::Manager *manager)
       m_out_status1(BUF_SUCCESS),
       m_out_status2(BUF_SUCCESS),
 
-      m_debug(false)
+      m_debug(true)
 {
   // Registration: InPort/OutPort/Service
 

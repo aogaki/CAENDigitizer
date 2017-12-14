@@ -52,8 +52,10 @@ SampleMonitor::SampleMonitor(RTC::Manager *manager)
       m_InPort("samplemonitor_in", m_in_data),
       m_in_status(BUF_SUCCESS),
       m_debug(true),
-      m_canvas(nullptr),
-      m_hist(nullptr),
+      fHisCanvas(nullptr),
+      fHis(nullptr),
+      fGrCanvas(nullptr),
+      fGr(nullptr),
       m_bin(0),
       m_min(0),
       m_max(0),
@@ -90,8 +92,8 @@ RTC::ReturnCode_t SampleMonitor::onExecute(RTC::UniqueId ec_id)
 
 int SampleMonitor::daq_dummy()
 {
-  if (m_canvas) {
-    m_canvas->Update();
+  if (fHisCanvas) {
+    fHisCanvas->Update();
     sleep(1);
   }
 
@@ -105,6 +107,20 @@ int SampleMonitor::daq_configure()
   ::NVList *paramList;
   paramList = m_daq_service0.getCompParams();
   parse_params(paramList);
+
+  DelPointer(fHisCanvas);
+  fHisCanvas = new TCanvas("HisCanvas", "test");
+
+  DelPointer(fHis);
+  fHis = new TH1D("hist", "test", 10000, 0., 10000.);
+
+  DelPointer(fGrCanvas);
+  fGrCanvas = new TCanvas("GrCanvas", "test");
+
+  DelPointer(fGr);
+  fGr = new TGraph();
+  fGr->SetMinimum(7000);
+  fGr->SetMaximum(9000);
 
   return 0;
 }
@@ -129,8 +145,10 @@ int SampleMonitor::daq_unconfigure()
 {
   std::cerr << "*** SampleMonitor::unconfigure" << std::endl;
 
-  DelPointer(m_canvas);
-  DelPointer(m_hist);
+  DelPointer(fHisCanvas);
+  DelPointer(fHis);
+  DelPointer(fGrCanvas);
+  DelPointer(fGr);
 
   return 0;
 }
@@ -141,12 +159,6 @@ int SampleMonitor::daq_start()
 
   m_in_status = BUF_SUCCESS;
 
-  DelPointer(m_canvas);
-  m_canvas = new TCanvas("c1", "test", 0, 0, 600, 400);
-
-  DelPointer(m_hist);
-  m_hist = new TH1D("hist", "test", 100000, 0., 100000.);
-
   return 0;
 }
 
@@ -154,8 +166,13 @@ int SampleMonitor::daq_stop()
 {
   std::cerr << "*** SampleMonitor::stop" << std::endl;
 
-  m_hist->Draw();
-  m_canvas->Update();
+  fHisCanvas->cd();
+  fHis->Draw();
+  fHisCanvas->Update();
+
+  fGrCanvas->cd();
+  fGr->Draw();
+  fGrCanvas->Update();
 
   reset_InPort();
 
@@ -240,8 +257,13 @@ int SampleMonitor::daq_run()
 
   unsigned long sequence_num = get_sequence_num();
   if ((sequence_num % m_monitor_update_rate) == 0) {
-    m_hist->Draw();
-    m_canvas->Update();
+    fHisCanvas->cd();
+    fHis->Draw();
+    fHisCanvas->Update();
+
+    fGrCanvas->cd();
+    fGr->Draw();
+    fGrCanvas->Update();
   }
 
   inc_sequence_num();                      // increase sequence num.
@@ -254,10 +276,13 @@ int SampleMonitor::fill_data(const unsigned char *mydata, const int size)
 {
   for (int i = 0; i < size / int(ONE_HIT_SIZE); i++) {
     decode_data(mydata);
-    m_hist->Fill(m_sampleData.ADC);
+    fHis->Fill(m_sampleData.ADC);
 
     mydata += ONE_HIT_SIZE;
   }
+
+  for (int i = 0; i < kNSamples; i++)
+    fGr->SetPoint(i, i, m_sampleData.Waveform[i]);
 
   return 0;
 }
@@ -275,13 +300,12 @@ int SampleMonitor::decode_data(const unsigned char *mydata)
   unsigned int adc = *(unsigned int *)&mydata[index];
   m_sampleData.ADC = ntohl(adc);
   index += sizeof(adc);
-  /*
+
   for (int i = 0; i < kNSamples; i++) {
     unsigned short pulse = *(unsigned short *)&mydata[index];
     m_sampleData.Waveform[i] = ntohs(pulse);
     index += sizeof(pulse);
   }
-  */
 }
 
 extern "C" {

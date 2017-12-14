@@ -54,9 +54,7 @@ class SampleReader : public DAQMW::DaqComponentBase
 
   DAQMW::Sock *m_sock;
 
-  static const int EVENT_BYTE_SIZE = 8;
-  // static const int SEND_BUFFER_SIZE = 1024;
-  unsigned char m_data[1024 * ONE_HIT_SIZE * 8];  // 1024 = BLT, 8 = ch
+  unsigned char m_data[BUFFER_SIZE];  // 1024 = BLT, 8 = ch
   unsigned int m_recv_byte_size;
 
   BufferStatus m_out_status;
