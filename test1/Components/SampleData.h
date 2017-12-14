@@ -9,7 +9,7 @@ constexpr int ONE_HIT_SIZE = sizeof(unsigned char) + sizeof(unsigned char) +
                              (sizeof(unsigned short) * kNSamples);
 // constexpr int ONE_HIT_SIZE = sizeof(unsigned char) + sizeof(unsigned char) +
 //                              sizeof(unsigned int) + sizeof(int);
-constexpr int BUFFER_SIZE = 1024 * ONE_HIT_SIZE * 16;
+constexpr int BUFFER_SIZE = 1024 * ONE_HIT_SIZE * 16 * 8;
 
 struct SampleData {
   unsigned char ModNumber;
