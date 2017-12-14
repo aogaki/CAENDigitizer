@@ -267,10 +267,20 @@ int SampleReader::daq_run()
         } else {               // OutPort write successfully done
           inc_sequence_num();  // increase sequence num.
           inc_total_data_size(
-              m_recv_byte_size);  // increase total data byte size
+			      m_recv_byte_size);  // increase total data byte size
           m_recv_byte_size = 0;
           iData = 0;
         }
+      }
+    }
+    if(nHit > 0 && m_recv_byte_size > 0){
+      set_data(m_recv_byte_size); 
+      if (write_OutPort() < 0) {
+	;                    // Timeout. do nothing.
+      } else {               // OutPort write successfully done
+	inc_sequence_num();  // increase sequence num.
+	inc_total_data_size(
+			    m_recv_byte_size);
       }
     }
   }
