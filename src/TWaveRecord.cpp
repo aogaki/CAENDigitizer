@@ -49,7 +49,7 @@ void TWaveRecord::SetParameters()
 {
   // Reading parameter functions should be implemented!!!!!!!
   fRecordLength = kNSamples;
-  fBLTEvents = 1024;
+  fBLTEvents = 20;
   fVpp = 2.;
   fVth = -0.03;
   // fVth = -0.001;
