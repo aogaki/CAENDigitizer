@@ -112,7 +112,7 @@ int SampleMonitor::daq_configure()
   fHisCanvas = new TCanvas("HisCanvas", "test");
 
   DelPointer(fHis);
-  fHis = new TH1D("hist", "test", 10000, 0., 10000.);
+  fHis = new TH1D("hist", "test", 20000, 0., 20000.);
 
   DelPointer(fGrCanvas);
   fGrCanvas = new TCanvas("GrCanvas", "test");
@@ -276,13 +276,13 @@ int SampleMonitor::fill_data(const unsigned char *mydata, const int size)
 {
   for (int i = 0; i < size / int(ONE_HIT_SIZE); i++) {
     decode_data(mydata);
-    fHis->Fill(m_sampleData.ADC);
-
+    if (m_sampleData.ChNumber == 0) {
+      fHis->Fill(m_sampleData.ADC);
+      for (int i = 0; i < kNSamples; i++)
+        fGr->SetPoint(i, i, m_sampleData.Waveform[i]);
+    }
     mydata += ONE_HIT_SIZE;
   }
-
-  for (int i = 0; i < kNSamples; i++)
-    fGr->SetPoint(i, i, m_sampleData.Waveform[i]);
 
   return 0;
 }
