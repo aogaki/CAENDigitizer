@@ -265,6 +265,7 @@ int SampleReader::daq_run()
       if (m_recv_byte_size > sizeTh) {
         set_data(m_recv_byte_size);  // set data to OutPort Buffer
         if (write_OutPort() < 0) {
+	  std::cout << "time out" << std::endl;
           ;                    // Timeout. do nothing.
         } else {               // OutPort write successfully done
           inc_sequence_num();  // increase sequence num.
