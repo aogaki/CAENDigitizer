@@ -1,3 +1,4 @@
+#include <string.h>
 #include <iostream>
 
 #include "TWaveRecord.hpp"
@@ -33,6 +34,11 @@ TWaveRecord::TWaveRecord(CAEN_DGTZ_ConnectionType type, int link, int node,
   Open(type, link, node, VMEadd);
   Reset();
   GetBoardInfo();
+
+  fData = new std::vector<TStdData>;
+  fData->reserve(fBLTEvents * 32);  // 32 means nothing.  minimum is No. chs
+
+  fDataArray = new unsigned char[fBLTEvents * ONE_HIT_SIZE * fNChs];
 }
 
 TWaveRecord::~TWaveRecord()
@@ -43,6 +49,7 @@ TWaveRecord::~TWaveRecord()
   Close();
 
   delete fData;
+  delete fDataArray;
 }
 
 void TWaveRecord::SetParameters()
@@ -51,15 +58,12 @@ void TWaveRecord::SetParameters()
   fRecordLength = kNSamples;
   fBLTEvents = 1024;
   fVpp = 2.;
-  fVth = -0.03;
-  // fVth = -0.001;
+  // fVth = -0.03;
+  fVth = -0.001;
   fPolarity = CAEN_DGTZ_TriggerOnFallingEdge;
   // fTriggerMode = CAEN_DGTZ_TRGMODE_ACQ_AND_EXTOUT;
   fPostTriggerSize = 80;
   fGateSize = 400;  // ns
-
-  fData = new std::vector<TStdData>;
-  fData->reserve(fBLTEvents * 32);  // 32 means nothing.  minimum is No. chs
 }
 
 void TWaveRecord::Initialize()
@@ -91,7 +95,7 @@ void TWaveRecord::ReadEvents()
   PrintError(err, "GetNumEvents");
   // std::cout << fNEvents << " Events" << std::endl;
 
-  fData->clear();
+  // fData->clear();
   TStdData data;
   for (int32_t iEve = 0; iEve < fNEvents; iEve++) {
     err = CAEN_DGTZ_GetEventInfo(fHandler, fpReadoutBuffer, fBufferSize, iEve,
@@ -146,13 +150,31 @@ void TWaveRecord::ReadEvents()
       fPreviousTime = timeStamp;
       timeStamp *= fTSample;
 
-      data.ModNumber = 0;  // fModNumber is needed.
-      data.ChNumber = iCh;
-      data.ADC = sumCharge;
-      data.TimeStamp = timeStamp;
-      for (uint32_t i = 0; i < kNSamples; i++)
-        data.Waveform[i] = fpEventStd->DataChannel[iCh][i];
-      fData->push_back(data);
+      // data.ModNumber = 0;  // fModNumber is needed.
+      // data.ChNumber = iCh;
+      // data.TimeStamp = timeStamp;
+      // data.ADC = sumCharge;
+      // for (uint32_t i = 0; i < kNSamples; i++)
+      //   data.Waveform[i] = fpEventStd->DataChannel[iCh][i];
+      // fData->push_back(data);
+
+      int index = (iEve * (fNChs * ONE_HIT_SIZE)) + (iCh * ONE_HIT_SIZE);
+      fDataArray[index++] = 0;  // fModNumber is needed.
+      fDataArray[index++] = iCh;
+
+      constexpr auto timeSize = sizeof(timeStamp);
+      memcpy(&fDataArray[index], &timeStamp, timeSize);
+      index += timeSize;
+
+      constexpr auto adcSize = sizeof(sumCharge);
+      // auto adc = sumCharge;
+      memcpy(&fDataArray[index], &sumCharge, adcSize);
+      index += adcSize;
+
+      constexpr auto waveSize =
+          sizeof(fpEventStd->DataChannel[0][0]) * kNSamples;
+      memcpy(&fDataArray[index], fpEventStd->DataChannel[iCh], waveSize);
+
       // std::cout << "time:\t" << fEventInfo.TriggerTimeTag << "\t" <<
       // timeStamp
       //<< std::endl;

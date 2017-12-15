@@ -29,6 +29,8 @@ class TWaveRecord : public TDigitizer
   void StopAcquisition();
 
   const std::vector<TStdData> *GetData() { return fData; };
+  int GetNEvents() { return fNEvents * fNChs; };
+  unsigned char *GetDataArray() { return fDataArray; };
 
  protected:
   // For event readout
@@ -52,13 +54,12 @@ class TWaveRecord : public TDigitizer
   uint32_t fPostTriggerSize;
   int32_t fGateSize;
 
-  // Charge and time
-  std::vector<int32_t> *fCharge;
-  std::vector<uint64_t> *fTime;
+  // Data
   uint64_t fTimeOffset;
   uint64_t fPreviousTime;
-
   std::vector<TStdData> *fData;
+
+  unsigned char *fDataArray;
 
   virtual void SetParameters();
 
