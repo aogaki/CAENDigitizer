@@ -243,16 +243,16 @@ int SampleReader::daq_run()
       buf[index++] = (*data)[iHit].ModNumber;
       buf[index++] = (*data)[iHit].ChNumber;
 
-      unsigned int time = htonl((*data)[iHit].TimeStamp);
+      unsigned int time = (*data)[iHit].TimeStamp;
       memcpy(&buf[index], &time, sizeof(time));
       index += sizeof(time);
 
-      int adc = htonl((*data)[iHit].ADC);
+      int adc = (*data)[iHit].ADC;
       memcpy(&buf[index], &adc, sizeof(adc));
       index += sizeof(adc);
 
       for (int i = 0; i < kNSamples; i++) {
-        unsigned short pulse = htons((*data)[iHit].Waveform[i]);
+        unsigned short pulse = (*data)[iHit].Waveform[i];
         memcpy(&buf[index], &pulse, sizeof(pulse));
         index += sizeof(pulse);
       }
