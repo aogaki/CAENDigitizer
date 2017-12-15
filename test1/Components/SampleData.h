@@ -3,18 +3,17 @@
 
 #include "TStdData.hpp"
 
-// constexpr int ONE_HIT_SIZE = 8202;
 constexpr int ONE_HIT_SIZE = sizeof(unsigned char) + sizeof(unsigned char) +
-                             sizeof(unsigned int) + sizeof(int) +
+                             sizeof(unsigned long) + sizeof(int) +
                              (sizeof(unsigned short) * kNSamples);
-// constexpr int ONE_HIT_SIZE = sizeof(unsigned char) + sizeof(unsigned char) +
-//                              sizeof(unsigned int) + sizeof(int);
-constexpr int BUFFER_SIZE = 1024 * ONE_HIT_SIZE * 16 * 8;
+
+// For data transfer buffer
+constexpr int BUFFER_SIZE = 1024 * 1024 * 2;
 
 struct SampleData {
   unsigned char ModNumber;
   unsigned char ChNumber;
-  unsigned int TimeStamp;
+  unsigned long TimeStamp;
   int ADC;
   unsigned short Waveform[kNSamples];
 };

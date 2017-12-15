@@ -243,7 +243,7 @@ int SampleReader::daq_run()
       buf[index++] = (*data)[iHit].ModNumber;
       buf[index++] = (*data)[iHit].ChNumber;
 
-      unsigned int time = (*data)[iHit].TimeStamp;
+      unsigned long time = (*data)[iHit].TimeStamp;
       memcpy(&buf[index], &time, sizeof(time));
       index += sizeof(time);
 

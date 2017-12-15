@@ -123,7 +123,7 @@ int SampleLogger::daq_start()
   fTree = new TTree("StdFirmwareData", "test data");
   fTree->Branch("ModNumber", &m_sampleData.ModNumber, "ModNumber/b");
   fTree->Branch("ChNumber", &m_sampleData.ChNumber, "ChNumber/b");
-  fTree->Branch("TimeStamp", &m_sampleData.TimeStamp, "TimeStamp/i");
+  fTree->Branch("TimeStamp", &m_sampleData.TimeStamp, "TimeStamp/l");
   fTree->Branch("ADC", &m_sampleData.ADC, "ADC/I");
   fTree->Branch("NSamples", (int *)&kNSamples, "NSamples/I");
   fTree->Branch("Waveform", m_sampleData.Waveform, "Waveform[NSamples]/s");
@@ -239,7 +239,7 @@ int SampleLogger::decode_data(const unsigned char *mydata)
   m_sampleData.ModNumber = mydata[index++];
   m_sampleData.ChNumber = mydata[index++];
 
-  unsigned int timeStamp = *(unsigned int *)&mydata[index];
+  unsigned long timeStamp = *(unsigned int *)&mydata[index];
   m_sampleData.TimeStamp = timeStamp;
   index += sizeof(timeStamp);
 

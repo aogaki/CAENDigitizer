@@ -138,19 +138,18 @@ void TWaveRecord::ReadEvents()
         // std::endl;
       }
 
-      // uint64_t timeStamp = fEventInfo.TriggerTimeTag + fTimeOffset;
-      // if (timeStamp < fPreviousTime) {
-      //   timeStamp += 0xFFFFFFFF;
-      //   fTimeOffset += 0xFFFFFFFF;
-      // }
-      // fPreviousTime = timeStamp;
-      // timeStamp *= fTSample;
+      uint64_t timeStamp = fEventInfo.TriggerTimeTag + fTimeOffset;
+      if (timeStamp < fPreviousTime) {
+        timeStamp += 0xFFFFFFFF;
+        fTimeOffset += 0xFFFFFFFF;
+      }
+      fPreviousTime = timeStamp;
+      timeStamp *= fTSample;
 
       data.ModNumber = 0;  // fModNumber is needed.
       data.ChNumber = iCh;
       data.ADC = sumCharge;
-      // data.TimeStamp = timeStamp;
-      data.TimeStamp = fEventInfo.TriggerTimeTag;
+      data.TimeStamp = timeStamp;
       for (uint32_t i = 0; i < kNSamples; i++)
         data.Waveform[i] = fpEventStd->DataChannel[iCh][i];
       fData->push_back(data);
