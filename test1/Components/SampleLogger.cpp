@@ -119,7 +119,7 @@ int SampleLogger::daq_start()
 
   m_in_status = BUF_SUCCESS;
 
-  fFile = new TFile("/tmp/daqmw/test.root", "RECREATE");
+  fFile = new TFile("/Data/DAQ/test.root", "RECREATE");
   fTree = new TTree("StdFirmwareData", "test data");
   fTree->Branch("ModNumber", &m_sampleData.ModNumber, "ModNumber/b");
   fTree->Branch("ChNumber", &m_sampleData.ChNumber, "ChNumber/b");
@@ -240,16 +240,16 @@ int SampleLogger::decode_data(const unsigned char *mydata)
   m_sampleData.ChNumber = mydata[index++];
 
   unsigned int timeStamp = *(unsigned int *)&mydata[index];
-  m_sampleData.TimeStamp = ntohl(timeStamp);
+  m_sampleData.TimeStamp = timeStamp;
   index += sizeof(timeStamp);
 
   unsigned int adc = *(unsigned int *)&mydata[index];
-  m_sampleData.ADC = ntohl(adc);
+  m_sampleData.ADC = adc;
   index += sizeof(adc);
 
   for (int i = 0; i < kNSamples; i++) {
     unsigned short pulse = *(unsigned short *)&mydata[index];
-    m_sampleData.Waveform[i] = ntohs(pulse);
+    m_sampleData.Waveform[i] = pulse;
     index += sizeof(pulse);
   }
 }

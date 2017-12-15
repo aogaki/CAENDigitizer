@@ -294,16 +294,16 @@ int SampleMonitor::decode_data(const unsigned char *mydata)
   m_sampleData.ChNumber = mydata[index++];
 
   unsigned int timeStamp = *(unsigned int *)&mydata[index];
-  m_sampleData.TimeStamp = ntohl(timeStamp);
+  m_sampleData.TimeStamp = timeStamp;
   index += sizeof(timeStamp);
 
   unsigned int adc = *(unsigned int *)&mydata[index];
-  m_sampleData.ADC = ntohl(adc);
+  m_sampleData.ADC = adc;
   index += sizeof(adc);
 
   for (int i = 0; i < kNSamples; i++) {
     unsigned short pulse = *(unsigned short *)&mydata[index];
-    m_sampleData.Waveform[i] = ntohs(pulse);
+    m_sampleData.Waveform[i] = pulse;
     index += sizeof(pulse);
   }
 }

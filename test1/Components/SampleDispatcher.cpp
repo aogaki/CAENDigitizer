@@ -43,7 +43,8 @@ static const char *sampledispatcher_spec[] = {"implementation_id",
 SampleDispatcher::SampleDispatcher(RTC::Manager *manager)
     : DAQMW::DaqComponentBase(manager),
       m_OutPort1("sampledispatcher_out1", m_out_data1),
-      m_OutPort2("sampledispatcher_out2", m_out_data2),
+      // m_OutPort2("sampledispatcher_out2", m_out_data2),
+      m_OutPort2("sampledispatcher_out2", m_out_data1),
       m_InPort("sampledispatcher_in", m_in_data),
       m_recv_byte_size(0),
       m_in_status(BUF_SUCCESS),
@@ -214,11 +215,12 @@ int SampleDispatcher::set_data(unsigned int data_byte_size)
   memcpy(&(m_out_data1.data[HEADER_BYTE_SIZE + data_byte_size]), &footer[0],
          FOOTER_BYTE_SIZE);
   /// set OutPort buffer length
-  m_out_data2.data.length(data_byte_size + HEADER_BYTE_SIZE + FOOTER_BYTE_SIZE);
-  memcpy(&(m_out_data2.data[0]), &header[0], HEADER_BYTE_SIZE);
-  memcpy(&(m_out_data2.data[HEADER_BYTE_SIZE]), &m_data[0], data_byte_size);
-  memcpy(&(m_out_data2.data[HEADER_BYTE_SIZE + data_byte_size]), &footer[0],
-         FOOTER_BYTE_SIZE);
+  // m_out_data2.data.length(data_byte_size + HEADER_BYTE_SIZE +
+  // FOOTER_BYTE_SIZE); memcpy(&(m_out_data2.data[0]), &header[0],
+  // HEADER_BYTE_SIZE); memcpy(&(m_out_data2.data[HEADER_BYTE_SIZE]),
+  // &m_data[0], data_byte_size); memcpy(&(m_out_data2.data[HEADER_BYTE_SIZE +
+  // data_byte_size]), &footer[0],
+  //        FOOTER_BYTE_SIZE);
 
   return 0;
 }
@@ -227,33 +229,25 @@ int SampleDispatcher::write_OutPort()
 {
   ////////////////// send data from OutPort  //////////////////
   bool ret = m_OutPort1.write();
+  ret |= m_OutPort2.write();
 
   //////////////////// check write status /////////////////////
   if (ret == false) {  // TIMEOUT or FATAL
     m_out_status1 = check_outPort_status(m_OutPort1);
     if (m_out_status1 == BUF_FATAL) {  // Fatal error
       fatal_error_report(OUTPORT_ERROR);
+    } else if (m_out_status1 == BUF_TIMEOUT) {  // Timeout
+      return -1;
     }
-    if (m_out_status1 == BUF_TIMEOUT) {  // Timeout
+
+    m_out_status2 = check_outPort_status(m_OutPort2);
+    if (m_out_status2 == BUF_FATAL) {  // Fatal error
+      fatal_error_report(OUTPORT_ERROR);
+    } else if (m_out_status2 == BUF_TIMEOUT) {  // Timeout
       return -1;
     }
   } else {
     m_out_status1 = BUF_SUCCESS;  // successfully done
-  }
-
-  ////////////////// send data from OutPort  //////////////////
-  ret = m_OutPort2.write();
-
-  //////////////////// check write status /////////////////////
-  if (ret == false) {  // TIMEOUT or FATAL
-    m_out_status2 = check_outPort_status(m_OutPort2);
-    if (m_out_status2 == BUF_FATAL) {  // Fatal error
-      fatal_error_report(OUTPORT_ERROR);
-    }
-    if (m_out_status2 == BUF_TIMEOUT) {  // Timeout
-      return -1;
-    }
-  } else {
     m_out_status2 = BUF_SUCCESS;  // successfully done
   }
 

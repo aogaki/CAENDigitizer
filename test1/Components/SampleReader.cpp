@@ -236,7 +236,7 @@ int SampleReader::daq_run()
     fDigitizer->ReadEvents();
     auto data = fDigitizer->GetData();
     const unsigned int nHit = data->size();
-    if(nHit > 0) std::cout << nHit << std::endl;
+    if (nHit > 0) std::cout << nHit << std::endl;
     unsigned char buf[ONE_HIT_SIZE];
     for (unsigned int iHit = 0, iData = 0; iHit < nHit; iHit++) {
       int index = 0;
@@ -261,7 +261,7 @@ int SampleReader::daq_run()
       m_recv_byte_size += ONE_HIT_SIZE;
 
       constexpr int sizeTh = 2000000 - ONE_HIT_SIZE;  // 2M is limit
-      //constexpr int sizeTh = 200000000 - ONE_HIT_SIZE;  // 2M is limit
+      // constexpr int sizeTh = 200000000 - ONE_HIT_SIZE;  // 2M is limit
       if (m_recv_byte_size > sizeTh) {
         set_data(m_recv_byte_size);  // set data to OutPort Buffer
         if (write_OutPort() < 0) {
@@ -269,25 +269,23 @@ int SampleReader::daq_run()
         } else {               // OutPort write successfully done
           inc_sequence_num();  // increase sequence num.
           inc_total_data_size(
-			      m_recv_byte_size);  // increase total data byte size
+              m_recv_byte_size);  // increase total data byte size
           m_recv_byte_size = 0;
           iData = 0;
         }
       }
     }
-    if(nHit > 0 && m_recv_byte_size > 0){
-      set_data(m_recv_byte_size); 
+    if (nHit > 0 && m_recv_byte_size > 0) {
+      set_data(m_recv_byte_size);
       if (write_OutPort() < 0) {
-	;                    // Timeout. do nothing.
+        ;                    // Timeout. do nothing.
       } else {               // OutPort write successfully done
-	inc_sequence_num();  // increase sequence num.
-	inc_total_data_size(
-			    m_recv_byte_size);
+        inc_sequence_num();  // increase sequence num.
+        inc_total_data_size(m_recv_byte_size);
+        m_recv_byte_size = 0;
       }
     }
   }
-
-  m_recv_byte_size = 0;
 
   return 0;
 }
