@@ -61,10 +61,10 @@ class TWaveRecord : public TDigitizer
 
   unsigned char *fDataArray;
 
-  virtual void SetParameters();
+  void SetParameters();
 
-  virtual void AcquisitionConfig();
-  virtual void TriggerConfig();
+  void AcquisitionConfig();
+  void TriggerConfig();
 };
 
 #endif

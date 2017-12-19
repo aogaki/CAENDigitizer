@@ -59,7 +59,7 @@ SampleMonitor::SampleMonitor(RTC::Manager *manager)
       m_bin(0),
       m_min(0),
       m_max(0),
-      m_monitor_update_rate(30),
+      m_monitor_update_rate(300),
       m_event_byte_size(0)
 {
   // Registration: InPort/OutPort/Service

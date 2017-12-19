@@ -39,7 +39,8 @@ int main(int argc, char **argv)
   TApplication app("testApp", &argc, argv);
 
   int link = 0;
-  auto digi = new TDPP(CAEN_DGTZ_USB, link, 0, 0, true);
+  auto digi = new TDPP(CAEN_DGTZ_USB, link);
+  digi->Initialize();
 
   delete digi;
 

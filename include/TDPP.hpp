@@ -8,14 +8,12 @@ class TDPP : public TDigitizer
  public:
   TDPP();
   TDPP(CAEN_DGTZ_ConnectionType type, int link, int node = 0,
-       uint32_t VMEadd = 0, bool plotWaveform = false);
+       uint32_t VMEadd = 0);
   ~TDPP();
 
   void Initialize();
 
   void ReadEvents();
-
-  void BoardCalibration();
 
   void StartAcquisition();
   void StopAcquisition();
@@ -27,9 +25,19 @@ class TDPP : public TDigitizer
   std::vector<int32_t> *fCharge;
   std::vector<uint64_t> *fTime;
 
-  void SetParameters();
+  virtual void SetParameters();
 
-  void Reset();
+  virtual void AcquisitionConfig();
+  virtual void TriggerConfig();
+
+  CAEN_DGTZ_DPP_PHA_Params_t fParPHA;
+  CAEN_DGTZ_DPP_PSD_Params_t fParPSD;
+  CAEN_DGTZ_TriggerMode_t fTriggerMode;
+  uint32_t fPostTriggerSize;
+  uint32_t fRecordLength;
+
+  double fVpp;
+  double fVth;
 };
 
 #endif

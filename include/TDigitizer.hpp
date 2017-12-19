@@ -10,6 +10,15 @@
 #include <CAENDigitizer.h>
 #include <CAENDigitizerType.h>
 
+enum class FirmWareCode {
+  // I need only theese
+  // Its are not same as CAENDigitizerType.h
+  DPP_PSD,
+  DPP_PHA,
+  DPP_CI,
+  STD,
+};
+
 class TDigitizer
 {
  public:
@@ -35,6 +44,7 @@ class TDigitizer
   // For board information
   void GetBoardInfo();
   int fDigitizerModel;
+  FirmWareCode fFirmware;
   uint32_t fNChs;
   int fTSample;  // This means time step length in ns
   int fNBits;    // ADC, Waveform resolution

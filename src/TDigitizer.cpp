@@ -109,6 +109,29 @@ void TDigitizer::GetBoardInfo()
   } else {
     PrintError(err, "Check Family code @ GetBoardInfo");
   }
+
+  uint32_t majorNumber = atoi(info.AMC_FirmwareRel);
+  if (fDigitizerModel == 5000) {        // Hexagon
+    fFirmware = FirmWareCode::DPP_PHA;  // It will be never used at ELI?
+  } else if (majorNumber == 128) {
+    fFirmware = FirmWareCode::DPP_PHA;  // It will be never used at ELI?
+  } else if (majorNumber == 130) {
+    fFirmware = FirmWareCode::DPP_CI;
+  } else if (majorNumber == 131) {
+    fFirmware = FirmWareCode::DPP_PSD;
+  } else if (majorNumber == 132) {
+    fFirmware = FirmWareCode::DPP_PSD;
+  } else if (majorNumber == 136) {
+    fFirmware = FirmWareCode::DPP_PSD;  // NOTE: valid also for x725
+  } else if (majorNumber == 139) {
+    fFirmware = FirmWareCode::DPP_PHA;  // NOTE: valid also for x725
+  } else {
+    fFirmware = FirmWareCode::STD;
+  }
+
+  std::cout << "Time sample length:\t" << fTSample << " ns\n"
+            << "ADC resolution:\t" << fNBits << " bits\n"
+            << "Firmware code:\t" << int(fFirmware) << std::endl;
 }
 
 void TDigitizer::BoardCalibration()
