@@ -119,7 +119,7 @@ void TWaveRecord::ReadEvents()
       //   std::cout << "No. samples of wave form error" << std::endl;
       // }
 
-      int32_t sumCharge = 0.;
+      int16_t sumCharge = 0.;
       // for (uint32_t i = 0; i < chSize; i++) {
       // const uint32_t start = 0;
       int32_t start = (chSize * (100 - fPostTriggerSize) / 100) -
@@ -238,7 +238,7 @@ void TWaveRecord::TriggerConfig()
   std::cout << "Polarity:\t" << pol << std::endl;
 }
 
-void TWaveRecord::StartAcquisition()
+CAEN_DGTZ_ErrorCode TWaveRecord::StartAcquisition()
 {
   CAEN_DGTZ_ErrorCode err;
   err = CAEN_DGTZ_SWStartAcquisition(fHandler);
@@ -249,6 +249,8 @@ void TWaveRecord::StartAcquisition()
 
   fTimeOffset = 0;
   fPreviousTime = 0;
+
+  return err;
 }
 
 void TWaveRecord::StopAcquisition()

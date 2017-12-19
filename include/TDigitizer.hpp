@@ -32,7 +32,9 @@ class TDigitizer
 
   virtual void ReadEvents() = 0;
 
-  virtual void StartAcquisition() = 0;
+  // When the FW is wxpired.  Configuration can be done.
+  // But, StartAcquisition can not be done.
+  virtual CAEN_DGTZ_ErrorCode StartAcquisition() = 0;
   virtual void StopAcquisition() = 0;
 
  protected:

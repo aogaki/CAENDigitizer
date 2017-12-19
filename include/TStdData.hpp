@@ -22,12 +22,12 @@ class TStdData
   uint8_t ModNumber;
   uint8_t ChNumber;
   uint64_t TimeStamp;
-  int32_t ADC;
+  int16_t ADC;
   uint16_t Waveform[kNSamples];
 };
 
 constexpr int ONE_HIT_SIZE = sizeof(unsigned char) + sizeof(unsigned char) +
-                             sizeof(unsigned long) + sizeof(int) +
+                             sizeof(unsigned long) + sizeof(short) +
                              (sizeof(unsigned short) * kNSamples);
 
 // For data transfer buffer
@@ -37,7 +37,7 @@ struct SampleData {
   unsigned char ModNumber;
   unsigned char ChNumber;
   unsigned long TimeStamp;
-  int ADC;
+  short ADC;
   unsigned short Waveform[kNSamples];
 };
 

@@ -25,7 +25,7 @@ class TWaveRecord : public TDigitizer
 
   void ReadEvents();
 
-  void StartAcquisition();
+  CAEN_DGTZ_ErrorCode StartAcquisition();
   void StopAcquisition();
 
   const std::vector<TStdData> *GetData() { return fData; };

@@ -42,6 +42,24 @@ int main(int argc, char **argv)
   auto digi = new TDPP(CAEN_DGTZ_USB, link);
   digi->Initialize();
 
+  auto err = digi->StartAcquisition();
+
+  if (err == CAEN_DGTZ_Success) {
+    for (int counter = 0; true; counter++) {
+      std::cout << counter << std::endl;
+      for (int i = 0; i < 10; i++) {
+        digi->SendSWTrigger();
+        usleep(100000);
+      }
+      digi->ReadEvents();
+      if (kbhit()) break;
+      usleep(100000);
+    }
+    digi->StopAcquisition();
+  } else {
+    std::cout << "Probably, FW is expired." << std::endl;
+  }
+
   delete digi;
 
   // app.Run();
