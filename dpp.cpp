@@ -8,7 +8,7 @@
 #include <TH1.h>
 
 #include "TDPP.hpp"
-#include "TStdData.hpp"
+#include "TWaveRecord.hpp"
 
 int kbhit(void)
 {
@@ -42,85 +42,77 @@ int main(int argc, char **argv)
 
   int link = 0;
   auto digi = new TDPP(CAEN_DGTZ_USB, link);
+
   digi->Initialize();
 
-  auto err = digi->StartAcquisition();
+  digi->StartAcquisition();
 
-  TH1D *hisCharge = new TH1D("hisCharge", "test", 120000, -60000, 60000);
-  TCanvas *canHis = new TCanvas("canHis", "his");
+  TH1D *hisCharge = new TH1D("hisCharge", "test", 20000, 0, 20000);
+  TCanvas *canvas = new TCanvas();
   TGraph *grWave = new TGraph();
   grWave->SetMaximum(9000);
   grWave->SetMinimum(7000);
-  TCanvas *canGr = new TCanvas("canGr", "graph");
-  canHis->cd();
+  TCanvas *canvas2 = new TCanvas();
+  canvas->cd();
   hisCharge->Draw();
 
-  unsigned char *dataArray{nullptr};
+  for (int i = 0; true; i++) {
+    //   // if (i > 10) break;
+    std::cout << i << std::endl;
 
-  if (err == CAEN_DGTZ_Success) {
-    for (int counter = 0; true; counter++) {
-      std::cout << counter << std::endl;
-      for (int i = 0; i < 10; i++) {
-        // digi->SendSWTrigger();
-        usleep(100000);
-      }
+    // for (int j = 0; j < 10; j++) digi->SendSWTrigger();
+    digi->ReadEvents();
 
-      digi->ReadEvents();
-      dataArray = digi->GetDataArray();
-      const int nHit = digi->GetNEvents();
-      std::cout << nHit << std::endl;
-      for (int i = 0; i < nHit; i++) {
-        auto index = (i * ONE_HIT_SIZE);
-        auto offset = 0;
-        SampleData data;
+    auto dataArray = digi->GetDataArray();
+    const int nHit = digi->GetNEvents();
+    std::cout << nHit << std::endl;
+    for (int i = 0; i < nHit; i++) {
+      auto index = (i * ONE_HIT_SIZE);
+      auto offset = 0;
+      SampleData data;
 
-        data.ModNumber = dataArray[index + offset];
-        offset += sizeof(data.ModNumber);
+      data.ModNumber = dataArray[index + offset];
+      offset += sizeof(data.ModNumber);
 
-        data.ChNumber = dataArray[index + offset];
-        offset += sizeof(data.ChNumber);
+      data.ChNumber = dataArray[index + offset];
+      offset += sizeof(data.ChNumber);
 
-        memcpy(&data.TimeStamp, &dataArray[index + offset],
-               sizeof(data.TimeStamp));
-        offset += sizeof(data.TimeStamp);
+      memcpy(&data.TimeStamp, &dataArray[index + offset],
+             sizeof(data.TimeStamp));
+      offset += sizeof(data.TimeStamp);
 
-        memcpy(&data.ADC, &dataArray[index + offset], sizeof(data.ADC));
-        offset += sizeof(data.ADC);
+      memcpy(&data.ADC, &dataArray[index + offset], sizeof(data.ADC));
+      offset += sizeof(data.ADC);
+      if (data.ChNumber == 0) {
+        hisCharge->Fill(data.ADC);
 
-        if (data.ChNumber == 5) {
-          hisCharge->Fill(data.ADC);
+        for (int iSample = 0; iSample < kNSamples; iSample++) {
+          unsigned short pulse;
+          memcpy(&pulse, &dataArray[index + offset], sizeof(pulse));
+          offset += sizeof(pulse);
 
-          for (int iSample = 0; iSample < kNSamples; iSample++) {
-            unsigned short pulse;
-            memcpy(&pulse, &dataArray[index + offset], sizeof(pulse));
-            offset += sizeof(pulse);
-
-            grWave->SetPoint(iSample, iSample * 2, pulse);  // one sample 2 ns
-          }
+          grWave->SetPoint(iSample, iSample * 2, pulse);  // one sample 2 ns
         }
       }
-
-      canGr->cd();
-      grWave->Draw("AL");
-      canGr->Update();
-
-      canHis->cd();
-      hisCharge->Draw();
-      canHis->Update();
-
-      if (kbhit()) break;
-      usleep(100000);
     }
 
-    digi->StopAcquisition();
+    canvas2->cd();
+    grWave->Draw("AL");
+    canvas2->Update();
 
-  } else {
-    std::cout << "Probably, FW is expired." << std::endl;
+    canvas->cd();
+    hisCharge->Draw();
+    canvas->Update();
+
+    if (kbhit()) break;
+
+    usleep(10000);
   }
 
-  delete digi;
+  digi->StopAcquisition();
 
   // app.Run();
+  delete digi;
 
   return 0;
 }

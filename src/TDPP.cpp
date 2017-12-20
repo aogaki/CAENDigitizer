@@ -61,6 +61,7 @@ void TDPP::Initialize()
   err = CAEN_DGTZ_SetDPPEventAggregation(fHandler, 0, 0);
   PrintError(err, "SetDPPEventAggregation");
 
+  SetPSDPar();
   uint32_t mask = 0xFF;
   if (fFirmware == FirmWareCode::DPP_PHA)
     err = CAEN_DGTZ_SetDPPParameters(fHandler, mask, &fParPHA);
@@ -152,7 +153,7 @@ void TDPP::ReadEvents()
 
 void TDPP::SetParameters()
 {
-  fRecordLength = 4096;
+  fRecordLength = kNSamples;
   fTriggerMode = CAEN_DGTZ_TRGMODE_ACQ_ONLY;
   fPostTriggerSize = 80;
   fBLTEvents = 1023;  // It is max, why not 1024?
@@ -165,13 +166,13 @@ void TDPP::SetPHAPar() {}
 void TDPP::SetPSDPar()
 {  // Copy from sample
   for (uint32_t iCh = 0; iCh < fNChs; iCh++) {
-    fParPSD.thr[iCh] = 50;  // Trigger Threshold
+    fParPSD.thr[iCh] = 1;  // Trigger Threshold
     /* The following parameter is used to specifiy the number of samples for the
     baseline averaging: 0 -> absolute Bl 1 -> 4samp 2 -> 8samp 3 -> 16samp 4 ->
     32samp 5 -> 64samp 6 -> 128samp */
     fParPSD.nsbl[iCh] = 2;
     fParPSD.lgate[iCh] = 128;  // Long Gate Width (N*4ns)
-    fParPSD.sgate[iCh] = 64;   // Short Gate Width (N*4ns)
+    fParPSD.sgate[iCh] = 0;    // Short Gate Width (N*4ns)
     fParPSD.pgate[iCh] = 16;   // Pre Gate Width (N*4ns)
     /* Self Trigger Mode:
     0 -> Disabled
@@ -181,7 +182,8 @@ void TDPP::SetPSDPar()
     // CAEN_DGTZ_DPP_TriggerConfig_Peak       -> trigger on peak. NOTE: Only for
     // FW <= 13X.5 CAEN_DGTZ_DPP_TriggerConfig_Threshold  -> trigger on
     // threshold */
-    fParPSD.trgc[iCh] = CAEN_DGTZ_DPP_TriggerConfig_Threshold;
+    // fParPSD.trgc[iCh] = CAEN_DGTZ_DPP_TriggerConfig_Threshold;
+    fParPSD.trgc[iCh] = CAEN_DGTZ_DPP_TriggerConfig_Peak;
     /* Trigger Validation Acquisition Window */
     fParPSD.tvaw[iCh] = 50;
     /* Charge sensibility: 0->40fc/LSB; 1->160fc/LSB; 2->640fc/LSB; 3->2,5pc/LSB
@@ -229,10 +231,9 @@ void TDPP::TriggerConfig()
   // Set the trigger threshold
   // The unit of its are V
   int32_t th = fabs((1 << fNBits) * (fVth / fVpp));
-
   for (uint32_t iCh = 0; iCh < fNChs; iCh++) {
-    // fParPHA.thr[iCh] = th;
-    // fParPSD.thr[iCh] = th;
+    fParPHA.thr[iCh] = th;
+    fParPSD.thr[iCh] = th;
   }
 
   // Set the triggermode
@@ -296,21 +297,15 @@ void TDPP::FreeMemory()
   CAEN_DGTZ_ErrorCode err;
   err = CAEN_DGTZ_FreeReadoutBuffer(&fpReadoutBuffer);
   PrintError(err, "FreeReadoutBuffer");
-  DelPointer(fpReadoutBuffer);
-  // delete fpReadoutBuffer;
-  // fpReadoutBuffer = nullptr;
+  // DelPointer(fpReadoutBuffer);
 
   err = CAEN_DGTZ_FreeDPPEvents(fHandler, (void **)fppPSDEvents);
   PrintError(err, "FreeDPPEvents");
-  DelPointer(fppPSDEvents);
-  // delete fppPSDEvents;
-  // fppPSDEvents = nullptr;
+  // DelPointer(fppPSDEvents);
 
   err = CAEN_DGTZ_FreeDPPWaveforms(fHandler, fpPSDWaveform);
   PrintError(err, "FreeDPPWaveforms");
-  DelPointer(fpPSDWaveform);
-  // delete fpPSDWaveform;
-  // fpPSDWaveform = nullptr;
+  // DelPointer(fpPSDWaveform);
 }
 
 CAEN_DGTZ_ErrorCode TDPP::StartAcquisition()
