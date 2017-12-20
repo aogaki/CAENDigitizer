@@ -1,7 +1,9 @@
 #include <math.h>
+#include <string.h>
 #include <iostream>
 
 #include "TDPP.hpp"
+#include "TStdData.hpp"
 
 template <class T>
 void DelPointer(T *&pointer)
@@ -29,6 +31,8 @@ TDPP::TDPP(CAEN_DGTZ_ConnectionType type, int link, int node, uint32_t VMEadd)
   fTime.resize(fNChs);
   fTimeOffset.resize(fNChs);
   fPreviousTime.resize(fNChs);
+
+  fDataArray = new unsigned char[fBLTEvents * ONE_HIT_SIZE * fNChs];
 }
 
 TDPP::~TDPP()
@@ -51,7 +55,7 @@ void TDPP::Initialize()
   // PrintError(err, "MallocReadoutBuffer");
 
   // Buffer setting
-  err = CAEN_DGTZ_SetNumEventsPerAggregate(fHandler, 128);
+  err = CAEN_DGTZ_SetNumEventsPerAggregate(fHandler, fBLTEvents);
   PrintError(err, "SetNumEventsPerAggregate");
   // 0 means automatically set
   err = CAEN_DGTZ_SetDPPEventAggregation(fHandler, 0, 0);
@@ -90,13 +94,14 @@ void TDPP::Initialize()
 
 void TDPP::ReadEvents()
 {
+  fNEvents = 0;  // Event counter
+
   CAEN_DGTZ_ErrorCode err;
 
   uint32_t bufferSize;
   err = CAEN_DGTZ_ReadData(fHandler, CAEN_DGTZ_SLAVE_TERMINATED_READOUT_MBLT,
                            fpReadoutBuffer, &bufferSize);
   PrintError(err, "ReadData");
-  std::cout << bufferSize << std::endl;
   if (bufferSize == 0) return;  // in the case of 0, GetDPPEvents makes crush
 
   uint32_t nEvents[fNChs];
@@ -121,9 +126,28 @@ void TDPP::ReadEvents()
         fTimeOffset[iCh] += maxTime;
       }
       fPreviousTime[iCh] = fTime[iCh];
+
+      auto index = fNEvents * ONE_HIT_SIZE;
+      fDataArray[index++] = 0;    // fModNumber is needed.
+      fDataArray[index++] = iCh;  // int to char.  Dangerous
+
+      constexpr auto timeSize = sizeof(fTime[0]);
+      memcpy(&fDataArray[index], &fTime[iCh], timeSize);
+      index += timeSize;
+
+      constexpr auto adcSize = sizeof(fppPSDEvents[0][0].ChargeLong);
+      // auto adc = sumCharge;
+      memcpy(&fDataArray[index], &fppPSDEvents[iCh][iEve].ChargeLong, adcSize);
+      index += adcSize;
+
+      std::cout << fppPSDEvents[iCh][iEve].ChargeLong << std::endl;
+
+      constexpr auto waveSize = sizeof(fpPSDWaveform->Trace1[0]) * kNSamples;
+      memcpy(&fDataArray[index], fpPSDWaveform->Trace1, waveSize);
+
+      fNEvents++;
     }
   }
-  std::cout << fTime[0] / 1000 / 1000 / 1000 << std::endl;
 }
 
 void TDPP::SetParameters()
@@ -131,6 +155,7 @@ void TDPP::SetParameters()
   fRecordLength = 4096;
   fTriggerMode = CAEN_DGTZ_TRGMODE_ACQ_ONLY;
   fPostTriggerSize = 80;
+  fBLTEvents = 1023;  // It is max, why not 1024?
 
   void SetPSDPar();
 }
@@ -140,14 +165,14 @@ void TDPP::SetPHAPar() {}
 void TDPP::SetPSDPar()
 {  // Copy from sample
   for (uint32_t iCh = 0; iCh < fNChs; iCh++) {
-    fParPSD.thr[iCh] = 500;  // Trigger Threshold
+    fParPSD.thr[iCh] = 50;  // Trigger Threshold
     /* The following parameter is used to specifiy the number of samples for the
     baseline averaging: 0 -> absolute Bl 1 -> 4samp 2 -> 8samp 3 -> 16samp 4 ->
     32samp 5 -> 64samp 6 -> 128samp */
     fParPSD.nsbl[iCh] = 2;
-    fParPSD.lgate[iCh] = 32;  // Long Gate Width (N*4ns)
-    fParPSD.sgate[iCh] = 24;  // Short Gate Width (N*4ns)
-    fParPSD.pgate[iCh] = 8;   // Pre Gate Width (N*4ns)
+    fParPSD.lgate[iCh] = 128;  // Long Gate Width (N*4ns)
+    fParPSD.sgate[iCh] = 64;   // Short Gate Width (N*4ns)
+    fParPSD.pgate[iCh] = 16;   // Pre Gate Width (N*4ns)
     /* Self Trigger Mode:
     0 -> Disabled
     1 -> Enabled */
@@ -206,8 +231,8 @@ void TDPP::TriggerConfig()
   int32_t th = fabs((1 << fNBits) * (fVth / fVpp));
 
   for (uint32_t iCh = 0; iCh < fNChs; iCh++) {
-    fParPHA.thr[iCh] = th;
-    fParPSD.thr[iCh] = th;
+    // fParPHA.thr[iCh] = th;
+    // fParPSD.thr[iCh] = th;
   }
 
   // Set the triggermode

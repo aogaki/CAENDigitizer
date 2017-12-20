@@ -18,6 +18,9 @@ class TDPP : public TDigitizer
   CAEN_DGTZ_ErrorCode StartAcquisition();
   void StopAcquisition();
 
+  uint32_t GetNEvents() { return fNEvents; };
+  unsigned char *GetDataArray() { return fDataArray; };
+
  private:
   virtual void SetParameters();
 
@@ -34,6 +37,7 @@ class TDPP : public TDigitizer
 
   double fVpp;
   double fVth;
+  uint32_t fBLTEvents;
 
   // Memory
   void AllocateMemory();
@@ -46,6 +50,9 @@ class TDPP : public TDigitizer
   std::vector<uint64_t> fTimeOffset;
   std::vector<uint64_t> fPreviousTime;
   std::vector<uint64_t> fTime;
+
+  unsigned char *fDataArray;
+  uint32_t fNEvents;
 };
 
 #endif
