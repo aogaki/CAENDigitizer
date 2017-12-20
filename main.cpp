@@ -59,7 +59,7 @@ int main(int argc, char **argv)
     //   // if (i > 10) break;
     std::cout << i << std::endl;
 
-    //for (int j = 0; j < 10; j++) digi->SendSWTrigger();
+    // for (int j = 0; j < 10; j++) digi->SendSWTrigger();
     digi->ReadEvents();
 
     auto dataArray = digi->GetDataArray();
@@ -82,16 +82,16 @@ int main(int argc, char **argv)
 
       memcpy(&data.ADC, &dataArray[index + offset], sizeof(data.ADC));
       offset += sizeof(data.ADC);
-      if(data.ChNumber == 0){
-	hisCharge->Fill(data.ADC);
-	
-	for (int iSample = 0; iSample < kNSamples; iSample++) {
-	  unsigned short pulse;
-	  memcpy(&pulse, &dataArray[index + offset], sizeof(pulse));
-	  offset += sizeof(pulse);
-	  
-	  grWave->SetPoint(iSample, iSample * 2, pulse);  // one sample 2 ns
-	}
+      if (data.ChNumber == 0) {
+        hisCharge->Fill(data.ADC);
+
+        for (int iSample = 0; iSample < kNSamples; iSample++) {
+          unsigned short pulse;
+          memcpy(&pulse, &dataArray[index + offset], sizeof(pulse));
+          offset += sizeof(pulse);
+
+          grWave->SetPoint(iSample, iSample * 2, pulse);  // one sample 2 ns
+        }
       }
     }
 
@@ -110,7 +110,7 @@ int main(int argc, char **argv)
 
   digi->StopAcquisition();
 
-  //app.Run();
+  // app.Run();
   delete digi;
 
   return 0;

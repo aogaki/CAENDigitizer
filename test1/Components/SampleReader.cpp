@@ -233,34 +233,15 @@ int SampleReader::daq_run()
   if (m_out_status == BUF_SUCCESS) {
     // previous OutPort.write() successfully done
     // Stupid! rewrite it!
-    for (int i = 0; i < 10; i++) fDigitizer->SendSWTrigger();
+    // fDigitizer->SendSWTrigger();
     fDigitizer->ReadEvents();
-    auto data = fDigitizer->GetData();
-    const unsigned int nHit = data->size();
-    if (nHit > 0) std::cout << nHit << std::endl;
-    unsigned char buf[ONE_HIT_SIZE];
+    auto dataArray = fDigitizer->GetDataArray();
+    const int nHit = fDigitizer->GetNEvents();
+    if (m_debug && nHit > 0) std::cout << nHit << std::endl;
+
     for (unsigned int iHit = 0, iData = 0; iHit < nHit; iHit++) {
-      int index = 0;
-      buf[index++] = (*data)[iHit].ModNumber;
-      buf[index++] = (*data)[iHit].ChNumber;
-
-      unsigned long time = (*data)[iHit].TimeStamp;
-      constexpr auto timeSize = sizeof(time);
-      memcpy(&buf[index], &time, timeSize);
-      index += timeSize;
-
-      int adc = (*data)[iHit].ADC;
-      constexpr auto adcSize = sizeof(adc);
-      memcpy(&buf[index], &adc, adcSize);
-      index += adcSize;
-
-      for (int i = 0; i < kNSamples; i++) {
-        unsigned short pulse = (*data)[iHit].Waveform[i];
-        constexpr auto pulseSize = sizeof(pulse);
-        memcpy(&buf[index], &pulse, pulseSize);
-        index += pulseSize;
-      }
-      memcpy(&m_data[iData * ONE_HIT_SIZE], buf, ONE_HIT_SIZE);
+      auto index = iHit * ONE_HIT_SIZE;
+      memcpy(&m_data[iData * ONE_HIT_SIZE], &dataArray[index], ONE_HIT_SIZE);
       iData++;
       m_recv_byte_size += ONE_HIT_SIZE;
 
@@ -290,8 +271,6 @@ int SampleReader::daq_run()
         m_recv_byte_size = 0;
       }
     }
-  } else {
-    std::cout << "Port error" << std::endl;
   }
 
   return 0;
