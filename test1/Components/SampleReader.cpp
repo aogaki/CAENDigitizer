@@ -290,6 +290,8 @@ int SampleReader::daq_run()
         m_recv_byte_size = 0;
       }
     }
+  } else {
+    std::cout << "Port error" << std::endl;
   }
 
   return 0;
