@@ -293,11 +293,11 @@ int SampleMonitor::decode_data(const unsigned char *mydata)
   m_sampleData.ModNumber = mydata[index++];
   m_sampleData.ChNumber = mydata[index++];
 
-  unsigned long timeStamp = *(unsigned int *)&mydata[index];
+  unsigned long timeStamp = *(unsigned long *)&mydata[index];
   m_sampleData.TimeStamp = timeStamp;
   index += sizeof(timeStamp);
 
-  unsigned int adc = *(unsigned int *)&mydata[index];
+  unsigned short adc = *(unsigned short *)&mydata[index];
   m_sampleData.ADC = adc;
   index += sizeof(adc);
 

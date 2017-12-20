@@ -233,6 +233,7 @@ int SampleReader::daq_run()
   if (m_out_status == BUF_SUCCESS) {
     // previous OutPort.write() successfully done
     // Stupid! rewrite it!
+    for (int i = 0; i < 10; i++) fDigitizer->SendSWTrigger();
     fDigitizer->ReadEvents();
     auto data = fDigitizer->GetData();
     const unsigned int nHit = data->size();
@@ -268,7 +269,7 @@ int SampleReader::daq_run()
       if (m_recv_byte_size > sizeTh) {
         set_data(m_recv_byte_size);  // set data to OutPort Buffer
         if (write_OutPort() < 0) {
-	  std::cout << "time out" << std::endl;
+          std::cout << "time out" << std::endl;
           ;                    // Timeout. do nothing.
         } else {               // OutPort write successfully done
           inc_sequence_num();  // increase sequence num.
