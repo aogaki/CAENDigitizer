@@ -142,13 +142,14 @@ void TWaveRecord::ReadEvents()
         // std::endl;
       }
 
-      uint64_t timeStamp = fEventInfo.TriggerTimeTag + fTimeOffset;
+      // It should be for each channel!
+      uint64_t timeStamp = (fEventInfo.TriggerTimeTag + fTimeOffset) * fTSample;
       if (timeStamp < fPreviousTime) {
-        timeStamp += 0xFFFFFFFF;
-        fTimeOffset += 0xFFFFFFFF;
+        constexpr uint32_t maxTime = 0xFFFFFFFF / 2;  // Check manual
+        timeStamp += maxTime * fTSample;
+        fTimeOffset += maxTime;
       }
       fPreviousTime = timeStamp;
-      timeStamp *= fTSample;
 
       // data.ModNumber = 0;  // fModNumber is needed.
       // data.ChNumber = iCh;
@@ -159,8 +160,8 @@ void TWaveRecord::ReadEvents()
       // fData->push_back(data);
 
       int index = (iEve * (fNChs * ONE_HIT_SIZE)) + (iCh * ONE_HIT_SIZE);
-      fDataArray[index++] = 0;  // fModNumber is needed.
-      fDataArray[index++] = iCh;
+      fDataArray[index++] = 0;    // fModNumber is needed.
+      fDataArray[index++] = iCh;  // int to char.  Dangerous
 
       constexpr auto timeSize = sizeof(timeStamp);
       memcpy(&fDataArray[index], &timeStamp, timeSize);

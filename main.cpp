@@ -44,62 +44,72 @@ int main(int argc, char **argv)
 
   digi->Initialize();
 
-  // digi->StartAcquisition();
-  //
-  // TH1D *hisCharge = new TH1D("hisCharge", "test", 20000, 0, 20000);
-  // TCanvas *canvas = new TCanvas();
-  // TGraph *grWave = new TGraph();
-  // grWave->SetMaximum(9000);
-  // grWave->SetMinimum(7000);
-  // TCanvas *canvas2 = new TCanvas();
-  // canvas->cd();
-  // hisCharge->Draw();
-  //
-  // for (int i = 0; true; i++) {
-  //   // if (i > 10) break;
-  //   std::cout << i << std::endl;
-  //
-  //   // for (int j = 0; j < 10; j++) digi->SendSWTrigger();
-  //   digi->ReadEvents();
-  //
-  //   // auto charge = digi->GetCharge();
-  //   // for (auto &q : *charge) hisCharge->Fill(q);
-  //   // auto data = digi->GetData();
-  //   auto dataArray = digi->GetDataArray();
-  //   // std::cout << data->size() << "\t" << digi->GetNEvents() << std::endl;
-  //   // for (int i = 0; i < data->size(); i++) {
-  //   //   constexpr auto offset = sizeof(unsigned char) * 2 + sizeof(unsigned
-  //   //   long); auto index = (i * ONE_HIT_SIZE); int ch = dataArray[index +
-  //   1];
-  //   //   memcpy(&ch, &dataArray[index + offset], 4);
-  //   //   if (int((*data)[i].ADC) != ch) std::cout << "hit" << std::endl;
-  //   // }
-  //
-  //   // for (auto &q : *data) {
-  //   //   if (q.ChNumber == 0) {
-  //   //     hisCharge->Fill(q.ADC);
-  //   //     for (int i = 0; i < kNSamples; i++)
-  //   //       grWave->SetPoint(i, i, q.Waveform[i]);
-  //   //   }
-  //   // }
-  //   // canvas2->cd();
-  //   // grWave->Draw("AL");
-  //   // canvas2->Update();
-  //   //
-  //   // canvas->cd();
-  //   // hisCharge->Draw();
-  //   // canvas->Update();
-  //
-  //   if (kbhit()) break;
-  //
-  //   // usleep(10000);
-  // }
-  //
-  // digi->StopAcquisition();
+  digi->StartAcquisition();
 
+  TH1D *hisCharge = new TH1D("hisCharge", "test", 20000, 0, 20000);
+  TCanvas *canvas = new TCanvas();
+  TGraph *grWave = new TGraph();
+  grWave->SetMaximum(9000);
+  grWave->SetMinimum(7000);
+  TCanvas *canvas2 = new TCanvas();
+  canvas->cd();
+  hisCharge->Draw();
+
+  for (int i = 0; true; i++) {
+    //   // if (i > 10) break;
+    std::cout << i << std::endl;
+
+    for (int j = 0; j < 10; j++) digi->SendSWTrigger();
+    digi->ReadEvents();
+
+    auto dataArray = digi->GetDataArray();
+    const int nHit = digi->GetNEvents();
+    std::cout << nHit << std::endl;
+    for (int i = 0; i < nHit; i++) {
+      auto index = (i * ONE_HIT_SIZE);
+      auto offset = 0;
+      SampleData data;
+
+      data.ModNumber = dataArray[index + offset];
+      offset += sizeof(data.ModNumber);
+
+      data.ChNumber = dataArray[index + offset];
+      offset += sizeof(data.ChNumber);
+
+      memcpy(&data.TimeStamp, &dataArray[index + offset],
+             sizeof(data.TimeStamp));
+      offset += sizeof(data.TimeStamp);
+
+      memcpy(&data.ADC, &dataArray[index + offset], sizeof(data.ADC));
+      offset += sizeof(data.ADC);
+      hisCharge->Fill(data.ADC);
+
+      for (int iSample = 0; iSample < kNSamples; iSample++) {
+        unsigned short pulse;
+        memcpy(&pulse, &dataArray[index + offset], sizeof(pulse));
+        offset += sizeof(pulse);
+
+        grWave->SetPoint(iSample, iSample * 2, pulse);  // one sample 2 ns
+      }
+    }
+
+    canvas2->cd();
+    grWave->Draw("AL");
+    canvas2->Update();
+
+    canvas->cd();
+    hisCharge->Draw();
+    canvas->Update();
+
+    if (kbhit()) break;
+
+    usleep(10000);
+  }
+
+  digi->StopAcquisition();
+
+  app.Run();
   delete digi;
-
-  // app.Run();
 
   return 0;
 }

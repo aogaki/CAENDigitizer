@@ -26,10 +26,6 @@ class TStdData
   uint16_t Waveform[kNSamples];
 };
 
-constexpr int ONE_HIT_SIZE = sizeof(unsigned char) + sizeof(unsigned char) +
-                             sizeof(unsigned long) + sizeof(short) +
-                             (sizeof(unsigned short) * kNSamples);
-
 // For data transfer buffer
 constexpr int BUFFER_SIZE = 1024 * 1024 * 2;
 
@@ -40,5 +36,9 @@ struct SampleData {
   short ADC;
   unsigned short Waveform[kNSamples];
 };
+
+constexpr int ONE_HIT_SIZE = sizeof(unsigned char) + sizeof(unsigned char) +
+                             sizeof(unsigned long) + sizeof(short) +
+                             (sizeof(unsigned short) * kNSamples);
 
 #endif
