@@ -166,7 +166,7 @@ void TDPP::SetPHAPar() {}
 void TDPP::SetPSDPar()
 {  // Copy from sample
   for (uint32_t iCh = 0; iCh < fNChs; iCh++) {
-    fParPSD.thr[iCh] = 1;  // Trigger Threshold
+    fParPSD.thr[iCh] = 100;  // Trigger Threshold
     /* The following parameter is used to specifiy the number of samples for the
     baseline averaging: 0 -> absolute Bl 1 -> 4samp 2 -> 8samp 3 -> 16samp 4 ->
     32samp 5 -> 64samp 6 -> 128samp */
