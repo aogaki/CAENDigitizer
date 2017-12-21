@@ -119,8 +119,8 @@ int SampleMonitor::daq_configure()
 
   DelPointer(fGr);
   fGr = new TGraph();
-  fGr->SetMinimum(7000);
-  fGr->SetMaximum(9000);
+  fGr->SetMinimum(0);
+  fGr->SetMaximum(20000);
 
   return 0;
 }
