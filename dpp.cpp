@@ -41,7 +41,7 @@ int main(int argc, char **argv)
   TApplication app("testApp", &argc, argv);
 
   int link = 0;
-  auto digi = new TDPP(CAEN_DGTZ_USB, link);
+  auto digi = new TDPP(CAEN_DGTZ_OpticalLink, link);
 
   digi->Initialize();
 
@@ -50,8 +50,8 @@ int main(int argc, char **argv)
   TH1D *hisCharge = new TH1D("hisCharge", "test", 20000, 0, 20000);
   TCanvas *canvas = new TCanvas();
   TGraph *grWave = new TGraph();
-  grWave->SetMaximum(9000);
-  grWave->SetMinimum(7000);
+  grWave->SetMaximum(20000);
+  grWave->SetMinimum(0);
   TCanvas *canvas2 = new TCanvas();
   canvas->cd();
   hisCharge->Draw();
