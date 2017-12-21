@@ -9,3 +9,6 @@ dpp
 *.log
 *.o
 autogen
+omninames*
+*Comp
+rtc.conf
