@@ -86,7 +86,7 @@ int SampleReader::daq_configure()
   paramList = m_daq_service0.getCompParams();
   parse_params(paramList);
 
-  fDigitizer = new TWaveRecord(CAEN_DGTZ_USB, 0);
+  fDigitizer = new TDPP(CAEN_DGTZ_OpticalLink, 0);
   fDigitizer->Initialize();
 
   return 0;

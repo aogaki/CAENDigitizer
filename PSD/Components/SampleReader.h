@@ -13,7 +13,7 @@
 #include <vector>
 
 #include "DaqComponentBase.h"
-#include "TWaveRecord.hpp"
+#include "TDPP.hpp"
 
 #include "SampleData.h"
 
@@ -65,7 +65,7 @@ class SampleReader : public DAQMW::DaqComponentBase
   int m_srcPort;
   std::string m_srcAddr;
 
-  TWaveRecord *fDigitizer;
+  TDPP *fDigitizer;
 };
 
 extern "C" {
