@@ -169,6 +169,8 @@ int SampleReader::daq_start()
     // fDigitizerVec[i]->SetSlave();
     // fDigitizerVec[0]->StartAcquisition();
     for (auto &&digi : fDigitizerVec) digi->StartSyncMode(fDigitizerVec.size());
+    fDigitizerVec[0]->StartAcquisition();
+    fDigitizerVec[0]->SendSWTrigger();
   } else {
     for (auto &&digi : fDigitizerVec) digi->StartAcquisition();
   }
