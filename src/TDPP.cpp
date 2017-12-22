@@ -373,12 +373,34 @@ void TDPP::SetSlave()
   PrintError(err, "SetExtTriggerInputMode");
 }
 
-void TDPP::StartSyncMode()
+void TDPP::StartSyncMode(uint32_t nMods)
 {
   // copy from digiTes
+  // CAEN_DGTZ_ErrorCode err;
+  int err{0};
+  uint32_t d32;
+  constexpr uint32_t RUN_START_ON_TRGIN_RISING_EDGE = 0xE;
+  err |= CAEN_DGTZ_ReadRegister(fHandler, CAEN_DGTZ_ACQ_CONTROL_ADD, &d32);
+  err |= CAEN_DGTZ_WriteRegister(
+      fHandler, CAEN_DGTZ_ACQ_CONTROL_ADD,
+      (d32 & 0xFFFFFFF0) | RUN_START_ON_TRGIN_RISING_EDGE);  // Arm acquisition
+                                                             // (Run will start
+                                                             // with 1st
+                                                             // trigger)
+  // Run Delay to deskew the start of acquisition
+  if (fModNumber == 0)
+    err |= CAEN_DGTZ_WriteRegister(fHandler, 0x8170, (nMods - 1) * 3 + 1);
+  else
+    err |=
+        CAEN_DGTZ_WriteRegister(fHandler, 0x8170, (nMods - fModNumber - 1) * 3);
+
   // StartMode 1: use the TRGIN-TRGOUT daisy chain; the 1st trigger starts the
   // acquisition
   uint32_t mask = (fModNumber == 0) ? 0x80000000 : 0x40000000;
-  CAEN_DGTZ_WriteRegister(fHandler, CAEN_DGTZ_TRIGGER_SRC_ENABLE_ADD, mask);
-  CAEN_DGTZ_WriteRegister(fHandler, CAEN_DGTZ_FP_TRIGGER_OUT_ENABLE_ADD, mask);
+  err |=
+      CAEN_DGTZ_WriteRegister(fHandler, CAEN_DGTZ_TRIGGER_SRC_ENABLE_ADD, mask);
+  err |= CAEN_DGTZ_WriteRegister(fHandler, CAEN_DGTZ_FP_TRIGGER_OUT_ENABLE_ADD,
+                                 mask);
+
+  PrintError(CAEN_DGTZ_ErrorCode(err), "StartSyncMode");
 }
