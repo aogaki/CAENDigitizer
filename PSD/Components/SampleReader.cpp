@@ -164,9 +164,11 @@ int SampleReader::daq_start()
   }
 
   if (fSyncMode) {
-    fDigitizerVec[0]->SetMaster();
-    for (int i = 1; i < fDigitizerVec.size(); i++) fDigitizerVec[i]->SetSlave();
-    fDigitizerVec[0]->StartAcquisition();
+    // fDigitizerVec[0]->SetMaster();
+    // for (int i = 1; i < fDigitizerVec.size(); i++)
+    // fDigitizerVec[i]->SetSlave();
+    // fDigitizerVec[0]->StartAcquisition();
+    for (auto &&digi : fDigitizerVec) digi->StartSyncMode();
   } else {
     for (auto &&digi : fDigitizerVec) digi->StartAcquisition();
   }
