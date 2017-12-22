@@ -340,8 +340,8 @@ void TDPP::StopAcquisition()
 void TDPP::SetMaster()
 {  // Synchronization Mode
   CAEN_DGTZ_ErrorCode err;
-  err = CAEN_DGTZ_SetRunSynchronizationMode(fHandler,
-                                            CAEN_DGTZ_RUN_SYNC_Disabled);
+  err = CAEN_DGTZ_SetRunSynchronizationMode(
+      fHandler, CAEN_DGTZ_RUN_SYNC_TrgOutTrgInDaisyChain);
   PrintError(err, "SetRunSynchronizationMode");
 
   err = CAEN_DGTZ_SetAcquisitionMode(fHandler, CAEN_DGTZ_SW_CONTROLLED);
