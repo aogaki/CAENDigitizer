@@ -22,6 +22,7 @@ class TDPP : public TDigitizer
 
   void SetMaster();
   void SetSlave();
+  void StartSyncMode();
 
  private:
   virtual void SetParameters();

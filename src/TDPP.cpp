@@ -146,7 +146,7 @@ void TDPP::ReadEvents()
       memcpy(&fDataArray[index], &fppPSDEvents[iCh][iEve].ChargeLong, adcSize);
       index += adcSize;
 
-      std::cout << fppPSDEvents[iCh][iEve].ChargeLong << std::endl;
+      // std::cout << fppPSDEvents[iCh][iEve].ChargeLong << std::endl;
 
       constexpr auto waveSize = sizeof(fpPSDWaveform->Trace1[0]) * kNSamples;
       memcpy(&fDataArray[index], fpPSDWaveform->Trace1, waveSize);
@@ -159,8 +159,8 @@ void TDPP::ReadEvents()
 void TDPP::SetParameters()
 {
   fRecordLength = kNSamples;
-  fTriggerMode = CAEN_DGTZ_TRGMODE_ACQ_ONLY;
-  // fTriggerMode = CAEN_DGTZ_TRGMODE_ACQ_AND_EXTOUT;
+  // fTriggerMode = CAEN_DGTZ_TRGMODE_ACQ_ONLY;
+  fTriggerMode = CAEN_DGTZ_TRGMODE_ACQ_AND_EXTOUT;
   fPostTriggerSize = 80;
   fBLTEvents = 1023;  // It is max, why not 1024?
 
@@ -371,4 +371,14 @@ void TDPP::SetSlave()
   err = CAEN_DGTZ_SetExtTriggerInputMode(fHandler,
                                          CAEN_DGTZ_TRGMODE_ACQ_AND_EXTOUT);
   PrintError(err, "SetExtTriggerInputMode");
+}
+
+void TDPP::StartSyncMode()
+{
+  // copy from digiTes
+  // StartMode 1: use the TRGIN-TRGOUT daisy chain; the 1st trigger starts the
+  // acquisition
+  uint32_t mask = (fModNumber == 0) ? 0x80000000 : 0x40000000;
+  CAEN_DGTZ_WriteRegister(fHandler, CAEN_DGTZ_TRIGGER_SRC_ENABLE_ADD, mask);
+  CAEN_DGTZ_WriteRegister(fHandler, CAEN_DGTZ_FP_TRIGGER_OUT_ENABLE_ADD, mask);
 }
