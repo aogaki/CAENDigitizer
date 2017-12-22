@@ -61,6 +61,11 @@ void TDPP::Initialize()
   err = CAEN_DGTZ_SetDPPEventAggregation(fHandler, 0, 0);
   PrintError(err, "SetDPPEventAggregation");
 
+  // Synchronization Mode
+  err = CAEN_DGTZ_SetRunSynchronizationMode(fHandler,
+                                            CAEN_DGTZ_RUN_SYNC_Disabled);
+  PrintError(err, "SetRunSynchronizationMode");
+
   SetPSDPar();
   uint32_t mask = 0xFF;
   if (fFirmware == FirmWareCode::DPP_PHA)
@@ -155,6 +160,7 @@ void TDPP::SetParameters()
 {
   fRecordLength = kNSamples;
   fTriggerMode = CAEN_DGTZ_TRGMODE_ACQ_ONLY;
+  // fTriggerMode = CAEN_DGTZ_TRGMODE_ACQ_AND_EXTOUT;
   fPostTriggerSize = 80;
   fBLTEvents = 1023;  // It is max, why not 1024?
 
@@ -329,4 +335,36 @@ void TDPP::StopAcquisition()
 
   // err = CAEN_DGTZ_FreeEvent(fHandler, (void **)&fpEventStd);
   // PrintError(err, "FreeEvent");
+}
+
+void TDPP::SetMaster()
+{  // Synchronization Mode
+  CAEN_DGTZ_ErrorCode err;
+  err = CAEN_DGTZ_SetRunSynchronizationMode(fHandler,
+                                            CAEN_DGTZ_RUN_SYNC_Disabled);
+  PrintError(err, "SetRunSynchronizationMode");
+
+  err = CAEN_DGTZ_SetAcquisitionMode(fHandler, CAEN_DGTZ_SW_CONTROLLED);
+  PrintError(err, "SetAcquisitionMode");
+
+  uint32_t mask = ((1 << fNChs) - 1);
+  err = CAEN_DGTZ_SetChannelSelfTrigger(fHandler,
+                                        CAEN_DGTZ_TRGMODE_ACQ_AND_EXTOUT, mask);
+  PrintError(err, "SetChannelSelfTrigger");
+}
+
+void TDPP::SetSlave()
+{
+  CAEN_DGTZ_ErrorCode err;
+  err = CAEN_DGTZ_SetRunSynchronizationMode(
+      fHandler, CAEN_DGTZ_RUN_SYNC_TrgOutTrgInDaisyChain);
+  PrintError(err, "SetRunSynchronizationMode");
+
+  err = CAEN_DGTZ_SetAcquisitionMode(fHandler, CAEN_DGTZ_FIRST_TRG_CONTROLLED);
+  PrintError(err, "SetAcquisitionMode");
+
+  uint32_t mask = ((1 << fNChs) - 1);
+  err = CAEN_DGTZ_SetChannelSelfTrigger(fHandler,
+                                        CAEN_DGTZ_TRGMODE_ACQ_AND_EXTOUT, mask);
+  PrintError(err, "SetChannelSelfTrigger");
 }

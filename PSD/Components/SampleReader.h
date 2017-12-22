@@ -66,6 +66,7 @@ class SampleReader : public DAQMW::DaqComponentBase
   std::string m_srcAddr;
 
   std::vector<TDPP *> fDigitizerVec;
+  bool fSyncMode;
 };
 
 extern "C" {

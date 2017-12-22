@@ -20,6 +20,9 @@ class TDPP : public TDigitizer
 
   uint32_t GetNEvents() { return fNEvents; };
 
+  void SetMaster();
+  void SetSlave();
+
  private:
   virtual void SetParameters();
 

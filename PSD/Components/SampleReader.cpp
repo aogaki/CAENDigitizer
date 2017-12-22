@@ -52,7 +52,8 @@ SampleReader::SampleReader(RTC::Manager *manager)
       m_sock(nullptr),
       m_recv_byte_size(0),
       m_out_status(BUF_SUCCESS),
-      m_debug(true)
+      m_debug(true),
+      fSyncMode(true)
 {
   // Registration: InPort/OutPort/Service
 
@@ -162,7 +163,13 @@ int SampleReader::daq_start()
     fatal_error_report(DATAPATH_DISCONNECTED);
   }
 
-  for (auto &&digi : fDigitizerVec) digi->StartAcquisition();
+  if (fSyncMode) {
+    fDigitizerVec[0]->SetMaster();
+    for (int i = 1; i < fDigitizerVec.size(); i++) fDigitizerVec[i]->SetSlave();
+    fDigitizerVec[0]->StartAcquisition();
+  } else {
+    for (auto &&digi : fDigitizerVec) digi->StartAcquisition();
+  }
 
   return 0;
 }
