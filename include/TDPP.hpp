@@ -19,7 +19,6 @@ class TDPP : public TDigitizer
   void StopAcquisition();
 
   uint32_t GetNEvents() { return fNEvents; };
-  unsigned char *GetDataArray() { return fDataArray; };
 
  private:
   virtual void SetParameters();
@@ -51,7 +50,6 @@ class TDPP : public TDigitizer
   std::vector<uint64_t> fPreviousTime;
   std::vector<uint64_t> fTime;
 
-  unsigned char *fDataArray;
   uint32_t fNEvents;
 };
 

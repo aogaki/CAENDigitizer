@@ -65,7 +65,7 @@ class SampleReader : public DAQMW::DaqComponentBase
   int m_srcPort;
   std::string m_srcAddr;
 
-  TDPP *fDigitizer;
+  std::vector<TDPP *> fDigitizerVec;
 };
 
 extern "C" {

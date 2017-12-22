@@ -21,8 +21,7 @@ TWaveRecord::TWaveRecord()
       fPostTriggerSize(50),
       fGateSize(0),
       fTimeOffset(0),
-      fPreviousTime(0),
-      fData(nullptr)
+      fPreviousTime(0)
 {
   SetParameters();
 }
@@ -35,9 +34,6 @@ TWaveRecord::TWaveRecord(CAEN_DGTZ_ConnectionType type, int link, int node,
   Reset();
   GetBoardInfo();
 
-  fData = new std::vector<TStdData>;
-  fData->reserve(fBLTEvents * 32);  // 32 means nothing.  minimum is No. chs
-
   fDataArray = new unsigned char[fBLTEvents * ONE_HIT_SIZE * fNChs];
 }
 
@@ -48,7 +44,6 @@ TWaveRecord::~TWaveRecord()
   Reset();
   Close();
 
-  delete fData;
   delete fDataArray;
 }
 
@@ -59,7 +54,7 @@ void TWaveRecord::SetParameters()
   fBLTEvents = 512;
   fVpp = 2.;
   fVth = -0.03;
-  //fVth = -0.001;
+  // fVth = -0.001;
   fPolarity = CAEN_DGTZ_TriggerOnFallingEdge;
   // fTriggerMode = CAEN_DGTZ_TRGMODE_ACQ_AND_EXTOUT;
   fPostTriggerSize = 80;
@@ -151,17 +146,9 @@ void TWaveRecord::ReadEvents()
       }
       fPreviousTime = timeStamp;
 
-      // data.ModNumber = 0;  // fModNumber is needed.
-      // data.ChNumber = iCh;
-      // data.TimeStamp = timeStamp;
-      // data.ADC = sumCharge;
-      // for (uint32_t i = 0; i < kNSamples; i++)
-      //   data.Waveform[i] = fpEventStd->DataChannel[iCh][i];
-      // fData->push_back(data);
-
       int index = (iEve * (fNChs * ONE_HIT_SIZE)) + (iCh * ONE_HIT_SIZE);
-      fDataArray[index++] = 0;    // fModNumber is needed.
-      fDataArray[index++] = iCh;  // int to char.  Dangerous
+      fDataArray[index++] = fModNumber;  // fModNumber is needed.
+      fDataArray[index++] = iCh;         // int to char.  Dangerous
 
       constexpr auto timeSize = sizeof(timeStamp);
       memcpy(&fDataArray[index], &timeStamp, timeSize);

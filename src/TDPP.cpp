@@ -129,8 +129,8 @@ void TDPP::ReadEvents()
       fPreviousTime[iCh] = fTime[iCh];
 
       auto index = fNEvents * ONE_HIT_SIZE;
-      fDataArray[index++] = 0;    // fModNumber is needed.
-      fDataArray[index++] = iCh;  // int to char.  Dangerous
+      fDataArray[index++] = fModNumber;  // fModNumber is needed.
+      fDataArray[index++] = iCh;         // int to char.  Dangerous
 
       constexpr auto timeSize = sizeof(fTime[0]);
       memcpy(&fDataArray[index], &fTime[iCh], timeSize);

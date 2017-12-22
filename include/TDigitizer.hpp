@@ -37,8 +37,12 @@ class TDigitizer
   virtual CAEN_DGTZ_ErrorCode StartAcquisition() = 0;
   virtual void StopAcquisition() = 0;
 
+  virtual uint32_t GetNEvents() = 0;
+  unsigned char *GetDataArray() { return fDataArray; };
+
  protected:
   int fHandler;
+  unsigned char fModNumber;
   void Open(CAEN_DGTZ_ConnectionType type, int link, int node, uint32_t VMEadd);
   void Close();
   void Reset();
@@ -52,6 +56,8 @@ class TDigitizer
   int fNBits;    // ADC, Waveform resolution
 
   void PrintError(const CAEN_DGTZ_ErrorCode &err, const std::string &funcName);
+
+  unsigned char *fDataArray;
 
  private:
   // Those SPI register functions are copy from digiTES

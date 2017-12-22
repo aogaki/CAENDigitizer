@@ -28,9 +28,7 @@ class TWaveRecord : public TDigitizer
   CAEN_DGTZ_ErrorCode StartAcquisition();
   void StopAcquisition();
 
-  const std::vector<TStdData> *GetData() { return fData; };
-  int GetNEvents() { return fNEvents * fNChs; };
-  unsigned char *GetDataArray() { return fDataArray; };
+  uint32_t GetNEvents() { return fNEvents * fNChs; };
 
  protected:
   // For event readout
@@ -57,9 +55,6 @@ class TWaveRecord : public TDigitizer
   // Data
   uint64_t fTimeOffset;
   uint64_t fPreviousTime;
-  std::vector<TStdData> *fData;
-
-  unsigned char *fDataArray;
 
   void SetParameters();
 
