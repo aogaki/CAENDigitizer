@@ -367,4 +367,8 @@ void TDPP::SetSlave()
   err = CAEN_DGTZ_SetChannelSelfTrigger(fHandler,
                                         CAEN_DGTZ_TRGMODE_ACQ_AND_EXTOUT, mask);
   PrintError(err, "SetChannelSelfTrigger");
+
+  err = CAEN_DGTZ_SetExtTriggerInputMode(fHandler,
+                                         CAEN_DGTZ_TRGMODE_ACQ_AND_EXTOUT);
+  PrintError(err, "SetExtTriggerInputMode");
 }
