@@ -66,14 +66,12 @@ void TPHA::Initialize()
                                             CAEN_DGTZ_RUN_SYNC_Disabled);
   PrintError(err, "SetRunSynchronizationMode");
 
-  SetPSDPar();
   SetPHAPar();
   uint32_t mask = 0xFF;
-  if (fFirmware == FirmWareCode::DPP_PHA)
+  if (fFirmware == FirmWareCode::DPP_PHA) {
     err = CAEN_DGTZ_SetDPPParameters(fHandler, mask, &fParPHA);
-  else if (fFirmware == FirmWareCode::DPP_PSD)
-    err = CAEN_DGTZ_SetDPPParameters(fHandler, mask, &fParPSD);
-  PrintError(err, "SetDPPParameters");
+    PrintError(err, "SetDPPParameters");
+  }
 
   // Following for loop is copied from sample.  Shame on me!!!!!!!
   for (int i = 0; i < fNChs; i++) {
@@ -158,7 +156,6 @@ void TPHA::SetParameters()
   fPostTriggerSize = 80;
   fBLTEvents = 1023;  // It is max, why not 1024?
 
-  SetPSDPar();
   SetPHAPar();
 }
 
@@ -188,43 +185,6 @@ void TPHA::SetPHAPar()
     // fParPHA.tsampl[iCh] = 10;
     // fParPHA.dgain[iCh] = 1;
   }
-}
-
-void TPHA::SetPSDPar()
-{  // Copy from sample
-  for (uint32_t iCh = 0; iCh < fNChs; iCh++) {
-    fParPSD.thr[iCh] = 100;  // Trigger Threshold
-    /* The following parameter is used to specifiy the number of samples for the
-    baseline averaging: 0 -> absolute Bl 1 -> 4samp 2 -> 8samp 3 -> 16samp 4 ->
-    32samp 5 -> 64samp 6 -> 128samp */
-    fParPSD.nsbl[iCh] = 2;
-    fParPSD.lgate[iCh] = 128;  // Long Gate Width (N*4ns)
-    fParPSD.sgate[iCh] = 0;    // Short Gate Width (N*4ns)
-    fParPSD.pgate[iCh] = 16;   // Pre Gate Width (N*4ns)
-    /* Self Trigger Mode:
-    0 -> Disabled
-    1 -> Enabled */
-    fParPSD.selft[iCh] = 1;
-    // Trigger configuration:
-    // CAEN_DGTZ_DPP_TriggerConfig_Peak       -> trigger on peak. NOTE: Only for
-    // FW <= 13X.5 CAEN_DGTZ_DPP_TriggerConfig_Threshold  -> trigger on
-    // threshold */
-    // fParPSD.trgc[iCh] = CAEN_DGTZ_DPP_TriggerConfig_Threshold;
-    fParPSD.trgc[iCh] = CAEN_DGTZ_DPP_TriggerConfig_Peak;
-    /* Trigger Validation Acquisition Window */
-    fParPSD.tvaw[iCh] = 50;
-    /* Charge sensibility: 0->40fc/LSB; 1->160fc/LSB; 2->640fc/LSB; 3->2,5pc/LSB
-     */
-    fParPSD.csens[iCh] = 0;
-  }
-  /* Pile-Up rejection Mode
-  CAEN_DGTZ_DPP_PSD_PUR_DetectOnly -> Only Detect Pile-Up
-  CAEN_DGTZ_DPP_PSD_PUR_Enabled -> Reject Pile-Up */
-  fParPSD.purh = CAEN_DGTZ_DPP_PSD_PUR_DetectOnly;
-  fParPSD.purgap = 100;  // Purity Gap
-  fParPSD.blthr = 3;     // Baseline Threshold
-  fParPSD.bltmo = 100;   // Baseline Timeout
-  fParPSD.trgho = 8;     // Trigger HoldOff
 }
 
 void TPHA::AcquisitionConfig()
@@ -260,7 +220,6 @@ void TPHA::TriggerConfig()
   int32_t th = fabs((1 << fNBits) * (fVth / fVpp));
   for (uint32_t iCh = 0; iCh < fNChs; iCh++) {
     fParPHA.thr[iCh] = th;
-    fParPSD.thr[iCh] = th;
   }
 
   // Set the triggermode
@@ -283,12 +242,6 @@ void TPHA::TriggerConfig()
     PrintError(err, "CAEN_DGTZ_SetChannelPulsePolarity");
   }
 
-  if (fFirmware == FirmWareCode::DPP_PSD) {
-    err = CAEN_DGTZ_SetDPPTriggerMode(
-        fHandler,
-        CAEN_DGTZ_DPP_TriggerMode_t::CAEN_DGTZ_DPP_TriggerMode_Normal);
-    PrintError(err, "SetDPPTriggerMode");
-  }
   // // Set post trigger size
   // err = CAEN_DGTZ_SetPostTriggerSize(fHandler, fPostTriggerSize);
   // PrintError(err, "SetPostTriggerSize");
@@ -310,7 +263,6 @@ void TPHA::AllocateMemory()
   err = CAEN_DGTZ_MallocReadoutBuffer(fHandler, &fpReadoutBuffer, &size);
   PrintError(err, "MallocReadoutBuffer");
 
-  // CAEN_DGTZ_DPP_PSD_Event_t *events[fNChs];
   fppPHAEvents = new CAEN_DGTZ_DPP_PHA_Event_t *[fNChs];
   err = CAEN_DGTZ_MallocDPPEvents(fHandler, (void **)fppPHAEvents, &size);
   PrintError(err, "MallocDPPEvents");

@@ -7,7 +7,7 @@
 #include <TGraph.h>
 #include <TH1.h>
 
-#include "TDPP.hpp"
+#include "TPSD.hpp"
 #include "TWaveRecord.hpp"
 
 int kbhit(void)
@@ -41,7 +41,7 @@ int main(int argc, char **argv)
   TApplication app("testApp", &argc, argv);
 
   int link = 0;
-  auto digi = new TDPP(CAEN_DGTZ_OpticalLink, link);
+  auto digi = new TPSD(CAEN_DGTZ_USB, link);
 
   digi->Initialize();
 

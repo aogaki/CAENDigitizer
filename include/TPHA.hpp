@@ -31,9 +31,7 @@ class TPHA : public TDigitizer
   virtual void TriggerConfig();
 
   void SetPHAPar();
-  void SetPSDPar();
   CAEN_DGTZ_DPP_PHA_Params_t fParPHA;
-  CAEN_DGTZ_DPP_PSD_Params_t fParPSD;
   CAEN_DGTZ_TriggerMode_t fTriggerMode;
   uint32_t fPostTriggerSize;
   uint32_t fRecordLength;

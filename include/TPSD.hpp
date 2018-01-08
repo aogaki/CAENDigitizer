@@ -1,15 +1,15 @@
-#ifndef TDPP_hpp
-#define TDPP_hpp 1
+#ifndef TPSD_hpp
+#define TPSD_hpp 1
 
 #include "TDigitizer.hpp"
 
-class TDPP : public TDigitizer
+class TPSD : public TDigitizer
 {
  public:
-  TDPP();
-  TDPP(CAEN_DGTZ_ConnectionType type, int link, int node = 0,
+  TPSD();
+  TPSD(CAEN_DGTZ_ConnectionType type, int link, int node = 0,
        uint32_t VMEadd = 0);
-  ~TDPP();
+  ~TPSD();
 
   void Initialize();
 
@@ -24,15 +24,13 @@ class TDPP : public TDigitizer
   void SetSlave();
   void StartSyncMode(uint32_t nMods);
 
- protected:
+ private:
   virtual void SetParameters();
 
   virtual void AcquisitionConfig();
   virtual void TriggerConfig();
 
-  void SetPHAPar();
   void SetPSDPar();
-  CAEN_DGTZ_DPP_PHA_Params_t fParPHA;
   CAEN_DGTZ_DPP_PSD_Params_t fParPSD;
   CAEN_DGTZ_TriggerMode_t fTriggerMode;
   uint32_t fPostTriggerSize;

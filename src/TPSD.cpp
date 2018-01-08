@@ -2,7 +2,7 @@
 #include <string.h>
 #include <iostream>
 
-#include "TDPP.hpp"
+#include "TPSD.hpp"
 #include "TStdData.hpp"
 
 template <class T>
@@ -12,26 +12,37 @@ void DelPointer(T *&pointer)
   pointer = nullptr;
 }
 
-TDPP::TDPP() : TDigitizer() { SetParameters(); }
+TPSD::TPSD()
+    : TDigitizer(),
+      fpReadoutBuffer(nullptr),
+      fppPSDEvents(nullptr),
+      fpPSDWaveform(nullptr)
+{
+  SetParameters();
+}
 
-TDPP::TDPP(CAEN_DGTZ_ConnectionType type, int link, int node, uint32_t VMEadd)
-    : TDPP()
+TPSD::TPSD(CAEN_DGTZ_ConnectionType type, int link, int node, uint32_t VMEadd)
+    : TPSD()
 {
   Open(type, link, node, VMEadd);
   Reset();
   GetBoardInfo();
 
+  fTime.resize(fNChs);
+  fTimeOffset.resize(fNChs);
+  fPreviousTime.resize(fNChs);
+
   fDataArray = new unsigned char[fBLTEvents * ONE_HIT_SIZE * fNChs];
 }
 
-TDPP::~TDPP()
+TPSD::~TPSD()
 {
   Reset();
   FreeMemory();
   Close();
 }
 
-void TDPP::Initialize()
+void TPSD::Initialize()
 {
   CAEN_DGTZ_ErrorCode err;
 
@@ -56,13 +67,11 @@ void TDPP::Initialize()
   PrintError(err, "SetRunSynchronizationMode");
 
   SetPSDPar();
-  uint32_t mask = 0xFF;
-  if (fFirmware == FirmWareCode::DPP_PHA)
-    err = CAEN_DGTZ_SetDPPParameters(fHandler, mask, &fParPHA);
-  else if (fFirmware == FirmWareCode::DPP_PSD)
+  if (fFirmware == FirmWareCode::DPP_PSD) {
+    uint32_t mask = 0xFF;
     err = CAEN_DGTZ_SetDPPParameters(fHandler, mask, &fParPSD);
-  PrintError(err, "SetDPPParameters");
-
+    PrintError(err, "SetDPPParameters");
+  }
   // Following for loop is copied from sample.  Shame on me!!!!!!!
   for (int i = 0; i < fNChs; i++) {
     // Set the number of samples for each waveform (you can set different RL
@@ -87,7 +96,7 @@ void TDPP::Initialize()
   BoardCalibration();
 }
 
-void TDPP::ReadEvents()
+void TPSD::ReadEvents()
 {
   fNEvents = 0;  // Event counter
 
@@ -145,7 +154,7 @@ void TDPP::ReadEvents()
   }
 }
 
-void TDPP::SetParameters()
+void TPSD::SetParameters()
 {
   fRecordLength = kNSamples;
   // fTriggerMode = CAEN_DGTZ_TRGMODE_ACQ_ONLY;
@@ -156,9 +165,7 @@ void TDPP::SetParameters()
   void SetPSDPar();
 }
 
-void TDPP::SetPHAPar() {}
-
-void TDPP::SetPSDPar()
+void TPSD::SetPSDPar()
 {  // Copy from sample
   for (uint32_t iCh = 0; iCh < fNChs; iCh++) {
     fParPSD.thr[iCh] = 100;  // Trigger Threshold
@@ -195,7 +202,7 @@ void TDPP::SetPSDPar()
   fParPSD.trgho = 8;     // Trigger HoldOff
 }
 
-void TDPP::AcquisitionConfig()
+void TPSD::AcquisitionConfig()
 {
   CAEN_DGTZ_ErrorCode err;
 
@@ -219,7 +226,7 @@ void TDPP::AcquisitionConfig()
   PrintError(err, "SetDPPAcquisitionMode");
 }
 
-void TDPP::TriggerConfig()
+void TPSD::TriggerConfig()
 {
   CAEN_DGTZ_ErrorCode err;
 
@@ -227,7 +234,6 @@ void TDPP::TriggerConfig()
   // The unit of its are V
   int32_t th = fabs((1 << fNBits) * (fVth / fVpp));
   for (uint32_t iCh = 0; iCh < fNChs; iCh++) {
-    fParPHA.thr[iCh] = th;
     fParPSD.thr[iCh] = th;
   }
 
@@ -270,7 +276,7 @@ void TDPP::TriggerConfig()
   // std::cout << "Polarity:\t" << pol << std::endl;
 }
 
-void TDPP::AllocateMemory()
+void TPSD::AllocateMemory()
 {
   CAEN_DGTZ_ErrorCode err;
   uint32_t size;
@@ -287,7 +293,7 @@ void TDPP::AllocateMemory()
   PrintError(err, "MallocDPPWaveforms");
 }
 
-void TDPP::FreeMemory()
+void TPSD::FreeMemory()
 {
   CAEN_DGTZ_ErrorCode err;
   err = CAEN_DGTZ_FreeReadoutBuffer(&fpReadoutBuffer);
@@ -303,7 +309,7 @@ void TDPP::FreeMemory()
   // DelPointer(fpPSDWaveform);
 }
 
-CAEN_DGTZ_ErrorCode TDPP::StartAcquisition()
+CAEN_DGTZ_ErrorCode TPSD::StartAcquisition()
 {
   CAEN_DGTZ_ErrorCode err;
   err = CAEN_DGTZ_SWStartAcquisition(fHandler);
@@ -316,7 +322,7 @@ CAEN_DGTZ_ErrorCode TDPP::StartAcquisition()
   return err;
 }
 
-void TDPP::StopAcquisition()
+void TPSD::StopAcquisition()
 {
   CAEN_DGTZ_ErrorCode err;
   err = CAEN_DGTZ_SWStopAcquisition(fHandler);
@@ -326,7 +332,7 @@ void TDPP::StopAcquisition()
   // PrintError(err, "FreeEvent");
 }
 
-void TDPP::SetMaster()
+void TPSD::SetMaster()
 {  // Synchronization Mode
   CAEN_DGTZ_ErrorCode err;
   err = CAEN_DGTZ_SetRunSynchronizationMode(
@@ -342,7 +348,7 @@ void TDPP::SetMaster()
   PrintError(err, "SetChannelSelfTrigger");
 }
 
-void TDPP::SetSlave()
+void TPSD::SetSlave()
 {
   CAEN_DGTZ_ErrorCode err;
   err = CAEN_DGTZ_SetRunSynchronizationMode(
@@ -362,7 +368,7 @@ void TDPP::SetSlave()
   PrintError(err, "SetExtTriggerInputMode");
 }
 
-void TDPP::StartSyncMode(uint32_t nMods)
+void TPSD::StartSyncMode(uint32_t nMods)
 {
   // copy from digiTes
   // CAEN_DGTZ_ErrorCode err;

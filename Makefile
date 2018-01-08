@@ -395,6 +395,39 @@ src/TPHA.cpp.s:
 	$(MAKE) -f CMakeFiles/dpp.dir/build.make CMakeFiles/dpp.dir/src/TPHA.cpp.s
 .PHONY : src/TPHA.cpp.s
 
+src/TPSD.o: src/TPSD.cpp.o
+
+.PHONY : src/TPSD.o
+
+# target to build an object file
+src/TPSD.cpp.o:
+	$(MAKE) -f CMakeFiles/PHA.dir/build.make CMakeFiles/PHA.dir/src/TPSD.cpp.o
+	$(MAKE) -f CMakeFiles/digi.dir/build.make CMakeFiles/digi.dir/src/TPSD.cpp.o
+	$(MAKE) -f CMakeFiles/dpp.dir/build.make CMakeFiles/dpp.dir/src/TPSD.cpp.o
+.PHONY : src/TPSD.cpp.o
+
+src/TPSD.i: src/TPSD.cpp.i
+
+.PHONY : src/TPSD.i
+
+# target to preprocess a source file
+src/TPSD.cpp.i:
+	$(MAKE) -f CMakeFiles/PHA.dir/build.make CMakeFiles/PHA.dir/src/TPSD.cpp.i
+	$(MAKE) -f CMakeFiles/digi.dir/build.make CMakeFiles/digi.dir/src/TPSD.cpp.i
+	$(MAKE) -f CMakeFiles/dpp.dir/build.make CMakeFiles/dpp.dir/src/TPSD.cpp.i
+.PHONY : src/TPSD.cpp.i
+
+src/TPSD.s: src/TPSD.cpp.s
+
+.PHONY : src/TPSD.s
+
+# target to generate assembly for a file
+src/TPSD.cpp.s:
+	$(MAKE) -f CMakeFiles/PHA.dir/build.make CMakeFiles/PHA.dir/src/TPSD.cpp.s
+	$(MAKE) -f CMakeFiles/digi.dir/build.make CMakeFiles/digi.dir/src/TPSD.cpp.s
+	$(MAKE) -f CMakeFiles/dpp.dir/build.make CMakeFiles/dpp.dir/src/TPSD.cpp.s
+.PHONY : src/TPSD.cpp.s
+
 src/TTestDigi.o: src/TTestDigi.cpp.o
 
 .PHONY : src/TTestDigi.o
@@ -496,6 +529,9 @@ help:
 	@echo "... src/TPHA.o"
 	@echo "... src/TPHA.i"
 	@echo "... src/TPHA.s"
+	@echo "... src/TPSD.o"
+	@echo "... src/TPSD.i"
+	@echo "... src/TPSD.s"
 	@echo "... src/TTestDigi.o"
 	@echo "... src/TTestDigi.i"
 	@echo "... src/TTestDigi.s"
