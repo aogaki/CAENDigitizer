@@ -23,5 +23,9 @@ file(GLOB headers ${PROJECT_SOURCE_DIR}/include/*.hpp)
 #
 add_executable(digi main.cpp ${sources} ${headers})
 target_link_libraries(digi ${ROOT_LIBRARIES} CAENDigitizer)
+
 add_executable(dpp dpp.cpp ${sources} ${headers})
 target_link_libraries(dpp ${ROOT_LIBRARIES} CAENDigitizer)
+
+add_executable(PHA PHA.cpp ${sources} ${headers})
+target_link_libraries(PHA ${ROOT_LIBRARIES} CAENDigitizer)
