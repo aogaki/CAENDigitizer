@@ -96,8 +96,8 @@ int SampleReader::daq_configure()
   paramList = m_daq_service0.getCompParams();
   parse_params(paramList);
 
-  fDigitizerVec.push_back(new TDPP(CAEN_DGTZ_OpticalLink, 0, 0));
-  fDigitizerVec.push_back(new TDPP(CAEN_DGTZ_OpticalLink, 0, 1));
+  fDigitizerVec.push_back(new TPSD(CAEN_DGTZ_OpticalLink, 0, 0));
+  fDigitizerVec.push_back(new TPSD(CAEN_DGTZ_OpticalLink, 0, 1));
   for (auto &digi : fDigitizerVec) digi->Initialize();
 
   return 0;

@@ -14,6 +14,8 @@
 
 #include "DaqComponentBase.h"
 #include "TDPP.hpp"
+#include "TPHA.hpp"
+#include "TPSD.hpp"
 
 #include "SampleData.h"
 
@@ -65,7 +67,7 @@ class SampleReader : public DAQMW::DaqComponentBase
   int m_srcPort;
   std::string m_srcAddr;
 
-  std::vector<TDPP *> fDigitizerVec;
+  std::vector<TPSD *> fDigitizerVec;
   bool fSyncMode;
 };
 
