@@ -119,7 +119,11 @@ int SampleLogger::daq_start()
 
   m_in_status = BUF_SUCCESS;
 
+  fFout.open("/Data/DAQ/test.dat", std::ios::out | std::ios::binary);
+  // fFout.open("/tmp/daqmw/test.dat", std::ios::out | std::ios::binary);
+
   fFile = new TFile("/Data/DAQ/test.root", "RECREATE");
+  // fFile = new TFile("/tmp/daqmw/test.root", "RECREATE");
   fTree = new TTree("StdFirmwareData", "test data");
   fTree->Branch("ModNumber", &m_sampleData.ModNumber, "ModNumber/b");
   fTree->Branch("ChNumber", &m_sampleData.ChNumber, "ChNumber/b");
@@ -135,6 +139,8 @@ int SampleLogger::daq_stop()
 {
   std::cerr << "*** SampleLogger::stop" << std::endl;
   reset_InPort();
+
+  fFout.close();
 
   fTree->Write();
   fFile->Close();
@@ -224,6 +230,8 @@ int SampleLogger::daq_run()
 
 int SampleLogger::fill_data(const unsigned char *mydata, const int size)
 {
+  fFout.write((const char *)mydata, size);
+
   for (int i = 0; i < size / int(ONE_HIT_SIZE); i++) {
     decode_data(mydata);
     fTree->Fill();
@@ -241,17 +249,23 @@ int SampleLogger::decode_data(const unsigned char *mydata)
 
   unsigned long timeStamp = *(unsigned long *)&mydata[index];
   m_sampleData.TimeStamp = timeStamp;
-  index += sizeof(timeStamp);
+  constexpr auto timeSize = sizeof(timeStamp);
+  index += timeSize;
 
   unsigned short adc = *(unsigned short *)&mydata[index];
   m_sampleData.ADC = adc;
-  index += sizeof(adc);
+  constexpr auto adcSize = sizeof(adc);
+  index += adcSize;
 
-  for (int i = 0; i < kNSamples; i++) {
-    unsigned short pulse = *(unsigned short *)&mydata[index];
-    m_sampleData.Waveform[i] = pulse;
-    index += sizeof(pulse);
-  }
+  constexpr auto pulseSize = sizeof(unsigned short) * kNSamples;
+  memcpy(&(m_sampleData.Waveform[0]), &mydata[index], pulseSize);
+
+  // for (int i = 0; i < kNSamples; i++) {
+  //   unsigned short pulse = *(unsigned short *)&mydata[index];
+  //   m_sampleData.Waveform[i] = pulse;
+  //   constexpr auto pulseSize = sizeof(pulse);
+  //   index += pulseSize;
+  // }
 }
 
 extern "C" {

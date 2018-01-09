@@ -30,29 +30,14 @@ class TDPP : public TDigitizer
   virtual void AcquisitionConfig();
   virtual void TriggerConfig();
 
-  void SetPHAPar();
-  void SetPSDPar();
-  CAEN_DGTZ_DPP_PHA_Params_t fParPHA;
-  CAEN_DGTZ_DPP_PSD_Params_t fParPSD;
-  CAEN_DGTZ_TriggerMode_t fTriggerMode;
-  uint32_t fPostTriggerSize;
-  uint32_t fRecordLength;
-
-  double fVpp;
-  double fVth;
   uint32_t fBLTEvents;
 
   // Memory
   void AllocateMemory();
   void FreeMemory();
-  char *fpReadoutBuffer;                         // readout buffer
-  CAEN_DGTZ_DPP_PSD_Event_t **fppPSDEvents;      // events buffer
-  CAEN_DGTZ_DPP_PSD_Waveforms_t *fpPSDWaveform;  // waveforms buffer
+  char *fpReadoutBuffer;  // readout buffer
 
   // Data
-  std::vector<uint64_t> fTimeOffset;
-  std::vector<uint64_t> fPreviousTime;
-  std::vector<uint64_t> fTime;
 
   uint32_t fNEvents;
 };

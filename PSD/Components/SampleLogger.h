@@ -10,6 +10,8 @@
 #ifndef SAMPLELOGGER_H
 #define SAMPLELOGGER_H
 
+#include <fstream>
+
 #include <TFile.h>
 #include <TTree.h>
 
@@ -57,6 +59,7 @@ class SampleLogger : public DAQMW::DaqComponentBase
 
   TFile *fFile;
   TTree *fTree;
+  std::ofstream fFout;  // Stupid name
 
   int decode_data(const unsigned char *mydata);
   int fill_data(const unsigned char *mydata, const int size);

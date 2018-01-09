@@ -53,7 +53,7 @@ SampleReader::SampleReader(RTC::Manager *manager)
       m_recv_byte_size(0),
       m_out_status(BUF_SUCCESS),
       m_debug(true),
-      fSyncMode(true)
+      fSyncMode(false)
 {
   // Registration: InPort/OutPort/Service
 

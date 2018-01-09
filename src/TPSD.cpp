@@ -80,7 +80,8 @@ void TPSD::Initialize()
 
     // Set a DC offset to the input signal to adapt it to digitizer's dynamic
     // range
-    err = CAEN_DGTZ_SetChannelDCOffset(fHandler, i, (1 << fNBits) / 2);
+    // err = CAEN_DGTZ_SetChannelDCOffset(fHandler, i, (1 << fNBits) / 2);
+    err = CAEN_DGTZ_SetChannelDCOffset(fHandler, i, 0x8000);  // Sample
 
     // Set the Pre-Trigger size (in samples)
     err = CAEN_DGTZ_SetDPPPreTriggerSize(fHandler, i, 80);

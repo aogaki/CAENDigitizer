@@ -67,8 +67,8 @@ void TPHA::Initialize()
   PrintError(err, "SetRunSynchronizationMode");
 
   SetPHAPar();
-  uint32_t mask = 0xFF;
   if (fFirmware == FirmWareCode::DPP_PHA) {
+    uint32_t mask = 0xFF;
     err = CAEN_DGTZ_SetDPPParameters(fHandler, mask, &fParPHA);
     PrintError(err, "SetDPPParameters");
   }
