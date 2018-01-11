@@ -41,7 +41,8 @@ int main(int argc, char **argv)
   TApplication app("testApp", &argc, argv);
 
   int link = 0;
-  auto digi = new TPHA(CAEN_DGTZ_USB, link);
+  // auto digi = new TPHA(CAEN_DGTZ_USB, link);
+  auto digi = new TPHA(CAEN_DGTZ_OpticalLink, link);
 
   digi->Initialize();
 

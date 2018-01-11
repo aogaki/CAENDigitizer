@@ -272,9 +272,7 @@ int SampleReader::daq_run()
         iData++;
         m_recv_byte_size += ONE_HIT_SIZE;
 
-        constexpr int sizeTh = 2000000 - ONE_HIT_SIZE;  // 2MB is limit
-        // constexpr int sizeTh = 200000000 - ONE_HIT_SIZE;  // 2M is limit
-        if (m_recv_byte_size > sizeTh) {
+        if (m_recv_byte_size > kMaxPacketSize) {
           set_data(m_recv_byte_size);  // set data to OutPort Buffer
           if (write_OutPort() < 0) {
             std::cout << "time out" << std::endl;

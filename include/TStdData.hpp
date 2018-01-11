@@ -42,4 +42,6 @@ constexpr int ONE_HIT_SIZE = sizeof(unsigned char) + sizeof(unsigned char) +
                              sizeof(unsigned long) + sizeof(short) +
                              (sizeof(unsigned short) * kNSamples);
 
+constexpr int kMaxPacketSize = 2000000 - ONE_HIT_SIZE;
+
 #endif

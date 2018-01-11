@@ -119,7 +119,7 @@ int SampleLogger::daq_start()
 
   m_in_status = BUF_SUCCESS;
 
-  fFout.open("/Data/DAQ/test.dat", std::ios::out | std::ios::binary);
+  // fFout.open("/Data/DAQ/test.dat", std::ios::out | std::ios::binary);
   // fFout.open("/tmp/daqmw/test.dat", std::ios::out | std::ios::binary);
 
   fFile = new TFile("/Data/DAQ/test.root", "RECREATE");
@@ -140,7 +140,7 @@ int SampleLogger::daq_stop()
   std::cerr << "*** SampleLogger::stop" << std::endl;
   reset_InPort();
 
-  fFout.close();
+  // fFout.close();
 
   fTree->Write();
   fFile->Close();
@@ -205,26 +205,31 @@ int SampleLogger::daq_run()
     std::cerr << "*** SampleLogger::run" << std::endl;
   }
 
-  unsigned int recv_byte_size = read_InPort();
-  if (recv_byte_size == 0) {  // Timeout
-    return 0;
+  while (1) {
+    unsigned int recv_byte_size = read_InPort();
+    if (recv_byte_size == 0) {  // Timeout
+      return 0;
+    }
+
+    check_header_footer(m_in_data, recv_byte_size);  // check header and footer
+    // unsigned int event_byte_size = get_event_size(recv_byte_size);
+    m_event_byte_size = get_event_size(recv_byte_size);
+
+    /////////////  Write component main logic here. /////////////
+    // online_analyze();
+    /////////////////////////////////////////////////////////////
+
+    memcpy(&m_recv_data[0], &m_in_data.data[HEADER_BYTE_SIZE],
+           m_event_byte_size);
+
+    fill_data(&m_recv_data[0], m_event_byte_size);
+
+    inc_sequence_num();                      // increase sequence num.
+    inc_total_data_size(m_event_byte_size);  // increase total data byte size
+
+    // Taking data till the one hit is finished
+    if (recv_byte_size < kMaxPacketSize) break;
   }
-
-  check_header_footer(m_in_data, recv_byte_size);  // check header and footer
-  // unsigned int event_byte_size = get_event_size(recv_byte_size);
-  m_event_byte_size = get_event_size(recv_byte_size);
-
-  /////////////  Write component main logic here. /////////////
-  // online_analyze();
-  /////////////////////////////////////////////////////////////
-
-  memcpy(&m_recv_data[0], &m_in_data.data[HEADER_BYTE_SIZE], m_event_byte_size);
-
-  fill_data(&m_recv_data[0], m_event_byte_size);
-
-  inc_sequence_num();                      // increase sequence num.
-  inc_total_data_size(m_event_byte_size);  // increase total data byte size
-
   return 0;
 }
 
