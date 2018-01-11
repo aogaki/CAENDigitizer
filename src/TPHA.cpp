@@ -164,13 +164,13 @@ void TPHA::SetPHAPar()
   // Copy from sample
   for (uint32_t iCh = 0; iCh < fNChs; iCh++) {
     fParPHA.thr[iCh] = 100;     // Trigger Threshold
-    fParPHA.k[iCh] = 3000;      // Trapezoid Rise Time (N*10ns)
-    fParPHA.m[iCh] = 1000;      // Trapezoid Flat Top  (N*10ns)
-    fParPHA.M[iCh] = 50000;     // Decay Time Constant (N*10ns) HACK-FPEP the
+    fParPHA.k[iCh] = 30;        // Trapezoid Rise Time (N*10ns)
+    fParPHA.m[iCh] = 100;       // Trapezoid Flat Top  (N*10ns)
+    fParPHA.M[iCh] = 50;        // Decay Time Constant (N*10ns) HACK-FPEP the
                                 // one expected from fitting algorithm?
-    fParPHA.ftd[iCh] = 800;     // Flat top delay (peaking time) (N*10ns) ??
+    fParPHA.ftd[iCh] = 8;       // Flat top delay (peaking time) (N*10ns) ??
     fParPHA.a[iCh] = 4;         // Trigger Filter smoothing factor
-    fParPHA.b[iCh] = 200;       // Input Signal Rise time (N*10ns)
+    fParPHA.b[iCh] = 20;        // Input Signal Rise time (N*10ns)
     fParPHA.trgho[iCh] = 1200;  // Trigger Hold Off
     fParPHA.nsbl[iCh] = 4;      // 3 = bx10 = 64 samples
     fParPHA.nspk[iCh] = 0;
