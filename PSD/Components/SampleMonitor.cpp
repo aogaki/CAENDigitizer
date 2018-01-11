@@ -92,10 +92,8 @@ RTC::ReturnCode_t SampleMonitor::onExecute(RTC::UniqueId ec_id)
 
 int SampleMonitor::daq_dummy()
 {
-  if (fHisCanvas) {
-    fHisCanvas->Update();
-    sleep(1);
-  }
+  if (fHisCanvas) fHisCanvas->Update();
+  if (fGrCanvas) fGrCanvas->Update();
 
   return 0;
 }
@@ -109,13 +107,13 @@ int SampleMonitor::daq_configure()
   parse_params(paramList);
 
   DelPointer(fHisCanvas);
-  fHisCanvas = new TCanvas("HisCanvas", "test");
+  fHisCanvas = new TCanvas("HisCanvas", "histogram");
 
   DelPointer(fHis);
   fHis = new TH1D("hist", "test", 20000, 0., 20000.);
 
   DelPointer(fGrCanvas);
-  fGrCanvas = new TCanvas("GrCanvas", "test");
+  fGrCanvas = new TCanvas("GrCanvas", "waveform");
 
   DelPointer(fGr);
   fGr = new TGraph();
@@ -145,10 +143,10 @@ int SampleMonitor::daq_unconfigure()
 {
   std::cerr << "*** SampleMonitor::unconfigure" << std::endl;
 
-  DelPointer(fHisCanvas);
   DelPointer(fHis);
-  DelPointer(fGrCanvas);
+  DelPointer(fHisCanvas);
   DelPointer(fGr);
+  DelPointer(fGrCanvas);
 
   return 0;
 }
