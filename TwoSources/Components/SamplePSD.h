@@ -7,19 +7,27 @@
  *
  */
 
-#ifndef SAMPLEDISPATCHER_H
-#define SAMPLEDISPATCHER_H
+#ifndef SAMPLEREADER_H
+#define SAMPLEREADER_H
+
+#include <vector>
 
 #include "DaqComponentBase.h"
+#include "TDPP.hpp"
+#include "TPHA.hpp"
+#include "TPSD.hpp"
+
 #include "SampleData.h"
+
+#include <daqmw/Sock.h>
 
 using namespace RTC;
 
-class SampleDispatcher : public DAQMW::DaqComponentBase
+class SamplePSD : public DAQMW::DaqComponentBase
 {
  public:
-  SampleDispatcher(RTC::Manager *manager);
-  ~SampleDispatcher();
+  SamplePSD(RTC::Manager *manager);
+  ~SamplePSD();
 
   // The initialize action (on CREATED->ALIVE transition)
   // former rtc_init_entry()
@@ -31,12 +39,7 @@ class SampleDispatcher : public DAQMW::DaqComponentBase
 
  private:
   TimedOctetSeq m_out_data;
-  OutPort<TimedOctetSeq> m_OutPort0;
-  OutPort<TimedOctetSeq> m_OutPort1;
-
-  TimedOctetSeq m_in_data;
-  InPort<TimedOctetSeq> m_InPort0;
-  InPort<TimedOctetSeq> m_InPort1;
+  OutPort<TimedOctetSeq> m_OutPort;
 
  private:
   int daq_dummy();
@@ -49,29 +52,27 @@ class SampleDispatcher : public DAQMW::DaqComponentBase
   int daq_resume();
 
   int parse_params(::NVList *list);
+  // int read_data_from_detectors();
   int set_data(unsigned int data_byte_size);
   int write_OutPort();
 
-  int reset_InPort();
-  unsigned int read_InPort();
-  unsigned int read_InPort(InPort<TimedOctetSeq> &port);
+  DAQMW::Sock *m_sock;
 
   unsigned char m_data[BUFFER_SIZE];
-  unsigned char m_recv_data[BUFFER_SIZE];
   unsigned int m_recv_byte_size;
 
-  unsigned char fDataBuffer[BUFFER_SIZE];
-  unsigned int fDataSize;
-
-  BufferStatus m_out_status0;
-  BufferStatus m_out_status1;
-  BufferStatus m_in_status0;
-  BufferStatus m_in_status1;
+  BufferStatus m_out_status;
   bool m_debug;
+
+  int m_srcPort;
+  std::string m_srcAddr;
+
+  std::vector<TPSD *> fDigitizerVec;
+  bool fSyncMode;
 };
 
 extern "C" {
-void SampleDispatcherInit(RTC::Manager *manager);
+void SamplePSDInit(RTC::Manager *manager);
 };
 
-#endif  // SAMPLEDISPATCHER_H
+#endif  // SAMPLEREADER_H

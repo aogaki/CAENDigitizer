@@ -8,7 +8,7 @@
  */
 
 #include "SampleData.h"
-#include "SampleReader.h"
+#include "SamplePSD.h"
 
 using DAQMW::FatalType::DATAPATH_DISCONNECTED;
 using DAQMW::FatalType::OUTPORT_ERROR;
@@ -18,11 +18,11 @@ using DAQMW::FatalType::USER_DEFINED_ERROR2;
 // Module specification
 // Change following items to suit your component's spec.
 static const char *samplereader_spec[] = {"implementation_id",
-                                          "SampleReader",
+                                          "SamplePSD",
                                           "type_name",
-                                          "SampleReader",
+                                          "SamplePSD",
                                           "description",
-                                          "SampleReader component",
+                                          "SamplePSD component",
                                           "version",
                                           "1.0",
                                           "vendor",
@@ -46,7 +46,7 @@ void DelPointer(T *&pointer)
   pointer = nullptr;
 }
 
-SampleReader::SampleReader(RTC::Manager *manager)
+SamplePSD::SamplePSD(RTC::Manager *manager)
     : DAQMW::DaqComponentBase(manager),
       m_OutPort("samplereader_out", m_out_data),
       m_sock(nullptr),
@@ -65,38 +65,39 @@ SampleReader::SampleReader(RTC::Manager *manager)
   set_comp_name("SAMPLEREADER");
 }
 
-SampleReader::~SampleReader()
+SamplePSD::~SamplePSD()
 {
   for (auto &&pointer : fDigitizerVec) DelPointer(pointer);
 }
 
-RTC::ReturnCode_t SampleReader::onInitialize()
+RTC::ReturnCode_t SamplePSD::onInitialize()
 {
   if (m_debug) {
-    std::cerr << "SampleReader::onInitialize()" << std::endl;
+    std::cerr << "SamplePSD::onInitialize()" << std::endl;
   }
 
   return RTC::RTC_OK;
 }
 
-RTC::ReturnCode_t SampleReader::onExecute(RTC::UniqueId ec_id)
+RTC::ReturnCode_t SamplePSD::onExecute(RTC::UniqueId ec_id)
 {
   daq_do();
 
   return RTC::RTC_OK;
 }
 
-int SampleReader::daq_dummy() { return 0; }
+int SamplePSD::daq_dummy() { return 0; }
 
-int SampleReader::daq_configure()
+int SamplePSD::daq_configure()
 {
-  std::cerr << "*** SampleReader::configure" << std::endl;
+  std::cerr << "*** SamplePSD::configure" << std::endl;
 
   ::NVList *paramList;
   paramList = m_daq_service0.getCompParams();
   parse_params(paramList);
 
-  fDigitizerVec.push_back(new TPHA(CAEN_DGTZ_OpticalLink, 0, 0));
+  fDigitizerVec.push_back(new TPSD(CAEN_DGTZ_OpticalLink, 0, 0));
+  fDigitizerVec.push_back(new TPSD(CAEN_DGTZ_OpticalLink, 0, 1));
   // fDigitizerVec.push_back(new TPHA(CAEN_DGTZ_OpticalLink, 0, 1));
   for (unsigned int i = 0; i < fDigitizerVec.size(); i++) {
     fDigitizerVec[i]->Initialize();
@@ -106,7 +107,7 @@ int SampleReader::daq_configure()
   return 0;
 }
 
-int SampleReader::parse_params(::NVList *list)
+int SamplePSD::parse_params(::NVList *list)
 {
   bool srcAddrSpecified = false;
   bool srcPortSpecified = false;
@@ -144,9 +145,9 @@ int SampleReader::parse_params(::NVList *list)
   return 0;
 }
 
-int SampleReader::daq_unconfigure()
+int SamplePSD::daq_unconfigure()
 {
-  std::cerr << "*** SampleReader::unconfigure" << std::endl;
+  std::cerr << "*** SamplePSD::unconfigure" << std::endl;
 
   for (auto &&pointer : fDigitizerVec) DelPointer(pointer);
   fDigitizerVec.clear();
@@ -154,9 +155,9 @@ int SampleReader::daq_unconfigure()
   return 0;
 }
 
-int SampleReader::daq_start()
+int SamplePSD::daq_start()
 {
-  std::cerr << "*** SampleReader::start" << std::endl;
+  std::cerr << "*** SamplePSD::start" << std::endl;
 
   m_out_status = BUF_SUCCESS;
 
@@ -183,9 +184,9 @@ int SampleReader::daq_start()
   return 0;
 }
 
-int SampleReader::daq_stop()
+int SamplePSD::daq_stop()
 {
-  std::cerr << "*** SampleReader::stop" << std::endl;
+  std::cerr << "*** SamplePSD::stop" << std::endl;
 
   for (auto &&digi : fDigitizerVec) {
     digi->StopAcquisition();
@@ -195,21 +196,21 @@ int SampleReader::daq_stop()
   return 0;
 }
 
-int SampleReader::daq_pause()
+int SamplePSD::daq_pause()
 {
-  std::cerr << "*** SampleReader::pause" << std::endl;
+  std::cerr << "*** SamplePSD::pause" << std::endl;
 
   return 0;
 }
 
-int SampleReader::daq_resume()
+int SamplePSD::daq_resume()
 {
-  std::cerr << "*** SampleReader::resume" << std::endl;
+  std::cerr << "*** SamplePSD::resume" << std::endl;
 
   return 0;
 }
 
-int SampleReader::set_data(unsigned int data_byte_size)
+int SamplePSD::set_data(unsigned int data_byte_size)
 {
   unsigned char header[8];
   unsigned char footer[8];
@@ -227,7 +228,7 @@ int SampleReader::set_data(unsigned int data_byte_size)
   return 0;
 }
 
-int SampleReader::write_OutPort()
+int SamplePSD::write_OutPort()
 {
   ////////////////// send data from OutPort  //////////////////
   bool ret = m_OutPort.write();
@@ -248,10 +249,10 @@ int SampleReader::write_OutPort()
   return 0;
 }
 
-int SampleReader::daq_run()
+int SamplePSD::daq_run()
 {
   if (m_debug) {
-    std::cerr << "*** SampleReader::run" << std::endl;
+    std::cerr << "*** SamplePSD::run" << std::endl;
   }
 
   if (check_trans_lock()) {  // check if stop command has come
@@ -289,6 +290,16 @@ int SampleReader::daq_run()
           }
         }
       }
+      // if (nHit > 0 && m_recv_byte_size > 0) {
+      //   set_data(m_recv_byte_size);
+      //   if (write_OutPort() < 0) {
+      //     ;                    // Timeout. do nothing.
+      //   } else {               // OutPort write successfully done
+      //     inc_sequence_num();  // increase sequence num.
+      //     inc_total_data_size(m_recv_byte_size);
+      //     m_recv_byte_size = 0;
+      //   }
+      // }
     }
   }
 
@@ -296,10 +307,10 @@ int SampleReader::daq_run()
 }
 
 extern "C" {
-void SampleReaderInit(RTC::Manager *manager)
+void SamplePSDInit(RTC::Manager *manager)
 {
   RTC::Properties profile(samplereader_spec);
-  manager->registerFactory(profile, RTC::Create<SampleReader>,
-                           RTC::Delete<SampleReader>);
+  manager->registerFactory(profile, RTC::Create<SamplePSD>,
+                           RTC::Delete<SamplePSD>);
 }
 };

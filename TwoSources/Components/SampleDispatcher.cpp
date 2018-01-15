@@ -42,23 +42,25 @@ static const char *sampledispatcher_spec[] = {"implementation_id",
 
 SampleDispatcher::SampleDispatcher(RTC::Manager *manager)
     : DAQMW::DaqComponentBase(manager),
-      m_OutPort1("sampledispatcher_out1", m_out_data1),
-      m_OutPort2("sampledispatcher_out2", m_out_data1),
-      m_InPort("sampledispatcher_in", m_in_data),
+      m_OutPort0("sampledispatcher_out0", m_out_data),
+      m_OutPort1("sampledispatcher_out1", m_out_data),
+      m_InPort0("sampledispatcher_in0", m_in_data),
+      m_InPort1("sampledispatcher_in1", m_in_data),
       m_recv_byte_size(0),
       fDataSize(0),
-      m_in_status(BUF_SUCCESS),
+      m_in_status0(BUF_SUCCESS),
+      m_in_status1(BUF_SUCCESS),
+      m_out_status0(BUF_SUCCESS),
       m_out_status1(BUF_SUCCESS),
-      m_out_status2(BUF_SUCCESS),
-
       m_debug(true)
 {
   // Registration: InPort/OutPort/Service
 
   // Set ports
-  registerInPort("samplemonitor_in", m_InPort);
+  registerInPort("samplemonitor_in0", m_InPort0);
+  registerInPort("samplemonitor_in1", m_InPort1);
+  registerOutPort("sampledispatcher_out0", m_OutPort0);
   registerOutPort("sampledispatcher_out1", m_OutPort1);
-  registerOutPort("sampledispatcher_out2", m_OutPort2);
 
   init_command_port();
   init_state_table();
@@ -123,21 +125,22 @@ int SampleDispatcher::daq_start()
 {
   std::cerr << "*** SampleDispatcher::start" << std::endl;
 
-  m_out_status1 = BUF_SUCCESS;
+  m_out_status0 = BUF_SUCCESS;
+  bool outport_conn0 = check_dataPort_connections(m_OutPort0);
+  if (!outport_conn0) {
+    std::cerr << "No Connection0" << std::endl;
+    fatal_error_report(DATAPATH_DISCONNECTED);
+  }
+
+  m_out_status0 = BUF_SUCCESS;
   bool outport_conn1 = check_dataPort_connections(m_OutPort1);
   if (!outport_conn1) {
     std::cerr << "No Connection1" << std::endl;
     fatal_error_report(DATAPATH_DISCONNECTED);
   }
 
-  m_out_status2 = BUF_SUCCESS;
-  bool outport_conn2 = check_dataPort_connections(m_OutPort2);
-  if (!outport_conn2) {
-    std::cerr << "No Connection1" << std::endl;
-    fatal_error_report(DATAPATH_DISCONNECTED);
-  }
-
-  m_in_status = BUF_SUCCESS;
+  m_in_status0 = BUF_SUCCESS;
+  m_in_status1 = BUF_SUCCESS;
 
   return 0;
 }
@@ -167,7 +170,11 @@ int SampleDispatcher::reset_InPort()
 {
   bool ret = true;
   while (ret == true) {
-    ret = m_InPort.read();
+    ret = m_InPort0.read();
+  }
+  ret = true;
+  while (ret == true) {
+    ret = m_InPort1.read();
   }
 
   return 0;
@@ -177,16 +184,43 @@ unsigned int SampleDispatcher::read_InPort()
 {
   /////////////// read data from InPort Buffer ///////////////
   unsigned int recv_byte_size = 0;
-  bool ret = m_InPort.read();
+  bool ret = m_InPort0.read();
 
   //////////////////// check read status /////////////////////
   if (ret == false) {  // false: TIMEOUT or FATAL
-    m_in_status = check_inPort_status(m_InPort);
-    if (m_in_status == BUF_TIMEOUT) {  // Buffer empty.
-      if (check_trans_lock()) {        // Check if stop command has come.
-        set_trans_unlock();            // Transit to CONFIGURE state.
+    m_in_status0 = check_inPort_status(m_InPort0);
+    if (m_in_status0 == BUF_TIMEOUT) {  // Buffer empty.
+      if (check_trans_lock()) {         // Check if stop command has come.
+        set_trans_unlock();             // Transit to CONFIGURE state.
       }
-    } else if (m_in_status == BUF_FATAL) {  // Fatal error
+    } else if (m_in_status0 == BUF_FATAL) {  // Fatal error
+      fatal_error_report(INPORT_ERROR);
+    }
+  } else {
+    recv_byte_size = m_in_data.data.length();
+  }
+
+  if (m_debug) {
+    std::cerr << "m_in_data.data.length():" << recv_byte_size << std::endl;
+  }
+
+  return recv_byte_size;
+}
+
+unsigned int SampleDispatcher::read_InPort(InPort<TimedOctetSeq> &port)
+{
+  /////////////// read data from InPort Buffer ///////////////
+  unsigned int recv_byte_size = 0;
+  bool ret = port.read();
+
+  //////////////////// check read status /////////////////////
+  if (ret == false) {  // false: TIMEOUT or FATAL
+    m_in_status0 = check_inPort_status(port);
+    if (m_in_status0 == BUF_TIMEOUT) {  // Buffer empty.
+      if (check_trans_lock()) {         // Check if stop command has come.
+        set_trans_unlock();             // Transit to CONFIGURE state.
+      }
+    } else if (m_in_status0 == BUF_FATAL) {  // Fatal error
       fatal_error_report(INPORT_ERROR);
     }
   } else {
@@ -211,12 +245,11 @@ int SampleDispatcher::set_data(unsigned int data_byte_size)
   set_footer(&footer[0]);
 
   /// set OutPort buffer length
-  m_out_data1.data.length(data_byte_size + HEADER_BYTE_SIZE + FOOTER_BYTE_SIZE);
-  memcpy(&(m_out_data1.data[0]), &header[0], HEADER_BYTE_SIZE);
-  // memcpy(&(m_out_data1.data[HEADER_BYTE_SIZE]), &m_data[0], data_byte_size);
-  memcpy(&(m_out_data1.data[HEADER_BYTE_SIZE]), &fDataBuffer[0],
-         data_byte_size);
-  memcpy(&(m_out_data1.data[HEADER_BYTE_SIZE + data_byte_size]), &footer[0],
+  m_out_data.data.length(data_byte_size + HEADER_BYTE_SIZE + FOOTER_BYTE_SIZE);
+  memcpy(&(m_out_data.data[0]), &header[0], HEADER_BYTE_SIZE);
+  // memcpy(&(m_out_data.data[HEADER_BYTE_SIZE]), &m_data[0], data_byte_size);
+  memcpy(&(m_out_data.data[HEADER_BYTE_SIZE]), &fDataBuffer[0], data_byte_size);
+  memcpy(&(m_out_data.data[HEADER_BYTE_SIZE + data_byte_size]), &footer[0],
          FOOTER_BYTE_SIZE);
 
   return 0;
@@ -225,27 +258,27 @@ int SampleDispatcher::set_data(unsigned int data_byte_size)
 int SampleDispatcher::write_OutPort()
 {
   ////////////////// send data from OutPort  //////////////////
-  bool ret = m_OutPort1.write();
-  ret |= m_OutPort2.write();
+  bool ret = m_OutPort0.write();
+  ret |= m_OutPort1.write();
 
   //////////////////// check write status /////////////////////
   if (ret == false) {  // TIMEOUT or FATAL
+    m_out_status0 = check_outPort_status(m_OutPort0);
+    if (m_out_status0 == BUF_FATAL) {  // Fatal error
+      fatal_error_report(OUTPORT_ERROR);
+    } else if (m_out_status0 == BUF_TIMEOUT) {  // Timeout
+      return -1;
+    }
+
     m_out_status1 = check_outPort_status(m_OutPort1);
     if (m_out_status1 == BUF_FATAL) {  // Fatal error
       fatal_error_report(OUTPORT_ERROR);
     } else if (m_out_status1 == BUF_TIMEOUT) {  // Timeout
       return -1;
     }
-
-    m_out_status2 = check_outPort_status(m_OutPort2);
-    if (m_out_status2 == BUF_FATAL) {  // Fatal error
-      fatal_error_report(OUTPORT_ERROR);
-    } else if (m_out_status2 == BUF_TIMEOUT) {  // Timeout
-      return -1;
-    }
   } else {
+    m_out_status0 = BUF_SUCCESS;  // successfully done
     m_out_status1 = BUF_SUCCESS;  // successfully done
-    m_out_status2 = BUF_SUCCESS;  // successfully done
   }
 
   return 0;
@@ -257,11 +290,13 @@ int SampleDispatcher::daq_run()
     std::cerr << "*** SampleDispatcher::run" << std::endl;
   }
 
-  unsigned int recv_byte_size = read_InPort();
+  // unsigned int recv_byte_size = read_InPort();
+  read_InPort(m_InPort0);
+  unsigned int recv_byte_size = read_InPort(m_InPort1);
   if (recv_byte_size == 0) {  // Timeout
     return 0;
   }
-  check_header_footer(m_in_data, recv_byte_size);  // check header and footer
+  // check_header_footer(m_in_data, recv_byte_size);  // check header and footer
   unsigned int event_byte_size = get_event_size(recv_byte_size);
   memcpy(&m_data[0], &m_in_data.data[HEADER_BYTE_SIZE], event_byte_size);
 
@@ -271,8 +306,8 @@ int SampleDispatcher::daq_run()
 
   // if (fDataSize > kMaxPacketSize) {
   if (fDataSize > 0) {
-    if (m_out_status1 == BUF_SUCCESS &&
-        m_out_status2 ==
+    if (m_out_status0 == BUF_SUCCESS &&
+        m_out_status1 ==
             BUF_SUCCESS) {  // previous OutPort.write() successfully done
       if (event_byte_size > 0) {
         set_data(event_byte_size);  // set data to OutPort Buffer
