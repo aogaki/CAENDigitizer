@@ -43,7 +43,6 @@ static const char *sampledispatcher_spec[] = {"implementation_id",
 SampleDispatcher::SampleDispatcher(RTC::Manager *manager)
     : DAQMW::DaqComponentBase(manager),
       m_OutPort1("sampledispatcher_out1", m_out_data1),
-      // m_OutPort2("sampledispatcher_out2", m_out_data2),
       m_OutPort2("sampledispatcher_out2", m_out_data1),
       m_InPort("sampledispatcher_in", m_in_data),
       m_recv_byte_size(0),
@@ -219,13 +218,6 @@ int SampleDispatcher::set_data(unsigned int data_byte_size)
          data_byte_size);
   memcpy(&(m_out_data1.data[HEADER_BYTE_SIZE + data_byte_size]), &footer[0],
          FOOTER_BYTE_SIZE);
-  /// set OutPort buffer length
-  // m_out_data2.data.length(data_byte_size + HEADER_BYTE_SIZE +
-  // FOOTER_BYTE_SIZE); memcpy(&(m_out_data2.data[0]), &header[0],
-  // HEADER_BYTE_SIZE); memcpy(&(m_out_data2.data[HEADER_BYTE_SIZE]),
-  // &m_data[0], data_byte_size); memcpy(&(m_out_data2.data[HEADER_BYTE_SIZE +
-  // data_byte_size]), &footer[0],
-  //        FOOTER_BYTE_SIZE);
 
   return 0;
 }

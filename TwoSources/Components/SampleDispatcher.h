@@ -32,7 +32,6 @@ class SampleDispatcher : public DAQMW::DaqComponentBase
  private:
   TimedOctetSeq m_out_data1;
   OutPort<TimedOctetSeq> m_OutPort1;
-  TimedOctetSeq m_out_data2;
   OutPort<TimedOctetSeq> m_OutPort2;
 
   TimedOctetSeq m_in_data;
