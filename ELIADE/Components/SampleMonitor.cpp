@@ -59,7 +59,7 @@ SampleMonitor::SampleMonitor(RTC::Manager *manager)
       m_bin(0),
       m_min(0),
       m_max(0),
-      m_monitor_update_rate(30),
+      m_monitor_update_rate(300),
       m_event_byte_size(0)
 {
   // Registration: InPort/OutPort/Service
@@ -234,38 +234,44 @@ int SampleMonitor::daq_run()
     std::cerr << "*** SampleMonitor::run" << std::endl;
   }
 
-  unsigned int recv_byte_size = read_InPort();
-  if (recv_byte_size == 0) {  // Timeout
-    return 0;
+  while (1) {
+    unsigned int recv_byte_size = read_InPort();
+    if (recv_byte_size == 0) {  // Timeout
+      return 0;
+    }
+
+    // check_header_footer(m_in_data, recv_byte_size);  // check header and
+    // footer unsigned int event_byte_size = get_event_size(recv_byte_size);
+    m_event_byte_size = get_event_size(recv_byte_size);
+
+    /////////////  Write component main logic here. /////////////
+    // online_analyze();
+    /////////////////////////////////////////////////////////////
+
+    memcpy(&m_recv_data[0], &m_in_data.data[HEADER_BYTE_SIZE],
+           m_event_byte_size);
+
+    fill_data(&m_recv_data[0], m_event_byte_size);
+
+    if (m_monitor_update_rate == 0) m_monitor_update_rate = 1000;
+
+    unsigned long sequence_num = get_sequence_num();
+    if ((sequence_num % m_monitor_update_rate) == 0) {
+      fHisCanvas->cd();
+      fHis->Draw();
+      fHisCanvas->Update();
+
+      fGrCanvas->cd();
+      fGr->Draw();
+      fGrCanvas->Update();
+    }
+
+    inc_sequence_num();                      // increase sequence num.
+    inc_total_data_size(m_event_byte_size);  // increase total data byte size
+
+    // Taking data till the one hit is finished
+    if (recv_byte_size < kMaxPacketSize) break;
   }
-
-  check_header_footer(m_in_data, recv_byte_size);  // check header and footer
-  // unsigned int event_byte_size = get_event_size(recv_byte_size);
-  m_event_byte_size = get_event_size(recv_byte_size);
-
-  /////////////  Write component main logic here. /////////////
-  // online_analyze();
-  /////////////////////////////////////////////////////////////
-
-  memcpy(&m_recv_data[0], &m_in_data.data[HEADER_BYTE_SIZE], m_event_byte_size);
-
-  fill_data(&m_recv_data[0], m_event_byte_size);
-
-  if (m_monitor_update_rate == 0) m_monitor_update_rate = 1000;
-
-  unsigned long sequence_num = get_sequence_num();
-  if ((sequence_num % m_monitor_update_rate) == 0) {
-    fHisCanvas->cd();
-    fHis->Draw();
-    fHisCanvas->Update();
-
-    fGrCanvas->cd();
-    fGr->Draw();
-    fGrCanvas->Update();
-  }
-
-  inc_sequence_num();                      // increase sequence num.
-  inc_total_data_size(m_event_byte_size);  // increase total data byte size
 
   return 0;
 }

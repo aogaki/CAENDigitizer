@@ -98,7 +98,10 @@ int SampleReader::daq_configure()
 
   fDigitizerVec.push_back(new TPHA(CAEN_DGTZ_OpticalLink, 0, 0));
   // fDigitizerVec.push_back(new TPHA(CAEN_DGTZ_OpticalLink, 0, 1));
-  for (auto &digi : fDigitizerVec) digi->Initialize();
+  for (unsigned int i = 0; i < fDigitizerVec.size(); i++) {
+    fDigitizerVec[i]->Initialize();
+    fDigitizerVec[i]->SetModNumber(i + 2);
+  }
 
   return 0;
 }

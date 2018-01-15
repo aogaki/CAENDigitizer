@@ -25,7 +25,7 @@ void TDigitizer::Open(CAEN_DGTZ_ConnectionType type, int link, int node,
   auto err = CAEN_DGTZ_OpenDigitizer(type, link, node, VMEadd, &fHandler);
   PrintError(err, "OpenDigitizer");
 
-  if (node >= 0 && node < 256) fModNumber = (unsigned char)node;
+  // if (node >= 0 && node < 256) fModNumber = (unsigned char)node;
   // else {think it!!}
 
   if (err != CAEN_DGTZ_Success) {

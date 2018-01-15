@@ -27,9 +27,6 @@ class TStdData
   uint16_t Waveform[kNSamples];
 };
 
-// For data transfer buffer
-constexpr int BUFFER_SIZE = 1024 * 1024 * 2;
-
 struct SampleData {
   unsigned char ModNumber;
   unsigned char ChNumber;
@@ -43,5 +40,8 @@ constexpr int ONE_HIT_SIZE = sizeof(unsigned char) + sizeof(unsigned char) +
                              (sizeof(unsigned short) * kNSamples);
 
 constexpr int kMaxPacketSize = 2000000 - ONE_HIT_SIZE;
+
+// For data transfer buffer
+constexpr int BUFFER_SIZE = 1024 * 1024 * 2 * 16;
 
 #endif

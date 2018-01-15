@@ -47,6 +47,7 @@ SampleDispatcher::SampleDispatcher(RTC::Manager *manager)
       m_OutPort2("sampledispatcher_out2", m_out_data1),
       m_InPort("sampledispatcher_in", m_in_data),
       m_recv_byte_size(0),
+      fDataSize(0),
       m_in_status(BUF_SUCCESS),
       m_out_status1(BUF_SUCCESS),
       m_out_status2(BUF_SUCCESS),
@@ -202,6 +203,8 @@ unsigned int SampleDispatcher::read_InPort()
 
 int SampleDispatcher::set_data(unsigned int data_byte_size)
 {
+  data_byte_size = fDataSize;
+
   unsigned char header[8];
   unsigned char footer[8];
 
@@ -211,7 +214,9 @@ int SampleDispatcher::set_data(unsigned int data_byte_size)
   /// set OutPort buffer length
   m_out_data1.data.length(data_byte_size + HEADER_BYTE_SIZE + FOOTER_BYTE_SIZE);
   memcpy(&(m_out_data1.data[0]), &header[0], HEADER_BYTE_SIZE);
-  memcpy(&(m_out_data1.data[HEADER_BYTE_SIZE]), &m_data[0], data_byte_size);
+  // memcpy(&(m_out_data1.data[HEADER_BYTE_SIZE]), &m_data[0], data_byte_size);
+  memcpy(&(m_out_data1.data[HEADER_BYTE_SIZE]), &fDataBuffer[0],
+         data_byte_size);
   memcpy(&(m_out_data1.data[HEADER_BYTE_SIZE + data_byte_size]), &footer[0],
          FOOTER_BYTE_SIZE);
   /// set OutPort buffer length
@@ -268,26 +273,32 @@ int SampleDispatcher::daq_run()
   unsigned int event_byte_size = get_event_size(recv_byte_size);
   memcpy(&m_data[0], &m_in_data.data[HEADER_BYTE_SIZE], event_byte_size);
 
-  // if (check_trans_lock()) {  // check if stop command has come
-  //   set_trans_unlock();      // transit to CONFIGURED state
-  //   return 0;
-  // }
+  memcpy(&fDataBuffer[fDataSize], &m_in_data.data[HEADER_BYTE_SIZE],
+         event_byte_size);
+  fDataSize += event_byte_size;
 
-  if (m_out_status1 == BUF_SUCCESS &&
-      m_out_status2 ==
-          BUF_SUCCESS) {  // previous OutPort.write() successfully done
-    if (event_byte_size > 0) {
-      set_data(event_byte_size);  // set data to OutPort Buffer
+  // if (fDataSize > kMaxPacketSize) {
+  if (fDataSize > 0) {
+    if (m_out_status1 == BUF_SUCCESS &&
+        m_out_status2 ==
+            BUF_SUCCESS) {  // previous OutPort.write() successfully done
+      if (event_byte_size > 0) {
+        set_data(event_byte_size);  // set data to OutPort Buffer
+      }
     }
+
+    if (write_OutPort() < 0) {
+      ;       // Timeout. do nothing.
+    } else {  // OutPort write successfully done
+      // inc_sequence_num();                    // increase sequence num.
+      // inc_total_data_size(event_byte_size);  // increase total data byte size
+    }
+
+    fDataSize = 0;
   }
 
-  if (write_OutPort() < 0) {
-    ;                                      // Timeout. do nothing.
-  } else {                                 // OutPort write successfully done
-    inc_sequence_num();                    // increase sequence num.
-    inc_total_data_size(event_byte_size);  // increase total data byte size
-  }
-
+  inc_sequence_num();                    // increase sequence num.
+  inc_total_data_size(event_byte_size);  // increase total data byte size
   return 0;
 }
 

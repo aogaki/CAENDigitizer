@@ -211,8 +211,8 @@ int SampleLogger::daq_run()
       return 0;
     }
 
-    check_header_footer(m_in_data, recv_byte_size);  // check header and footer
-    // unsigned int event_byte_size = get_event_size(recv_byte_size);
+    // check_header_footer(m_in_data, recv_byte_size);  // check header and
+    // footer unsigned int event_byte_size = get_event_size(recv_byte_size);
     m_event_byte_size = get_event_size(recv_byte_size);
 
     /////////////  Write component main logic here. /////////////

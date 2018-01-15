@@ -40,6 +40,8 @@ class TDigitizer
   virtual uint32_t GetNEvents() = 0;
   unsigned char *GetDataArray() { return fDataArray; };
 
+  void SetModNumber(unsigned char n) { fModNumber = n; };
+
  protected:
   int fHandler;
   unsigned char fModNumber;
