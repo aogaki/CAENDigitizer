@@ -54,6 +54,8 @@ class SampleDispatcher : public DAQMW::DaqComponentBase
 
   int reset_InPort();
   unsigned int read_InPort();
+  unsigned int read_InPort0();  // Stupid!!!!!!!!!!
+  unsigned int read_InPort1();
   unsigned int read_InPort(InPort<TimedOctetSeq> &port);
 
   unsigned char m_data[BUFFER_SIZE];

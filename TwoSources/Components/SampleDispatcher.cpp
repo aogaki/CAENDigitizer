@@ -57,8 +57,8 @@ SampleDispatcher::SampleDispatcher(RTC::Manager *manager)
   // Registration: InPort/OutPort/Service
 
   // Set ports
-  registerInPort("samplemonitor_in0", m_InPort0);
-  registerInPort("samplemonitor_in1", m_InPort1);
+  registerInPort("sampledispatcher_in0", m_InPort0);
+  registerInPort("sampledispatcher_in1", m_InPort1);
   registerOutPort("sampledispatcher_out0", m_OutPort0);
   registerOutPort("sampledispatcher_out1", m_OutPort1);
 
@@ -207,6 +207,60 @@ unsigned int SampleDispatcher::read_InPort()
   return recv_byte_size;
 }
 
+unsigned int SampleDispatcher::read_InPort0()
+{
+  /////////////// read data from InPort Buffer ///////////////
+  unsigned int recv_byte_size = 0;
+  bool ret = m_InPort0.read();
+
+  //////////////////// check read status /////////////////////
+  if (ret == false) {  // false: TIMEOUT or FATAL
+    m_in_status0 = check_inPort_status(m_InPort0);
+    if (m_in_status0 == BUF_TIMEOUT) {  // Buffer empty.
+      if (check_trans_lock()) {         // Check if stop command has come.
+        set_trans_unlock();             // Transit to CONFIGURE state.
+      }
+    } else if (m_in_status0 == BUF_FATAL) {  // Fatal error
+      fatal_error_report(INPORT_ERROR);
+    }
+  } else {
+    recv_byte_size = m_in_data.data.length();
+  }
+
+  if (m_debug) {
+    std::cerr << "m_in_data.data.length():" << recv_byte_size << std::endl;
+  }
+
+  return recv_byte_size;
+}
+
+unsigned int SampleDispatcher::read_InPort1()
+{
+  /////////////// read data from InPort Buffer ///////////////
+  unsigned int recv_byte_size = 0;
+  bool ret = m_InPort1.read();
+
+  //////////////////// check read status /////////////////////
+  if (ret == false) {  // false: TIMEOUT or FATAL
+    m_in_status1 = check_inPort_status(m_InPort1);
+    if (m_in_status1 == BUF_TIMEOUT) {  // Buffer empty.
+      if (check_trans_lock()) {         // Check if stop command has come.
+        set_trans_unlock();             // Transit to CONFIGURE state.
+      }
+    } else if (m_in_status1 == BUF_FATAL) {  // Fatal error
+      fatal_error_report(INPORT_ERROR);
+    }
+  } else {
+    recv_byte_size = m_in_data.data.length();
+  }
+
+  if (m_debug) {
+    std::cerr << "m_in_data.data.length():" << recv_byte_size << std::endl;
+  }
+
+  return recv_byte_size;
+}
+
 unsigned int SampleDispatcher::read_InPort(InPort<TimedOctetSeq> &port)
 {
   /////////////// read data from InPort Buffer ///////////////
@@ -291,8 +345,38 @@ int SampleDispatcher::daq_run()
   }
 
   // unsigned int recv_byte_size = read_InPort();
-  read_InPort(m_InPort0);
-  unsigned int recv_byte_size = read_InPort(m_InPort1);
+  unsigned int recv_byte_size = read_InPort0();
+  if (recv_byte_size > 0) {
+    unsigned int event_byte_size = get_event_size(recv_byte_size);
+    memcpy(&m_data[0], &m_in_data.data[HEADER_BYTE_SIZE], event_byte_size);
+
+    memcpy(&fDataBuffer[fDataSize], &m_in_data.data[HEADER_BYTE_SIZE],
+           event_byte_size);
+    fDataSize += event_byte_size;
+
+    // if (fDataSize > kMaxPacketSize) {
+    if (fDataSize > 0) {
+      if (m_out_status0 == BUF_SUCCESS &&
+          m_out_status1 ==
+              BUF_SUCCESS) {  // previous OutPort.write() successfully done
+        if (event_byte_size > 0) {
+          set_data(event_byte_size);  // set data to OutPort Buffer
+        }
+      }
+
+      if (write_OutPort() < 0) {
+        ;       // Timeout. do nothing.
+      } else {  // OutPort write successfully done
+        // inc_sequence_num();                    // increase sequence num.
+        // inc_total_data_size(event_byte_size);  // increase total data byte
+        // size
+      }
+
+      fDataSize = 0;
+    }
+  }
+
+  recv_byte_size = read_InPort1();
   if (recv_byte_size == 0) {  // Timeout
     return 0;
   }
