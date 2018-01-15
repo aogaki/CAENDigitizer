@@ -348,6 +348,7 @@ int SampleDispatcher::daq_run()
   unsigned int recv_byte_size = read_InPort0();
   if (recv_byte_size > 0) {
     unsigned int event_byte_size = get_event_size(recv_byte_size);
+    inc_total_data_size(event_byte_size);  // increase total data byte size
     memcpy(&m_data[0], &m_in_data.data[HEADER_BYTE_SIZE], event_byte_size);
 
     memcpy(&fDataBuffer[fDataSize], &m_in_data.data[HEADER_BYTE_SIZE],
