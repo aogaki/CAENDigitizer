@@ -13,11 +13,11 @@
   <daqGroups>
     <daqGroup gid="group0">
       <components>
-        <component cid="SampleReader0">
+        <component cid="SamplePHA0">
           <hostAddr>192.168.160.34</hostAddr>
           <hostPort>50000</hostPort>
-          <instName>SampleReader0.rtc</instName>
-          <execPath>/home/aogaki/DAQ/CAENDigitizer/ELIADE/Components/SampleReaderComp</execPath>
+          <instName>SamplePHA0.rtc</instName>
+          <execPath>/home/aogaki/DAQ/CAENDigitizer/TwoSources/Components/SamplePHAComp</execPath>
           <confFile>/tmp/daqmw/rtc.conf</confFile>
           <startOrd>4</startOrd>
           <inPorts>
@@ -38,7 +38,7 @@
           <confFile>/tmp/daqmw/rtc.conf</confFile>
           <startOrd>3</startOrd>
           <inPorts>
-            <inPort from="SampleReader0:samplereader_out">sampledispatcher_in</inPort>
+            <inPort from="SamplePHA0:samplereader_out">sampledispatcher_in</inPort>
           </inPorts>
           <outPorts>
             <outPort>sampledispatcher_out1</outPort>

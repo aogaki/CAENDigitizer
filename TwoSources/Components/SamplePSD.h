@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef SAMPLEREADER_H
-#define SAMPLEREADER_H
+#ifndef SAMPLEPSD_H
+#define SAMPLEPSD_H
 
 #include <vector>
 
