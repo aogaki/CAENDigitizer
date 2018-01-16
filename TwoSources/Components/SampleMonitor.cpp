@@ -52,10 +52,12 @@ SampleMonitor::SampleMonitor(RTC::Manager *manager)
       m_InPort("samplemonitor_in", m_in_data),
       m_in_status(BUF_SUCCESS),
       m_debug(true),
-      fHisCanvas(nullptr),
-      fHis(nullptr),
-      fGrCanvas(nullptr),
-      fGr(nullptr),
+      fGANTCanvas(nullptr),
+      fGANTHis(nullptr),
+      fGANTGr(nullptr),
+      fELIADECanvas(nullptr),
+      fELIADEHis(nullptr),
+      fELIADEGr(nullptr),
       m_bin(0),
       m_min(0),
       m_max(0),
@@ -63,6 +65,8 @@ SampleMonitor::SampleMonitor(RTC::Manager *manager)
       m_event_byte_size(0)
 {
   // Registration: InPort/OutPort/Service
+
+  fNPads = 2;
 
   // Set InPort buffers
   registerInPort("samplemonitor_in", m_InPort);
@@ -72,7 +76,15 @@ SampleMonitor::SampleMonitor(RTC::Manager *manager)
   set_comp_name("SAMPLEMONITOR");
 }
 
-SampleMonitor::~SampleMonitor() {}
+SampleMonitor::~SampleMonitor()
+{
+  DelPointer(fGANTGr);
+  DelPointer(fGANTHis);
+  DelPointer(fGANTCanvas);
+  DelPointer(fELIADEGr);
+  DelPointer(fELIADEHis);
+  DelPointer(fELIADECanvas);
+}
 
 RTC::ReturnCode_t SampleMonitor::onInitialize()
 {
@@ -92,8 +104,18 @@ RTC::ReturnCode_t SampleMonitor::onExecute(RTC::UniqueId ec_id)
 
 int SampleMonitor::daq_dummy()
 {
-  if (fHisCanvas) fHisCanvas->Update();
-  if (fGrCanvas) fGrCanvas->Update();
+  if (fGANTCanvas) {
+    for (int i = 0; i <= fNPads; i++) {
+      fGANTCanvas->cd(i);
+      fGANTCanvas->Update();
+    }
+  }
+  if (fELIADECanvas) {
+    for (int i = 0; i <= fNPads; i++) {
+      fELIADECanvas->cd(i);
+      fELIADECanvas->Update();
+    }
+  }
 
   return 0;
 }
@@ -106,19 +128,33 @@ int SampleMonitor::daq_configure()
   paramList = m_daq_service0.getCompParams();
   parse_params(paramList);
 
-  DelPointer(fHisCanvas);
-  fHisCanvas = new TCanvas("HisCanvas", "histogram");
+  DelPointer(fGANTGr);
+  DelPointer(fGANTHis);
+  DelPointer(fGANTCanvas);
 
-  DelPointer(fHis);
-  fHis = new TH1D("hist", "test", 20000, 0., 20000.);
+  fGANTCanvas = new TCanvas("GANTCanvas", "GANT");
+  fGANTCanvas->Divide(fNPads);
 
-  DelPointer(fGrCanvas);
-  fGrCanvas = new TCanvas("GrCanvas", "waveform");
+  fGANTHis = new TH1D("GANTHis", "test", 20000, 0., 20000.);
 
-  DelPointer(fGr);
-  fGr = new TGraph();
-  fGr->SetMinimum(0);
-  fGr->SetMaximum(20000);
+  fGANTGr = new TGraph();
+  fGANTGr->SetTitle("GANT");
+  fGANTGr->SetMinimum(6000);
+  fGANTGr->SetMaximum(10000);
+
+  DelPointer(fELIADEGr);
+  DelPointer(fELIADEHis);
+  DelPointer(fELIADECanvas);
+
+  fELIADECanvas = new TCanvas("ELIADECanvas", "ELIADE");
+  fELIADECanvas->Divide(fNPads);
+
+  fELIADEHis = new TH1D("ELIADEHis", "test", 20000, 0., 20000.);
+
+  fELIADEGr = new TGraph();
+  fELIADEGr->SetTitle("ELIADE");
+  fELIADEGr->SetMinimum(0);
+  fELIADEGr->SetMaximum(10000);
 
   return 0;
 }
@@ -143,10 +179,13 @@ int SampleMonitor::daq_unconfigure()
 {
   std::cerr << "*** SampleMonitor::unconfigure" << std::endl;
 
-  DelPointer(fHis);
-  DelPointer(fHisCanvas);
-  DelPointer(fGr);
-  DelPointer(fGrCanvas);
+  DelPointer(fGANTGr);
+  DelPointer(fGANTHis);
+  DelPointer(fGANTCanvas);
+
+  DelPointer(fELIADEGr);
+  DelPointer(fELIADEHis);
+  DelPointer(fELIADECanvas);
 
   return 0;
 }
@@ -164,13 +203,27 @@ int SampleMonitor::daq_stop()
 {
   std::cerr << "*** SampleMonitor::stop" << std::endl;
 
-  fHisCanvas->cd();
-  fHis->Draw();
-  fHisCanvas->Update();
+  if (fGANTCanvas) {
+    for (int i = 1; i <= fNPads; i++) {
+      fGANTCanvas->cd(i);
+      if (i == 1)
+        fGANTGr->Draw();
+      else if (i == 2)
+        fGANTHis->Draw();
+      fGANTCanvas->Update();
+    }
+  }
 
-  fGrCanvas->cd();
-  fGr->Draw();
-  fGrCanvas->Update();
+  if (fELIADECanvas) {
+    for (int i = 1; i <= fNPads; i++) {
+      fELIADECanvas->cd(i);
+      if (i == 1)
+        fELIADEGr->Draw();
+      else if (i == 2)
+        fELIADEHis->Draw();
+      fELIADECanvas->Update();
+    }
+  }
 
   reset_InPort();
 
@@ -193,7 +246,7 @@ int SampleMonitor::daq_resume()
 
 int SampleMonitor::reset_InPort()
 {
-  int ret = true;
+  bool ret = true;
   while (ret == true) {
     ret = m_InPort.read();
   }
@@ -257,13 +310,26 @@ int SampleMonitor::daq_run()
 
     unsigned long sequence_num = get_sequence_num();
     if ((sequence_num % m_monitor_update_rate) == 0) {
-      fHisCanvas->cd();
-      fHis->Draw();
-      fHisCanvas->Update();
-
-      fGrCanvas->cd();
-      fGr->Draw();
-      fGrCanvas->Update();
+      if (fGANTCanvas) {
+        for (int i = 1; i <= fNPads; i++) {
+          fGANTCanvas->cd(i);
+          if (i == 1)
+            fGANTGr->Draw();
+          else if (i == 2)
+            fGANTHis->Draw();
+          fGANTCanvas->Update();
+        }
+      }
+      if (fELIADECanvas) {
+        for (int i = 1; i <= fNPads; i++) {
+          fELIADECanvas->cd(i);
+          if (i == 1)
+            fELIADEGr->Draw();
+          else if (i == 2)
+            fELIADEHis->Draw();
+          fELIADECanvas->Update();
+        }
+      }
     }
 
     inc_sequence_num();                      // increase sequence num.
@@ -280,10 +346,19 @@ int SampleMonitor::fill_data(const unsigned char *mydata, const int size)
 {
   for (int i = 0; i < size / int(ONE_HIT_SIZE); i++) {
     decode_data(mydata);
-    if (m_sampleData.ChNumber == 0) {
-      fHis->Fill(m_sampleData.ADC);
-      for (int i = 0; i < kNSamples; i++)
-        fGr->SetPoint(i, i, m_sampleData.Waveform[i]);
+    if (m_sampleData.ModNumber == 0) {
+      if (m_sampleData.ChNumber == 0) {
+        fGANTHis->Fill(m_sampleData.ADC);
+        for (int i = 0; i < kNSamples; i++)
+          fGANTGr->SetPoint(i, i, m_sampleData.Waveform[i]);
+      }
+    }
+    if (m_sampleData.ModNumber == 2) {
+      if (m_sampleData.ChNumber == 0) {
+        fELIADEHis->Fill(m_sampleData.ADC);
+        for (int i = 0; i < kNSamples; i++)
+          fELIADEGr->SetPoint(i, i, m_sampleData.Waveform[i]);
+      }
     }
     mydata += ONE_HIT_SIZE;
   }

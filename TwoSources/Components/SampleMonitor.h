@@ -62,10 +62,14 @@ class SampleMonitor : public DAQMW::DaqComponentBase
   int decode_data(const unsigned char *mydata);
   int fill_data(const unsigned char *mydata, const int size);
 
-  TCanvas *fHisCanvas;
-  TH1D *fHis;
-  TCanvas *fGrCanvas;
-  TGraph *fGr;
+  int fNPads;
+  TCanvas *fGANTCanvas;
+  TH1D *fGANTHis;
+  TGraph *fGANTGr;
+
+  TCanvas *fELIADECanvas;
+  TH1D *fELIADEHis;
+  TGraph *fELIADEGr;
 
   int m_bin;
   double m_min;

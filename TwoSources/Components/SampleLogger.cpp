@@ -124,7 +124,7 @@ int SampleLogger::daq_start()
 
   fFile = new TFile("/Data/DAQ/test.root", "RECREATE");
   // fFile = new TFile("/tmp/daqmw/test.root", "RECREATE");
-  fTree = new TTree("StdFirmwareData", "test data");
+  fTree = new TTree("TestData", "test data");
   fTree->Branch("ModNumber", &m_sampleData.ModNumber, "ModNumber/b");
   fTree->Branch("ChNumber", &m_sampleData.ChNumber, "ChNumber/b");
   fTree->Branch("TimeStamp", &m_sampleData.TimeStamp, "TimeStamp/l");
