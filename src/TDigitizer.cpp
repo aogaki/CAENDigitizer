@@ -224,3 +224,31 @@ CAEN_DGTZ_ErrorCode TDigitizer::ReadSPIRegister(uint32_t ch, uint32_t address,
   }
   return CAEN_DGTZ_Success;
 }
+
+int TDigitizer::RegisterSetBits(uint16_t addr, int start_bit, int end_bit,
+                                int val)
+{  // copy from digiTes
+  uint32_t mask = 0, reg;
+  int ret;
+  int i;
+
+  if (((addr & 0xFF00) == 0x8000) && (addr != 0x8000) && (addr != 0x8004) &&
+      (addr != 0x8008)) {  // broadcast access to channel individual registers
+    // (loop over channels)
+    uint16_t ch;
+    for (ch = 0; ch < fNChs; ch++) {
+      ret = CAEN_DGTZ_ReadRegister(fHandler, 0x1000 | (addr & 0xFF) | (ch << 8),
+                                   &reg);
+      for (i = start_bit; i <= end_bit; i++) mask |= 1 << i;
+      reg = reg & ~mask | ((val << start_bit) & mask);
+      ret |= CAEN_DGTZ_WriteRegister(fHandler,
+                                     0x1000 | (addr & 0xFF) | (ch << 8), reg);
+    }
+  } else {  // access to channel individual register or mother board register
+    ret = CAEN_DGTZ_ReadRegister(fHandler, addr, &reg);
+    for (i = start_bit; i <= end_bit; i++) mask |= 1 << i;
+    reg = reg & ~mask | ((val << start_bit) & mask);
+    ret |= CAEN_DGTZ_WriteRegister(fHandler, addr, reg);
+  }
+  return ret;
+}

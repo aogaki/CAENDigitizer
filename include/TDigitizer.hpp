@@ -61,6 +61,8 @@ class TDigitizer
 
   unsigned char *fDataArray;
 
+  int RegisterSetBits(uint16_t addr, int start_bit, int end_bit, int val);
+
  private:
   // Those SPI register functions are copy from digiTES
   CAEN_DGTZ_ErrorCode ReadSPIRegister(uint32_t ch, uint32_t address,
