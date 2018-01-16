@@ -4,6 +4,7 @@ cmake_install.cmake
 compile_commands.json
 digi
 dpp
+PHA
 *~
 .*
 *.log

@@ -97,7 +97,8 @@ void TPSD::Initialize()
   BoardCalibration();
 
   // Set register to use extended 47 bit time stamp
-  for (int i = 0; i < fNChs; i++) RegisterSetBits(0x1084 + (i << 8), 8, 10, 2);
+  // But, not setting is also work.  I dont know how to disable it
+  for (int i = 0; i < fNChs; i++) RegisterSetBits(0x1084 + (i << 8), 8, 10, 0);
 }
 
 void TPSD::ReadEvents()
@@ -135,9 +136,7 @@ void TPSD::ReadEvents()
       // }
       // fPreviousTime[iCh] = fTime[iCh];
 
-      std::cout << ((fppPSDEvents[iCh][iEve].Format >> 24) & 0x7) << std::endl;
-
-      fTime[iCh] = fppPSDEvents[iCh][iEve].TimeTag;
+      fTime[iCh] = fppPSDEvents[iCh][iEve].TimeTag + ((uint64_t)((fppPSDEvents[iCh][iEve].Extras >> 16) & 0xFFFF) << 31);
 
       auto index = fNEvents * ONE_HIT_SIZE;
       fDataArray[index++] = fModNumber;  // fModNumber is needed.
