@@ -95,6 +95,10 @@ void TPSD::Initialize()
   AllocateMemory();
 
   BoardCalibration();
+
+  // Set register to use extended 47 bit time stamp
+  
+  
 }
 
 void TPSD::ReadEvents()
@@ -131,6 +135,8 @@ void TPSD::ReadEvents()
       //   fTimeOffset[iCh] += maxTime;
       // }
       // fPreviousTime[iCh] = fTime[iCh];
+
+      std::cout << ((fppPSDEvents[iCh][iEve].Format >> 24) & 0x7) << std::endl;
 
       fTime[iCh] = fppPSDEvents[iCh][iEve].TimeTag;
 
