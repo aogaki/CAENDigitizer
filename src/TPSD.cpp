@@ -136,7 +136,9 @@ void TPSD::ReadEvents()
       // }
       // fPreviousTime[iCh] = fTime[iCh];
 
-      fTime[iCh] = fppPSDEvents[iCh][iEve].TimeTag + ((uint64_t)((fppPSDEvents[iCh][iEve].Extras >> 16) & 0xFFFF) << 31);
+      fTime[iCh] =
+          fppPSDEvents[iCh][iEve].TimeTag +
+          ((uint64_t)((fppPSDEvents[iCh][iEve].Extras >> 16) & 0xFFFF) << 31);
 
       auto index = fNEvents * ONE_HIT_SIZE;
       fDataArray[index++] = fModNumber;  // fModNumber is needed.
