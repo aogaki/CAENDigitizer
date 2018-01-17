@@ -142,7 +142,7 @@ void TPHA::ReadEvents()
       }
       fPreviousTime[iCh] = tdc;
 
-      fTime[iCh] = fppPHAEvents[iCh][iEve].TimeTag;
+      fTime[iCh] = tdc;
       constexpr auto timeSize = sizeof(fTime[0]);
       memcpy(&fDataArray[index], &fTime[iCh], timeSize);
       index += timeSize;
