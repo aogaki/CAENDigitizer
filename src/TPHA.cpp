@@ -141,13 +141,6 @@ void TPHA::ReadEvents()
       }
       fPreviousTime[iCh] = tdc;
 
-      if (iCh == 0)
-        std::cout << (uint64_t)(
-                         ((fppPHAEvents[iCh][iEve].Extras2 >> 16) & 0xFFFF)
-                         << 31)
-                  << "\t" << fppPHAEvents[iCh][iEve].TimeTag << "\t" << tdc
-                  << std::endl;
-
       fTime[iCh] = fppPHAEvents[iCh][iEve].TimeTag;
       constexpr auto timeSize = sizeof(fTime[0]);
       memcpy(&fDataArray[index], &fTime[iCh], timeSize);
