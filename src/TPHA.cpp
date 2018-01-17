@@ -99,7 +99,8 @@ void TPHA::Initialize()
 
   // Set register to use extended 47 bit time stamp
   // But, for 1725 with PHA, it is not working as same as 1730 with PSD
-  for (int i = 0; i < fNChs; i++) RegisterSetBits(0x10A0 + (i << 8), 8, 10, 2);
+  // for (int i = 0; i < fNChs; i++) RegisterSetBits(0x10A0 + (i << 8), 8, 10,
+  // 2);
 }
 
 void TPHA::ReadEvents()
