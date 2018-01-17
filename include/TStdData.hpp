@@ -4,7 +4,7 @@
 #include <CAENDigitizerType.h>
 
 // constexpr uint32_t kNSamples = 1024 + 512;
-constexpr uint32_t kNSamples = 4096;
+constexpr uint32_t kNSamples = 2048;
 
 class TStdData
 {
