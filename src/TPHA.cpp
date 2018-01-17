@@ -85,7 +85,7 @@ void TPHA::Initialize()
     err = CAEN_DGTZ_SetChannelDCOffset(fHandler, i, 50000);  // sample
 
     // Set the Pre-Trigger size (in samples)
-    err = CAEN_DGTZ_SetDPPPreTriggerSize(fHandler, i, 80);
+    err = CAEN_DGTZ_SetDPPPreTriggerSize(fHandler, i, 200);
 
     // Set the polarity for the given channel (CAEN_DGTZ_PulsePolarityPositive
     // or CAEN_DGTZ_PulsePolarityNegative)
