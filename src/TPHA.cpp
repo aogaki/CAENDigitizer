@@ -177,7 +177,7 @@ void TPHA::SetPHAPar()
 {
   // Copy from sample
   for (uint32_t iCh = 0; iCh < fNChs; iCh++) {
-    fParPHA.thr[iCh] = 200;     // Trigger Threshold
+    fParPHA.thr[iCh] = 100;     // Trigger Threshold
     fParPHA.k[iCh] = 30;        // Trapezoid Rise Time (N*10ns)
     fParPHA.m[iCh] = 100;       // Trapezoid Flat Top  (N*10ns)
     fParPHA.M[iCh] = 50;        // Decay Time Constant (N*10ns) HACK-FPEP the
