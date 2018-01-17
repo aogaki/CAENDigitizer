@@ -13,6 +13,7 @@ all:
 	make -f Makefile.Monitor
 
 clean:
+	rm ../../src/*.o
 	make -f Makefile.PSD clean
 	make -f Makefile.PHA clean
 	make -f Makefile.Dispatcher clean
