@@ -97,7 +97,6 @@ void TPSD::Initialize()
   BoardCalibration();
 
   // Set register to use extended 47 bit time stamp
-  // But, not setting is also work.  I dont know how to disable it
   for (int i = 0; i < fNChs; i++) RegisterSetBits(0x1084 + (i << 8), 8, 10, 0);
 }
 
