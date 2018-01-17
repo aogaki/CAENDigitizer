@@ -154,7 +154,7 @@ int SampleMonitor::daq_configure()
   fELIADEGr = new TGraph();
   fELIADEGr->SetTitle("ELIADE");
   fELIADEGr->SetMinimum(0);
-  fELIADEGr->SetMaximum(10000);
+  fELIADEGr->SetMaximum(20000);
 
   return 0;
 }
