@@ -132,11 +132,21 @@ void TPHA::ReadEvents()
       fDataArray[index++] = fModNumber;  // fModNumber is needed.
       fDataArray[index++] = iCh;         // int to char.  Dangerous
 
+      constexpr uint64_t timeMask = 0x7FFFFFFF;
+      auto tdc =
+          (fppPHAEvents[iCh][iEve].TimeTag & timeMask) + fTimeOffset[iCh];
+      if (tdc < fPreviousTime[iCh]) {
+        tdc += (timeMask + 1);
+        fTimeOffset[iCh] += (timeMask + 1);
+      }
+      fPreviousTime[iCh] = tdc;
+
       if (iCh == 0)
         std::cout << (uint64_t)(
                          ((fppPHAEvents[iCh][iEve].Extras2 >> 16) & 0xFFFF)
                          << 31)
-                  << "\t" << fppPHAEvents[iCh][iEve].TimeTag << std::endl;
+                  << "\t" << fppPHAEvents[iCh][iEve].TimeTag << "\t" << tdc
+                  << std::endl;
 
       fTime[iCh] = fppPHAEvents[iCh][iEve].TimeTag;
       constexpr auto timeSize = sizeof(fTime[0]);
