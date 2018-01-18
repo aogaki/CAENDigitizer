@@ -115,15 +115,15 @@ int SampleLogger::daq_unconfigure()
 
 int SampleLogger::daq_start()
 {
+  // All procedures are done AFTER setting run number
+
   std::cerr << "*** SampleLogger::start" << std::endl;
 
   m_in_status = BUF_SUCCESS;
 
-  // fFout.open("/Data/DAQ/test.dat", std::ios::out | std::ios::binary);
-  // fFout.open("/tmp/daqmw/test.dat", std::ios::out | std::ios::binary);
-
-  fFile = new TFile("/Data/DAQ/test.root", "RECREATE");
-  // fFile = new TFile("/tmp/daqmw/test.root", "RECREATE");
+  auto fileName = "/Data/DAQ/" + std::to_string(get_run_number()) + ".root";
+  fFile = new TFile(fileName.c_str(), "RECREATE");
+  // fFile = new TFile("/Data/DAQ/test.root", "RECREATE");
   fTree = new TTree("TestData", "test data");
   fTree->Branch("ModNumber", &m_sampleData.ModNumber, "ModNumber/b");
   fTree->Branch("ChNumber", &m_sampleData.ChNumber, "ChNumber/b");
