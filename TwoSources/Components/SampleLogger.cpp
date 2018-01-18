@@ -228,6 +228,7 @@ int SampleLogger::daq_run()
     inc_total_data_size(m_event_byte_size);  // increase total data byte size
 
     // Taking data till the one hit is finished
+    // This is too bad?
     if (recv_byte_size < kMaxPacketSize) break;
   }
   return 0;
@@ -264,13 +265,6 @@ int SampleLogger::decode_data(const unsigned char *mydata)
 
   constexpr auto pulseSize = sizeof(unsigned short) * kNSamples;
   memcpy(&(m_sampleData.Waveform[0]), &mydata[index], pulseSize);
-
-  // for (int i = 0; i < kNSamples; i++) {
-  //   unsigned short pulse = *(unsigned short *)&mydata[index];
-  //   m_sampleData.Waveform[i] = pulse;
-  //   constexpr auto pulseSize = sizeof(pulse);
-  //   index += pulseSize;
-  // }
 }
 
 extern "C" {
