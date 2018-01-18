@@ -301,8 +301,7 @@ int SamplePHA::daq_run()
         }
       }
     }
-  } else
-    std::cout << "Port status is " << m_out_status << std::endl;
+  }
 
   return 0;
 }

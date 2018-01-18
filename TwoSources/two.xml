@@ -55,8 +55,10 @@
           <confFile>/tmp/daqmw/rtc.conf</confFile>
           <startOrd>3</startOrd>
           <inPorts>
-            <inPort from="SamplePHA0:samplereader_out">sampledispatcher_in1</inPort>
-            <inPort from="SamplePSD0:samplereader_out">sampledispatcher_in0</inPort>
+            <inPort from="SamplePHA0:samplereader_out"
+                    buffer_length="4096">sampledispatcher_in1</inPort>
+            <inPort from="SamplePSD0:samplereader_out"
+                    buffer_length="4096">sampledispatcher_in0</inPort>
           </inPorts>
           <outPorts>
             <outPort>sampledispatcher_out0</outPort>
@@ -73,7 +75,8 @@
           <confFile>/tmp/daqmw/rtc.conf</confFile>
           <startOrd>2</startOrd>
           <inPorts>
-            <inPort from="SampleDispatcher0:sampledispatcher_out1">samplemonitor_in</inPort>
+            <inPort from="SampleDispatcher0:sampledispatcher_out1"
+                    buffer_length="4096">samplemonitor_in</inPort>
           </inPorts>
           <outPorts>
           </outPorts>
@@ -89,7 +92,8 @@
           <confFile>/tmp/daqmw/rtc.conf</confFile>
           <startOrd>1</startOrd>
           <inPorts>
-            <inPort from="SampleDispatcher0:sampledispatcher_out0">samplelogger_in</inPort>
+            <inPort from="SampleDispatcher0:sampledispatcher_out0"
+                    buffer_length="4096">samplelogger_in</inPort>
           </inPorts>
           <outPorts>
           </outPorts>
