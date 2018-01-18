@@ -1,23 +1,29 @@
-#include <iostream>
 #include <math.h>
 #include <string.h>
+#include <iostream>
 
 #include "TPHA.hpp"
 #include "TStdData.hpp"
 
-template <class T> void DelPointer(T *&pointer) {
+template <class T>
+void DelPointer(T *&pointer)
+{
   delete pointer;
   pointer = nullptr;
 }
 
 TPHA::TPHA()
-    : TDigitizer(), fpReadoutBuffer(nullptr), fppPHAEvents(nullptr),
-      fpPHAWaveform(nullptr) {
+    : TDigitizer(),
+      fpReadoutBuffer(nullptr),
+      fppPHAEvents(nullptr),
+      fpPHAWaveform(nullptr)
+{
   SetParameters();
 }
 
 TPHA::TPHA(CAEN_DGTZ_ConnectionType type, int link, int node, uint32_t VMEadd)
-    : TPHA() {
+    : TPHA()
+{
   Open(type, link, node, VMEadd);
   Reset();
   GetBoardInfo();
@@ -29,13 +35,15 @@ TPHA::TPHA(CAEN_DGTZ_ConnectionType type, int link, int node, uint32_t VMEadd)
   fDataArray = new unsigned char[fBLTEvents * ONE_HIT_SIZE * fNChs];
 }
 
-TPHA::~TPHA() {
+TPHA::~TPHA()
+{
   Reset();
   FreeMemory();
   Close();
 }
 
-void TPHA::Initialize() {
+void TPHA::Initialize()
+{
   CAEN_DGTZ_ErrorCode err;
 
   Reset();
@@ -74,7 +82,7 @@ void TPHA::Initialize() {
     // Set a DC offset to the input signal to adapt it to digitizer's dynamic
     // range
     // err = CAEN_DGTZ_SetChannelDCOffset(fHandler, i, (1 << fNBits));
-    err = CAEN_DGTZ_SetChannelDCOffset(fHandler, i, 50000); // sample
+    err = CAEN_DGTZ_SetChannelDCOffset(fHandler, i, 50000);  // sample
 
     // Set the Pre-Trigger size (in samples)
     err = CAEN_DGTZ_SetDPPPreTriggerSize(fHandler, i, 200);
@@ -95,8 +103,9 @@ void TPHA::Initialize() {
   // 2);
 }
 
-void TPHA::ReadEvents() {
-  fNEvents = 0; // Event counter
+void TPHA::ReadEvents()
+{
+  fNEvents = 0;  // Event counter
 
   CAEN_DGTZ_ErrorCode err;
 
@@ -104,8 +113,7 @@ void TPHA::ReadEvents() {
   err = CAEN_DGTZ_ReadData(fHandler, CAEN_DGTZ_SLAVE_TERMINATED_READOUT_MBLT,
                            fpReadoutBuffer, &bufferSize);
   PrintError(err, "ReadData");
-  if (bufferSize == 0)
-    return; // in the case of 0, GetDPPEvents makes crush
+  if (bufferSize == 0) return;  // in the case of 0, GetDPPEvents makes crush
 
   uint32_t nEvents[fNChs];
   err = CAEN_DGTZ_GetDPPEvents(fHandler, fpReadoutBuffer, bufferSize,
@@ -122,8 +130,8 @@ void TPHA::ReadEvents() {
       PrintError(err, "DecodeDPPWaveforms");
 
       auto index = fNEvents * ONE_HIT_SIZE;
-      fDataArray[index++] = fModNumber; // fModNumber is needed.
-      fDataArray[index++] = iCh;        // int to char.  Dangerous
+      fDataArray[index++] = fModNumber;  // fModNumber is needed.
+      fDataArray[index++] = iCh;         // int to char.  Dangerous
 
       constexpr uint64_t timeMask = 0x7FFFFFFF;
       auto tdc =
@@ -132,11 +140,6 @@ void TPHA::ReadEvents() {
         tdc += (timeMask + 1);
         fTimeOffset[iCh] += (timeMask + 1);
       }
-<<<<<<< HEAD
-=======
-      if (fTSample > 0)
-        tdc *= fTSample;
->>>>>>> f800daaf32fe9d379d3c083b4e6f0f8da745d112
       fPreviousTime[iCh] = tdc;
 
       if (fTSample > 0) tdc *= fTSample;
@@ -161,34 +164,36 @@ void TPHA::ReadEvents() {
   }
 }
 
-void TPHA::SetParameters() {
+void TPHA::SetParameters()
+{
   fRecordLength = kNSamples;
   // fTriggerMode = CAEN_DGTZ_TRGMODE_ACQ_ONLY;
   fTriggerMode = CAEN_DGTZ_TRGMODE_ACQ_AND_EXTOUT;
   fPostTriggerSize = 80;
   // fBLTEvents = 1023;  // It is max, why not 1024?
-  fBLTEvents = 4096; // It is max, why not 1024?
+  fBLTEvents = 4096;  // It is max, why not 1024?
 
   SetPHAPar();
 }
 
-void TPHA::SetPHAPar() {
+void TPHA::SetPHAPar()
+{
   // Copy from sample
   for (uint32_t iCh = 0; iCh < fNChs; iCh++) {
-    fParPHA.thr[iCh] = 100;    // Trigger Threshold
-    fParPHA.k[iCh] = 30;       // Trapezoid Rise Time (N*10ns)
-    fParPHA.m[iCh] = 100;      // Trapezoid Flat Top  (N*10ns)
-    fParPHA.M[iCh] = 50;       // Decay Time Constant (N*10ns) HACK-FPEP the
-                               // one expected from fitting algorithm?
-    fParPHA.ftd[iCh] = 8;      // Flat top delay (peaking time) (N*10ns) ??
-    fParPHA.a[iCh] = 4;        // Trigger Filter smoothing factor
-    fParPHA.b[iCh] = 20;       // Input Signal Rise time (N*10ns)
-    fParPHA.trgho[iCh] = 1200; // Trigger Hold Off
-    fParPHA.nsbl[iCh] = 4;     // 3 = bx10 = 64 samples
+    fParPHA.thr[iCh] = 100;     // Trigger Threshold
+    fParPHA.k[iCh] = 30;        // Trapezoid Rise Time (N*10ns)
+    fParPHA.m[iCh] = 100;       // Trapezoid Flat Top  (N*10ns)
+    fParPHA.M[iCh] = 50;        // Decay Time Constant (N*10ns) HACK-FPEP the
+                                // one expected from fitting algorithm?
+    fParPHA.ftd[iCh] = 8;       // Flat top delay (peaking time) (N*10ns) ??
+    fParPHA.a[iCh] = 4;         // Trigger Filter smoothing factor
+    fParPHA.b[iCh] = 20;        // Input Signal Rise time (N*10ns)
+    fParPHA.trgho[iCh] = 1200;  // Trigger Hold Off
+    fParPHA.nsbl[iCh] = 4;      // 3 = bx10 = 64 samples
     fParPHA.nspk[iCh] = 0;
     fParPHA.pkho[iCh] = 2000;
     fParPHA.blho[iCh] = 500;
-    fParPHA.enf[iCh] = 1.0; // Energy Normalization Factor
+    fParPHA.enf[iCh] = 1.0;  // Energy Normalization Factor
     fParPHA.decimation[iCh] = 0;
     fParPHA.dgain[iCh] = 0;
     fParPHA.otrej[iCh] = 0;
@@ -199,7 +204,8 @@ void TPHA::SetPHAPar() {
   }
 }
 
-void TPHA::AcquisitionConfig() {
+void TPHA::AcquisitionConfig()
+{
   CAEN_DGTZ_ErrorCode err;
 
   // Eanble all channels
@@ -222,7 +228,8 @@ void TPHA::AcquisitionConfig() {
   PrintError(err, "SetDPPAcquisitionMode");
 }
 
-void TPHA::TriggerConfig() {
+void TPHA::TriggerConfig()
+{
   CAEN_DGTZ_ErrorCode err;
 
   // Set the trigger threshold
@@ -265,7 +272,8 @@ void TPHA::TriggerConfig() {
   // std::cout << "Polarity:\t" << pol << std::endl;
 }
 
-void TPHA::AllocateMemory() {
+void TPHA::AllocateMemory()
+{
   CAEN_DGTZ_ErrorCode err;
   uint32_t size;
 
@@ -280,7 +288,8 @@ void TPHA::AllocateMemory() {
   PrintError(err, "MallocDPPWaveforms");
 }
 
-void TPHA::FreeMemory() {
+void TPHA::FreeMemory()
+{
   CAEN_DGTZ_ErrorCode err;
   err = CAEN_DGTZ_FreeReadoutBuffer(&fpReadoutBuffer);
   PrintError(err, "FreeReadoutBuffer");
@@ -295,22 +304,21 @@ void TPHA::FreeMemory() {
   // DelPointer(fpPHAWaveform);
 }
 
-CAEN_DGTZ_ErrorCode TPHA::StartAcquisition() {
+CAEN_DGTZ_ErrorCode TPHA::StartAcquisition()
+{
   CAEN_DGTZ_ErrorCode err;
   err = CAEN_DGTZ_SWStartAcquisition(fHandler);
   PrintError(err, "StartAcquisition");
 
-  for (auto &t : fTime)
-    t = 0;
-  for (auto &t : fTimeOffset)
-    t = 0;
-  for (auto &t : fPreviousTime)
-    t = 0;
+  for (auto &t : fTime) t = 0;
+  for (auto &t : fTimeOffset) t = 0;
+  for (auto &t : fPreviousTime) t = 0;
 
   return err;
 }
 
-void TPHA::StopAcquisition() {
+void TPHA::StopAcquisition()
+{
   CAEN_DGTZ_ErrorCode err;
   err = CAEN_DGTZ_SWStopAcquisition(fHandler);
   PrintError(err, "StopAcquisition");
@@ -319,7 +327,8 @@ void TPHA::StopAcquisition() {
   // PrintError(err, "FreeEvent");
 }
 
-void TPHA::SetMaster() { // Synchronization Mode
+void TPHA::SetMaster()
+{  // Synchronization Mode
   CAEN_DGTZ_ErrorCode err;
   err = CAEN_DGTZ_SetRunSynchronizationMode(
       fHandler, CAEN_DGTZ_RUN_SYNC_TrgOutTrgInDaisyChain);
@@ -334,7 +343,8 @@ void TPHA::SetMaster() { // Synchronization Mode
   PrintError(err, "SetChannelSelfTrigger");
 }
 
-void TPHA::SetSlave() {
+void TPHA::SetSlave()
+{
   CAEN_DGTZ_ErrorCode err;
   err = CAEN_DGTZ_SetRunSynchronizationMode(
       fHandler, CAEN_DGTZ_RUN_SYNC_TrgOutTrgInDaisyChain);
@@ -353,7 +363,8 @@ void TPHA::SetSlave() {
   PrintError(err, "SetExtTriggerInputMode");
 }
 
-void TPHA::StartSyncMode(uint32_t nMods) {
+void TPHA::StartSyncMode(uint32_t nMods)
+{
   // copy from digiTes
   // CAEN_DGTZ_ErrorCode err;
   int err{0};
@@ -362,10 +373,10 @@ void TPHA::StartSyncMode(uint32_t nMods) {
   err |= CAEN_DGTZ_ReadRegister(fHandler, CAEN_DGTZ_ACQ_CONTROL_ADD, &d32);
   err |= CAEN_DGTZ_WriteRegister(
       fHandler, CAEN_DGTZ_ACQ_CONTROL_ADD,
-      (d32 & 0xFFFFFFF0) | RUN_START_ON_TRGIN_RISING_EDGE); // Arm acquisition
-                                                            // (Run will start
-                                                            // with 1st
-                                                            // trigger)
+      (d32 & 0xFFFFFFF0) | RUN_START_ON_TRGIN_RISING_EDGE);  // Arm acquisition
+                                                             // (Run will start
+                                                             // with 1st
+                                                             // trigger)
   // Run Delay to deskew the start of acquisition
   if (fModNumber == 0)
     err |= CAEN_DGTZ_WriteRegister(fHandler, 0x8170, (nMods - 1) * 3 + 1);
