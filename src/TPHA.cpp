@@ -140,8 +140,9 @@ void TPHA::ReadEvents()
         tdc += (timeMask + 1);
         fTimeOffset[iCh] += (timeMask + 1);
       }
-      if (fTSample > 0) tdc *= fTSample;
       fPreviousTime[iCh] = tdc;
+
+      if (fTSample > 0) tdc *= fTSample;
       fTime[iCh] = tdc;
 
       constexpr auto timeSize = sizeof(fTime[0]);
