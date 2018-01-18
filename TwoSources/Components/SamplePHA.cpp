@@ -265,8 +265,9 @@ int SamplePHA::daq_run()
     // fDigitizer->SendSWTrigger();
     for (auto &&digi : fDigitizerVec) {
       digi->ReadEvents();
-      auto dataArray = digi->GetDataArray();
       const int nHit = digi->GetNEvents();
+      if (nHit == 0) continue;
+      auto dataArray = digi->GetDataArray();
       if (m_debug && nHit > 0) std::cout << nHit << std::endl;
 
       for (unsigned int iHit = 0, iData = 0; iHit < nHit; iHit++) {

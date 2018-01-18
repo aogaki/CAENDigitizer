@@ -126,18 +126,11 @@ void TPSD::ReadEvents()
                                          fpPSDWaveform);
       PrintError(err, "DecodeDPPWaveforms");
 
-      // fTime[iCh] =
-      //     (fppPSDEvents[iCh][iEve].TimeTag + fTimeOffset[iCh]) * fTSample;
-      // if (fTime[iCh] < fPreviousTime[iCh]) {
-      //   constexpr uint32_t maxTime = 0xFFFFFFFF / 2;  // Check manual
-      //   fTime[iCh] += maxTime * fTSample;
-      //   fTimeOffset[iCh] += maxTime;
-      // }
-      // fPreviousTime[iCh] = fTime[iCh];
-
-      fTime[iCh] =
+      auto tdc =
           fppPSDEvents[iCh][iEve].TimeTag +
           ((uint64_t)((fppPSDEvents[iCh][iEve].Extras >> 16) & 0xFFFF) << 31);
+      if (fTSample > 0) tdc *= fTSample;
+      fTime[iCh] = tdc;
 
       auto index = fNEvents * ONE_HIT_SIZE;
       fDataArray[index++] = fModNumber;  // fModNumber is needed.
