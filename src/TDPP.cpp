@@ -1,13 +1,11 @@
+#include <iostream>
 #include <math.h>
 #include <string.h>
-#include <iostream>
 
 #include "TDPP.hpp"
 #include "TStdData.hpp"
 
-template <class T>
-void DelPointer(T *&pointer)
-{
+template <class T> void DelPointer(T *&pointer) {
   delete pointer;
   pointer = nullptr;
 }
@@ -15,8 +13,7 @@ void DelPointer(T *&pointer)
 TDPP::TDPP() : TDigitizer() { SetParameters(); }
 
 TDPP::TDPP(CAEN_DGTZ_ConnectionType type, int link, int node, uint32_t VMEadd)
-    : TDPP()
-{
+    : TDPP() {
   Open(type, link, node, VMEadd);
   Reset();
   GetBoardInfo();
@@ -24,15 +21,13 @@ TDPP::TDPP(CAEN_DGTZ_ConnectionType type, int link, int node, uint32_t VMEadd)
   fDataArray = new unsigned char[fBLTEvents * ONE_HIT_SIZE * fNChs];
 }
 
-TDPP::~TDPP()
-{
+TDPP::~TDPP() {
   Reset();
   FreeMemory();
   Close();
 }
 
-void TDPP::Initialize()
-{
+void TDPP::Initialize() {
   CAEN_DGTZ_ErrorCode err;
 
   Reset();
@@ -77,13 +72,11 @@ void TDPP::Initialize()
 
 void TDPP::ReadEvents() {}
 
-void TDPP::SetParameters()
-{
-  fBLTEvents = 1023;  // It is max, why not 1024?
+void TDPP::SetParameters() {
+  fBLTEvents = 1023; // It is max, why not 1024?
 }
 
-void TDPP::AcquisitionConfig()
-{
+void TDPP::AcquisitionConfig() {
   CAEN_DGTZ_ErrorCode err;
 
   // Eanble all channels
@@ -106,8 +99,7 @@ void TDPP::AcquisitionConfig()
   PrintError(err, "SetDPPAcquisitionMode");
 }
 
-void TDPP::TriggerConfig()
-{
+void TDPP::TriggerConfig() {
   CAEN_DGTZ_ErrorCode err;
 
   // Set the triggermode
@@ -139,8 +131,7 @@ void TDPP::TriggerConfig()
   }
 }
 
-void TDPP::AllocateMemory()
-{
+void TDPP::AllocateMemory() {
   CAEN_DGTZ_ErrorCode err;
   uint32_t size;
 
@@ -148,16 +139,14 @@ void TDPP::AllocateMemory()
   PrintError(err, "MallocReadoutBuffer");
 }
 
-void TDPP::FreeMemory()
-{
+void TDPP::FreeMemory() {
   CAEN_DGTZ_ErrorCode err;
   err = CAEN_DGTZ_FreeReadoutBuffer(&fpReadoutBuffer);
   PrintError(err, "FreeReadoutBuffer");
   // DelPointer(fpReadoutBuffer);
 }
 
-CAEN_DGTZ_ErrorCode TDPP::StartAcquisition()
-{
+CAEN_DGTZ_ErrorCode TDPP::StartAcquisition() {
   CAEN_DGTZ_ErrorCode err;
   err = CAEN_DGTZ_SWStartAcquisition(fHandler);
   PrintError(err, "StartAcquisition");
@@ -165,8 +154,7 @@ CAEN_DGTZ_ErrorCode TDPP::StartAcquisition()
   return err;
 }
 
-void TDPP::StopAcquisition()
-{
+void TDPP::StopAcquisition() {
   CAEN_DGTZ_ErrorCode err;
   err = CAEN_DGTZ_SWStopAcquisition(fHandler);
   PrintError(err, "StopAcquisition");
@@ -175,8 +163,7 @@ void TDPP::StopAcquisition()
   // PrintError(err, "FreeEvent");
 }
 
-void TDPP::SetMaster()
-{  // Synchronization Mode
+void TDPP::SetMaster() { // Synchronization Mode
   CAEN_DGTZ_ErrorCode err;
   err = CAEN_DGTZ_SetRunSynchronizationMode(
       fHandler, CAEN_DGTZ_RUN_SYNC_TrgOutTrgInDaisyChain);
@@ -191,8 +178,7 @@ void TDPP::SetMaster()
   PrintError(err, "SetChannelSelfTrigger");
 }
 
-void TDPP::SetSlave()
-{
+void TDPP::SetSlave() {
   CAEN_DGTZ_ErrorCode err;
   err = CAEN_DGTZ_SetRunSynchronizationMode(
       fHandler, CAEN_DGTZ_RUN_SYNC_TrgOutTrgInDaisyChain);
@@ -211,8 +197,7 @@ void TDPP::SetSlave()
   PrintError(err, "SetExtTriggerInputMode");
 }
 
-void TDPP::StartSyncMode(uint32_t nMods)
-{
+void TDPP::StartSyncMode(uint32_t nMods) {
   // copy from digiTes
   // CAEN_DGTZ_ErrorCode err;
   int err{0};
@@ -221,10 +206,10 @@ void TDPP::StartSyncMode(uint32_t nMods)
   err |= CAEN_DGTZ_ReadRegister(fHandler, CAEN_DGTZ_ACQ_CONTROL_ADD, &d32);
   err |= CAEN_DGTZ_WriteRegister(
       fHandler, CAEN_DGTZ_ACQ_CONTROL_ADD,
-      (d32 & 0xFFFFFFF0) | RUN_START_ON_TRGIN_RISING_EDGE);  // Arm acquisition
-                                                             // (Run will start
-                                                             // with 1st
-                                                             // trigger)
+      (d32 & 0xFFFFFFF0) | RUN_START_ON_TRGIN_RISING_EDGE); // Arm acquisition
+                                                            // (Run will start
+                                                            // with 1st
+                                                            // trigger)
   // Run Delay to deskew the start of acquisition
   if (fModNumber == 0)
     err |= CAEN_DGTZ_WriteRegister(fHandler, 0x8170, (nMods - 1) * 3 + 1);

@@ -29,3 +29,6 @@ target_link_libraries(dpp ${ROOT_LIBRARIES} CAENDigitizer)
 
 add_executable(PHA PHA.cpp ${sources} ${headers})
 target_link_libraries(PHA ${ROOT_LIBRARIES} CAENDigitizer)
+
+add_executable(sync sync.cpp ${sources} ${headers})
+target_link_libraries(sync ${ROOT_LIBRARIES} CAENDigitizer)

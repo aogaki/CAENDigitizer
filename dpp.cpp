@@ -1,6 +1,6 @@
 #include <fcntl.h>
-#include <termios.h>
 #include <iostream>
+#include <termios.h>
 
 #include <TApplication.h>
 #include <TCanvas.h>
@@ -10,8 +10,7 @@
 #include "TPSD.hpp"
 #include "TWaveRecord.hpp"
 
-int kbhit(void)
-{
+int kbhit(void) {
   struct termios oldt, newt;
   int ch;
   int oldf;
@@ -36,15 +35,12 @@ int kbhit(void)
   return 0;
 }
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
   TApplication app("testApp", &argc, argv);
 
   int link = 0;
-  auto digi = new TPSD(CAEN_DGTZ_OpticalLink, link);
-
+  auto digi = new TPSD(CAEN_DGTZ_OpticalLink, link, 0);
   digi->Initialize();
-
   digi->StartAcquisition();
 
   TH1D *hisCharge = new TH1D("hisCharge", "test", 20000, 0, 20000);
@@ -80,6 +76,7 @@ int main(int argc, char **argv)
       memcpy(&data.TimeStamp, &dataArray[index + offset],
              sizeof(data.TimeStamp));
       offset += sizeof(data.TimeStamp);
+      std::cout << data.TimeStamp << std::endl;
 
       memcpy(&data.ADC, &dataArray[index + offset], sizeof(data.ADC));
       offset += sizeof(data.ADC);
@@ -91,7 +88,7 @@ int main(int argc, char **argv)
           memcpy(&pulse, &dataArray[index + offset], sizeof(pulse));
           offset += sizeof(pulse);
 
-          grWave->SetPoint(iSample, iSample * 2, pulse);  // one sample 2 ns
+          grWave->SetPoint(iSample, iSample * 2, pulse); // one sample 2 ns
         }
       }
     }
@@ -104,7 +101,8 @@ int main(int argc, char **argv)
     hisCharge->Draw();
     canvas->Update();
 
-    if (kbhit()) break;
+    if (kbhit())
+      break;
 
     usleep(10000);
   }
