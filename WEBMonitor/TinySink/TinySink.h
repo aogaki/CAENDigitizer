@@ -65,7 +65,7 @@ class TinySink : public DAQMW::DaqComponentBase
 
   TCanvas *m_canvas;
   TH1F *m_hist;
-  constexpr static Int_t kNrHists{16 * 36 * 2};  // Use a number multiplied by 8
+  constexpr static Int_t kNrHists{2400};  // Use a number multiplied by 8
   TH1D *fHisTest[kNrHists];
   int m_bin;
   double m_max;

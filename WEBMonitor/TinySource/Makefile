@@ -7,6 +7,7 @@ SRCS += $(COMP_NAME)Comp.cpp
 
 LDFLAGS  += -L/usr/lib/daqmw -L/usr/lib64/daqmw
 LDLIBS += -lSock
+CPPFLAGS += -I$(shell root-config --incdir) -I../../include -std=c++11
 
 # sample install target
 #
