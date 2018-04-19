@@ -9,6 +9,7 @@
 
 #include <arpa/inet.h>
 
+#include <TString.h>
 #include <TSystem.h>
 
 #include "TinySink.h"
@@ -61,6 +62,7 @@ TinySink::TinySink(RTC::Manager *manager)
       m_min(0.),
       m_monitor_update_rate(30),
       m_event_byte_size(0),
+      fServ(nullptr),
 
       m_debug(false)
 {
@@ -122,13 +124,15 @@ int TinySink::daq_configure()
   DelPointer(m_hist);
   m_hist = new TH1F("m_hist", "test", m_bin, m_min, m_max);
 
+  DelPointer(fServ);
   fServ = new THttpServer("http:8080?monitoring=5000;rw;noglobal");
   fServ->SetDefaultPage("index.html");
   fServ->Register("/", m_hist);
 
   for (auto i = 0; i < kNrHists; i++) {
+    DelPointer(fHisTest[i]);
     fHisTest[i] = new TH1D(Form("HisTest%03d", i), "test", m_bin, m_min, m_max);
-    fServ->Register("/hists", fHisTest[i]);
+    fServ->Register(Form("/hists%02d", i / 10), fHisTest[i]);
   }
 
   return 0;
@@ -156,6 +160,9 @@ int TinySink::daq_unconfigure()
 
   DelPointer(m_canvas);
   DelPointer(m_hist);
+  DelPointer(fServ);
+
+  for (auto i = 0; i < kNrHists; i++) DelPointer(fHisTest[i]);
 
   return 0;
 }
