@@ -17,7 +17,7 @@ That,s all
 
 For Ubuntu 16.04  
 Install omniORB  
-**sudo apt install omni omni-***  
+**sudo apt install omniorb omniorb-***  
   
 Install OpenRTM-aist  
 Download a script file from http://svn.openrtm.org/OpenRTM-aist/tags/RELEASE_1_1_1/OpenRTM-aist/build/pkg_install_ubuntu.sh  
