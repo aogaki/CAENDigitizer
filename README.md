@@ -34,6 +34,9 @@ Install boost
 Install swig  
 **apt install swig**  
   
+Install UUID  
+**apt install uuid-dev**  
+  
 Install DAQ-middleware  
 Download file from http://daqmw.kek.jp/src/  
 Now (1 / 18 / 2018), the last version is http://daqmw.kek.jp/src/DAQ-Middleware-1.4.2.tar.gz  
