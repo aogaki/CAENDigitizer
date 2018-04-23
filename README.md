@@ -17,7 +17,7 @@ That,s all
 
 For Ubuntu 16.04  
 Install omniORB  
-**sudo apt install omniorb omniorb-***  
+**sudo apt install omniorb omniidl omniorb-***  
   
 Install OpenRTM-aist  
 Now there WEB page is beeing moved and modified.  Check http://openrtm.org/
