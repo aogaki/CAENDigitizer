@@ -20,8 +20,7 @@ Install omniORB
 **sudo apt install omniorb omniorb-***  
   
 Install OpenRTM-aist  
-Download a script file from http://svn.openrtm.org/OpenRTM-aist/tags/RELEASE_1_1_1/OpenRTM-aist/build/pkg_install_ubuntu.sh  
-**sh pkg_install_ubuntu.sh** as root  
+Now there WEB page is beeing moved and modified.  Check http://openrtm.org/
   
 Install xerces-c  
 **sudo apt install libxerces-c***  
