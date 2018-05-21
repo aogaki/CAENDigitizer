@@ -41,8 +41,8 @@ int main(int argc, char **argv)
   TApplication app("testApp", &argc, argv);
 
   int link = 0;
-  // auto digi = new TPHA(CAEN_DGTZ_USB, link);
-  auto digi = new TPHA(CAEN_DGTZ_OpticalLink, link);
+  auto digi = new TPHA(CAEN_DGTZ_USB, link);
+  // auto digi = new TPHA(CAEN_DGTZ_OpticalLink, link);
 
   digi->Initialize();
 
@@ -61,7 +61,7 @@ int main(int argc, char **argv)
     //   // if (i > 10) break;
     std::cout << i << std::endl;
 
-    for (int j = 0; j < 10; j++) digi->SendSWTrigger();
+    // for (int j = 0; j < 10; j++) digi->SendSWTrigger();
     digi->ReadEvents();
 
     auto dataArray = digi->GetDataArray();

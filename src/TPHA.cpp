@@ -82,7 +82,7 @@ void TPHA::Initialize()
     // Set a DC offset to the input signal to adapt it to digitizer's dynamic
     // range
     // err = CAEN_DGTZ_SetChannelDCOffset(fHandler, i, (1 << fNBits));
-    err = CAEN_DGTZ_SetChannelDCOffset(fHandler, i, 50000);  // sample
+    err = CAEN_DGTZ_SetChannelDCOffset(fHandler, i, 150000);  // sample
 
     // Set the Pre-Trigger size (in samples)
     err = CAEN_DGTZ_SetDPPPreTriggerSize(fHandler, i, 200);
@@ -90,7 +90,7 @@ void TPHA::Initialize()
     // Set the polarity for the given channel (CAEN_DGTZ_PulsePolarityPositive
     // or CAEN_DGTZ_PulsePolarityNegative)
     err = CAEN_DGTZ_SetChannelPulsePolarity(fHandler, i,
-                                            CAEN_DGTZ_PulsePolarityNegative);
+                                            CAEN_DGTZ_PulsePolarityPositive);
   }
 
   AllocateMemory();
@@ -170,8 +170,8 @@ void TPHA::SetParameters()
   // fTriggerMode = CAEN_DGTZ_TRGMODE_ACQ_ONLY;
   fTriggerMode = CAEN_DGTZ_TRGMODE_ACQ_AND_EXTOUT;
   fPostTriggerSize = 80;
-  // fBLTEvents = 1023;  // It is max, why not 1024?
-  fBLTEvents = 4096;  // It is max, why not 1024?
+  fBLTEvents = 1023;  // It is max, why not 1024?
+  // fBLTEvents = 4096;  // It is max, why not 1024?
 
   SetPHAPar();
 }
@@ -264,8 +264,9 @@ void TPHA::TriggerConfig()
   // PrintError(err, "SetPostTriggerSize");
 
   // // Set the triiger polarity
-  // for (uint32_t iCh = 0; iCh < fNChs; iCh++)
-  //   CAEN_DGTZ_SetTriggerPolarity(fHandler, iCh, fPolarity);
+  CAEN_DGTZ_TriggerPolarity_t triggerPol = CAEN_DGTZ_TriggerOnRisingEdge;
+  for (uint32_t iCh = 0; iCh < fNChs; iCh++)
+    CAEN_DGTZ_SetTriggerPolarity(fHandler, iCh, triggerPol);
   //
   // CAEN_DGTZ_TriggerPolarity_t pol;
   // CAEN_DGTZ_GetTriggerPolarity(fHandler, 0, &pol);
