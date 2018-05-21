@@ -35,18 +35,18 @@ Install boost
 **sudo apt install libboost-all\***  
   
 Install swig  
-**apt install swig**  
+**sudo apt install swig**  
   
 Install UUID  
-**apt install uuid-dev**  
+**sudo apt install uuid-dev**  
   
 Install XML utilities  
-**apt install libxml2-utils**  
+**sudo apt install libxml2-utils**  
   
 Install DAQ-middleware  
 Download file from http://daqmw.kek.jp/src/  
 Now (1 / 18 / 2018), the last version is http://daqmw.kek.jp/src/DAQ-Middleware-1.4.2.tar.gz  
-I found some problems with gcc version 7.  It comes from conflicting the boost::function and gcc.  The solution is simple.  Check the some variables and indicate the name space.  
+I found some problems with gcc version 7.  It comes from conflicting the boost::function and gcc.  The solution is simple.  Check the some variables and indicate the name space.  For example, in the file src/lib/json_spirit_v2.06/json_spirit/json_spirit_reader.cpp, replace "typedef function" with "typedef boost::function".  Need patch?  DIY!    
   
 Now you can use DAQ system without networking.  
 Let's go to the network configuration.  
