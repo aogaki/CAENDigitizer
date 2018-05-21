@@ -13,35 +13,20 @@ Download rpm files from http://daqmw.kek.jp/rpm/
 or  
 Download a script file from http://daqmw.kek.jp/src/daqmw-rpm  
 **sh daqmw-rpm install** as root  
-That,s all  
+That's all  
 
-For Ubuntu 16.04  
+For Ubuntu 16.04 (and 18.04)  
 Install omniORB  
 **sudo apt install omniorb omniidl libomniorb4-dev omniorb-\***  
   
 and stop nameserver service  
 **sudo systemctl disable omniorb4-nameserver.service**
   
+Install some packages for OpenRTM-aist and DAQ-Middleware  
+**sudo apt install libxerces-c\* libxalan-c\* libboost-all\* swig uuid-dev libxml2-utils**  
+
 Install OpenRTM-aist  
 Now there WEB page is beeing moved and modified.  Check http://openrtm.org/
-  
-Install xerces-c  
-**sudo apt install libxerces-c\***  
-  
-Install xalan-c  
-**sudo apt install libxalan-c\***  
-  
-Install boost  
-**sudo apt install libboost-all\***  
-  
-Install swig  
-**sudo apt install swig**  
-  
-Install UUID  
-**sudo apt install uuid-dev**  
-  
-Install XML utilities  
-**sudo apt install libxml2-utils**  
   
 Install DAQ-middleware  
 Download file from http://daqmw.kek.jp/src/  
