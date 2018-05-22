@@ -82,10 +82,10 @@ void TPHA::Initialize()
     // Set a DC offset to the input signal to adapt it to digitizer's dynamic
     // range
     // err = CAEN_DGTZ_SetChannelDCOffset(fHandler, i, (1 << fNBits));
-    err = CAEN_DGTZ_SetChannelDCOffset(fHandler, i, 150000);  // sample
+    err = CAEN_DGTZ_SetChannelDCOffset(fHandler, i, 60000);  // sample
 
     // Set the Pre-Trigger size (in samples)
-    err = CAEN_DGTZ_SetDPPPreTriggerSize(fHandler, i, 200);
+    err = CAEN_DGTZ_SetDPPPreTriggerSize(fHandler, i, 100);
 
     // Set the polarity for the given channel (CAEN_DGTZ_PulsePolarityPositive
     // or CAEN_DGTZ_PulsePolarityNegative)
@@ -180,7 +180,7 @@ void TPHA::SetPHAPar()
 {
   // Copy from sample
   for (uint32_t iCh = 0; iCh < fNChs; iCh++) {
-    fParPHA.thr[iCh] = 100;     // Trigger Threshold
+    fParPHA.thr[iCh] = 200;     // Trigger Threshold
     fParPHA.k[iCh] = 30;        // Trapezoid Rise Time (N*10ns)
     fParPHA.m[iCh] = 100;       // Trapezoid Flat Top  (N*10ns)
     fParPHA.M[iCh] = 50;        // Decay Time Constant (N*10ns) HACK-FPEP the
@@ -234,10 +234,10 @@ void TPHA::TriggerConfig()
 
   // Set the trigger threshold
   // The unit of its are V
-  int32_t th = fabs((1 << fNBits) * (fVth / fVpp));
-  for (uint32_t iCh = 0; iCh < fNChs; iCh++) {
-    fParPHA.thr[iCh] = th;
-  }
+  // int32_t th = fabs((1 << fNBits) * (fVth / fVpp));
+  // for (uint32_t iCh = 0; iCh < fNChs; iCh++) {
+  //   fParPHA.thr[iCh] = th;
+  // }
 
   // Set the triggermode
   uint32_t mask = ((1 << fNChs) - 1);
