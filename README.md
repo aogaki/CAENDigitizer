@@ -13,40 +13,25 @@ Download rpm files from http://daqmw.kek.jp/rpm/
 or  
 Download a script file from http://daqmw.kek.jp/src/daqmw-rpm  
 **sh daqmw-rpm install** as root  
-That,s all  
+That's all  
 
-For Ubuntu 16.04  
+For Ubuntu 16.04 (and 18.04)  
 Install omniORB  
 **sudo apt install omniorb omniidl libomniorb4-dev omniorb-\***  
   
 and stop nameserver service  
 **sudo systemctl disable omniorb4-nameserver.service**
   
+Install some packages for OpenRTM-aist and DAQ-Middleware  
+**sudo apt install libxerces-c\* libxalan-c\* libboost-all\* swig uuid-dev libxml2-utils**  
+
 Install OpenRTM-aist  
 Now there WEB page is beeing moved and modified.  Check http://openrtm.org/
-  
-Install xerces-c  
-**sudo apt install libxerces-c\***  
-  
-Install xalan-c  
-**sudo apt install libxalan-c\***  
-  
-Install boost  
-**sudo apt install libboost-all\***  
-  
-Install swig  
-**apt install swig**  
-  
-Install UUID  
-**apt install uuid-dev**  
-  
-Install XML utilities  
-**apt install libxml2-utils**  
   
 Install DAQ-middleware  
 Download file from http://daqmw.kek.jp/src/  
 Now (1 / 18 / 2018), the last version is http://daqmw.kek.jp/src/DAQ-Middleware-1.4.2.tar.gz  
-I found some problems with gcc version 7.  It comes from conflicting the boost::function and gcc.  The solution is simple.  Check the some variables and indicate the name space.  
+I found some problems with gcc version 7.  It comes from conflicting the boost::function and std::function(C++11).  The solution is simple.  In the file src/lib/json_spirit_v2.06/json_spirit/json_spirit_reader.cpp, replace "typedef function" with "typedef boost::function".  Need patch?  DIY!    
   
 Now you can use DAQ system without networking.  
 Let's go to the network configuration.  
