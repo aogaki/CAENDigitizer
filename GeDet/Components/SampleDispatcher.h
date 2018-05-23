@@ -59,9 +59,6 @@ class SampleDispatcher : public DAQMW::DaqComponentBase
   unsigned char m_recv_data[BUFFER_SIZE];
   unsigned int m_recv_byte_size;
 
-  unsigned char fDataBuffer[BUFFER_SIZE];
-  unsigned int fDataSize;
-
   BufferStatus m_out_status1;
   BufferStatus m_out_status2;
   BufferStatus m_in_status;

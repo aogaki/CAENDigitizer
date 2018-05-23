@@ -2,9 +2,7 @@ COMP_NAME = SampleReader
 
 all: $(COMP_NAME)Comp
 
-SRCS += ../../src/TDPP.cpp
-SRCS += ../../src/TPSD.cpp
-SRCS += ../../src/TPHA.cpp
+SRCS += ../../src/TWaveRecord.cpp
 SRCS += ../../src/TDigitizer.cpp
 SRCS += $(COMP_NAME).cpp
 SRCS += $(COMP_NAME)Comp.cpp

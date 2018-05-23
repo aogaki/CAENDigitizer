@@ -119,16 +119,12 @@ int SampleLogger::daq_start()
 
   m_in_status = BUF_SUCCESS;
 
-  // fFout.open("/Data/DAQ/test.dat", std::ios::out | std::ios::binary);
-  // fFout.open("/tmp/daqmw/test.dat", std::ios::out | std::ios::binary);
-
   fFile = new TFile("/Data/DAQ/test.root", "RECREATE");
-  // fFile = new TFile("/tmp/daqmw/test.root", "RECREATE");
   fTree = new TTree("StdFirmwareData", "test data");
   fTree->Branch("ModNumber", &m_sampleData.ModNumber, "ModNumber/b");
   fTree->Branch("ChNumber", &m_sampleData.ChNumber, "ChNumber/b");
   fTree->Branch("TimeStamp", &m_sampleData.TimeStamp, "TimeStamp/l");
-  fTree->Branch("ADC", &m_sampleData.ADC, "ADC/S");
+  fTree->Branch("ADC", &m_sampleData.ADC, "ADC/I");
   fTree->Branch("NSamples", (int *)&kNSamples, "NSamples/I");
   fTree->Branch("Waveform", m_sampleData.Waveform, "Waveform[NSamples]/s");
 
@@ -139,8 +135,6 @@ int SampleLogger::daq_stop()
 {
   std::cerr << "*** SampleLogger::stop" << std::endl;
   reset_InPort();
-
-  // fFout.close();
 
   fTree->Write();
   fFile->Close();
@@ -205,38 +199,31 @@ int SampleLogger::daq_run()
     std::cerr << "*** SampleLogger::run" << std::endl;
   }
 
-  while (1) {
-    unsigned int recv_byte_size = read_InPort();
-    if (recv_byte_size == 0) {  // Timeout
-      return 0;
-    }
-
-    // check_header_footer(m_in_data, recv_byte_size);  // check header and
-    // footer unsigned int event_byte_size = get_event_size(recv_byte_size);
-    m_event_byte_size = get_event_size(recv_byte_size);
-
-    /////////////  Write component main logic here. /////////////
-    // online_analyze();
-    /////////////////////////////////////////////////////////////
-
-    memcpy(&m_recv_data[0], &m_in_data.data[HEADER_BYTE_SIZE],
-           m_event_byte_size);
-
-    fill_data(&m_recv_data[0], m_event_byte_size);
-
-    inc_sequence_num();                      // increase sequence num.
-    inc_total_data_size(m_event_byte_size);  // increase total data byte size
-
-    // Taking data till the one hit is finished
-    if (recv_byte_size < kMaxPacketSize) break;
+  unsigned int recv_byte_size = read_InPort();
+  if (recv_byte_size == 0) {  // Timeout
+    return 0;
   }
+
+  check_header_footer(m_in_data, recv_byte_size);  // check header and footer
+  // unsigned int event_byte_size = get_event_size(recv_byte_size);
+  m_event_byte_size = get_event_size(recv_byte_size);
+
+  /////////////  Write component main logic here. /////////////
+  // online_analyze();
+  /////////////////////////////////////////////////////////////
+
+  memcpy(&m_recv_data[0], &m_in_data.data[HEADER_BYTE_SIZE], m_event_byte_size);
+
+  fill_data(&m_recv_data[0], m_event_byte_size);
+
+  inc_sequence_num();                      // increase sequence num.
+  inc_total_data_size(m_event_byte_size);  // increase total data byte size
+
   return 0;
 }
 
 int SampleLogger::fill_data(const unsigned char *mydata, const int size)
 {
-  fFout.write((const char *)mydata, size);
-
   for (int i = 0; i < size / int(ONE_HIT_SIZE); i++) {
     decode_data(mydata);
     fTree->Fill();
@@ -252,25 +239,19 @@ int SampleLogger::decode_data(const unsigned char *mydata)
   m_sampleData.ModNumber = mydata[index++];
   m_sampleData.ChNumber = mydata[index++];
 
-  unsigned long timeStamp = *(unsigned long *)&mydata[index];
+  unsigned long timeStamp = *(unsigned int *)&mydata[index];
   m_sampleData.TimeStamp = timeStamp;
-  constexpr auto timeSize = sizeof(timeStamp);
-  index += timeSize;
+  index += sizeof(timeStamp);
 
-  unsigned short adc = *(unsigned short *)&mydata[index];
+  unsigned int adc = *(unsigned int *)&mydata[index];
   m_sampleData.ADC = adc;
-  constexpr auto adcSize = sizeof(adc);
-  index += adcSize;
+  index += sizeof(adc);
 
-  constexpr auto pulseSize = sizeof(unsigned short) * kNSamples;
-  memcpy(&(m_sampleData.Waveform[0]), &mydata[index], pulseSize);
-
-  // for (int i = 0; i < kNSamples; i++) {
-  //   unsigned short pulse = *(unsigned short *)&mydata[index];
-  //   m_sampleData.Waveform[i] = pulse;
-  //   constexpr auto pulseSize = sizeof(pulse);
-  //   index += pulseSize;
-  // }
+  for (int i = 0; i < kNSamples; i++) {
+    unsigned short pulse = *(unsigned short *)&mydata[index];
+    m_sampleData.Waveform[i] = pulse;
+    index += sizeof(pulse);
+  }
 }
 
 extern "C" {

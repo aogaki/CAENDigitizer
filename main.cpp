@@ -39,7 +39,7 @@ int main(int argc, char **argv)
 {
   TApplication app("testApp", &argc, argv);
 
-  int link = 0;
+  int link = 1;
   auto digi = new TWaveRecord(CAEN_DGTZ_USB, link);
 
   digi->Initialize();

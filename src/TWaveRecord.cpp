@@ -53,7 +53,7 @@ void TWaveRecord::SetParameters()
   fRecordLength = kNSamples;
   fBLTEvents = 512;
   fVpp = 2.;
-  fVth = -0.03;
+  fVth = -0.5;
   // fVth = -0.001;
   fPolarity = CAEN_DGTZ_TriggerOnFallingEdge;
   // fTriggerMode = CAEN_DGTZ_TRGMODE_ACQ_AND_EXTOUT;

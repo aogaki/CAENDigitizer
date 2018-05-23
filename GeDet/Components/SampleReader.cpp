@@ -39,13 +39,6 @@ static const char *samplereader_spec[] = {"implementation_id",
                                           "compile",
                                           ""};
 
-template <class T>
-void DelPointer(T *&pointer)
-{
-  delete pointer;
-  pointer = nullptr;
-}
-
 SampleReader::SampleReader(RTC::Manager *manager)
     : DAQMW::DaqComponentBase(manager),
       m_OutPort("samplereader_out", m_out_data),
@@ -53,7 +46,7 @@ SampleReader::SampleReader(RTC::Manager *manager)
       m_recv_byte_size(0),
       m_out_status(BUF_SUCCESS),
       m_debug(true),
-      fSyncMode(false)
+      fDigitizer(nullptr)
 {
   // Registration: InPort/OutPort/Service
 
@@ -65,10 +58,7 @@ SampleReader::SampleReader(RTC::Manager *manager)
   set_comp_name("SAMPLEREADER");
 }
 
-SampleReader::~SampleReader()
-{
-  for (auto &&pointer : fDigitizerVec) DelPointer(pointer);
-}
+SampleReader::~SampleReader() { delete fDigitizer; }
 
 RTC::ReturnCode_t SampleReader::onInitialize()
 {
@@ -96,12 +86,8 @@ int SampleReader::daq_configure()
   paramList = m_daq_service0.getCompParams();
   parse_params(paramList);
 
-  fDigitizerVec.push_back(new TPHA(CAEN_DGTZ_OpticalLink, 0, 0));
-  // fDigitizerVec.push_back(new TPHA(CAEN_DGTZ_OpticalLink, 0, 1));
-  for (unsigned int i = 0; i < fDigitizerVec.size(); i++) {
-    fDigitizerVec[i]->Initialize();
-    fDigitizerVec[i]->SetModNumber(i + 2);
-  }
+  fDigitizer = new TWaveRecord(CAEN_DGTZ_USB, 0);
+  fDigitizer->Initialize();
 
   return 0;
 }
@@ -148,8 +134,7 @@ int SampleReader::daq_unconfigure()
 {
   std::cerr << "*** SampleReader::unconfigure" << std::endl;
 
-  for (auto &&pointer : fDigitizerVec) DelPointer(pointer);
-  fDigitizerVec.clear();
+  delete fDigitizer;
 
   return 0;
 }
@@ -166,19 +151,7 @@ int SampleReader::daq_start()
     fatal_error_report(DATAPATH_DISCONNECTED);
   }
 
-  if (fSyncMode) {
-    // fDigitizerVec[0]->SetMaster();
-    // for (int i = 1; i < fDigitizerVec.size(); i++)
-    // fDigitizerVec[i]->SetSlave();
-    // fDigitizerVec[0]->StartAcquisition();
-    for (auto &&digi : fDigitizerVec) digi->StartSyncMode(fDigitizerVec.size());
-    // fDigitizerVec[0]->StartAcquisition();
-    // for (auto &&digi : fDigitizerVec) digi->StartAcquisition();
-    // fDigitizerVec[0]->SendSWTrigger();
-    for (auto &&digi : fDigitizerVec) digi->SendSWTrigger();
-  } else {
-    for (auto &&digi : fDigitizerVec) digi->StartAcquisition();
-  }
+  fDigitizer->StartAcquisition();
 
   return 0;
 }
@@ -187,10 +160,8 @@ int SampleReader::daq_stop()
 {
   std::cerr << "*** SampleReader::stop" << std::endl;
 
-  for (auto &&digi : fDigitizerVec) {
-    digi->StopAcquisition();
-    digi->ReadEvents();
-  }
+  fDigitizer->StopAcquisition();
+  fDigitizer->ReadEvents();
 
   return 0;
 }
@@ -263,41 +234,41 @@ int SampleReader::daq_run()
     // previous OutPort.write() successfully done
     // Stupid! rewrite it!
     // fDigitizer->SendSWTrigger();
-    for (auto &&digi : fDigitizerVec) {
-      digi->ReadEvents();
-      auto dataArray = digi->GetDataArray();
-      const int nHit = digi->GetNEvents();
-      if (m_debug && nHit > 0) std::cout << nHit << std::endl;
+    fDigitizer->ReadEvents();
+    auto dataArray = fDigitizer->GetDataArray();
+    const int nHit = fDigitizer->GetNEvents();
+    if (m_debug && nHit > 0) std::cout << nHit << std::endl;
 
-      for (unsigned int iHit = 0, iData = 0; iHit < nHit; iHit++) {
-        auto index = iHit * ONE_HIT_SIZE;
-        memcpy(&m_data[iData * ONE_HIT_SIZE], &dataArray[index], ONE_HIT_SIZE);
-        iData++;
-        m_recv_byte_size += ONE_HIT_SIZE;
+    for (unsigned int iHit = 0, iData = 0; iHit < nHit; iHit++) {
+      auto index = iHit * ONE_HIT_SIZE;
+      memcpy(&m_data[iData * ONE_HIT_SIZE], &dataArray[index], ONE_HIT_SIZE);
+      iData++;
+      m_recv_byte_size += ONE_HIT_SIZE;
 
-        if (m_recv_byte_size > kMaxPacketSize) {
-          set_data(m_recv_byte_size);  // set data to OutPort Buffer
-          if (write_OutPort() < 0) {
-            std::cout << "time out" << std::endl;
-            ;                    // Timeout. do nothing.
-          } else {               // OutPort write successfully done
-            inc_sequence_num();  // increase sequence num.
-            inc_total_data_size(
-                m_recv_byte_size);  // increase total data byte size
-            m_recv_byte_size = 0;
-            iData = 0;
-          }
-        }
-      }
-      if (nHit > 0 && m_recv_byte_size > 0) {
-        set_data(m_recv_byte_size);
+      constexpr int sizeTh = 2000000 - ONE_HIT_SIZE;  // 2M is limit
+      // constexpr int sizeTh = 200000000 - ONE_HIT_SIZE;  // 2M is limit
+      if (m_recv_byte_size > sizeTh) {
+        set_data(m_recv_byte_size);  // set data to OutPort Buffer
         if (write_OutPort() < 0) {
+          std::cout << "time out" << std::endl;
           ;                    // Timeout. do nothing.
         } else {               // OutPort write successfully done
           inc_sequence_num();  // increase sequence num.
-          inc_total_data_size(m_recv_byte_size);
+          inc_total_data_size(
+              m_recv_byte_size);  // increase total data byte size
           m_recv_byte_size = 0;
+          iData = 0;
         }
+      }
+    }
+    if (nHit > 0 && m_recv_byte_size > 0) {
+      set_data(m_recv_byte_size);
+      if (write_OutPort() < 0) {
+        ;                    // Timeout. do nothing.
+      } else {               // OutPort write successfully done
+        inc_sequence_num();  // increase sequence num.
+        inc_total_data_size(m_recv_byte_size);
+        m_recv_byte_size = 0;
       }
     }
   }

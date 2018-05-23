@@ -6,14 +6,12 @@
 #
 
 all:
-	make -f Makefile.PHA
 	make -f Makefile.Reader
 	make -f Makefile.Dispatcher
 	make -f Makefile.Logger
 	make -f Makefile.Monitor
 
 clean:
-	make -f Makefile.PHA clean
 	make -f Makefile.Reader clean
 	make -f Makefile.Dispatcher clean
 	make -f Makefile.Logger clean

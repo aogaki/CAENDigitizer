@@ -92,8 +92,10 @@ RTC::ReturnCode_t SampleMonitor::onExecute(RTC::UniqueId ec_id)
 
 int SampleMonitor::daq_dummy()
 {
-  if (fHisCanvas) fHisCanvas->Update();
-  if (fGrCanvas) fGrCanvas->Update();
+  if (fHisCanvas) {
+    fHisCanvas->Update();
+    sleep(1);
+  }
 
   return 0;
 }
@@ -107,18 +109,18 @@ int SampleMonitor::daq_configure()
   parse_params(paramList);
 
   DelPointer(fHisCanvas);
-  fHisCanvas = new TCanvas("HisCanvas", "histogram");
+  fHisCanvas = new TCanvas("HisCanvas", "test");
 
   DelPointer(fHis);
   fHis = new TH1D("hist", "test", 20000, 0., 20000.);
 
   DelPointer(fGrCanvas);
-  fGrCanvas = new TCanvas("GrCanvas", "waveform");
+  fGrCanvas = new TCanvas("GrCanvas", "test");
 
   DelPointer(fGr);
   fGr = new TGraph();
-  fGr->SetMinimum(0);
-  fGr->SetMaximum(20000);
+  fGr->SetMinimum(7000);
+  fGr->SetMaximum(9000);
 
   return 0;
 }
@@ -143,10 +145,10 @@ int SampleMonitor::daq_unconfigure()
 {
   std::cerr << "*** SampleMonitor::unconfigure" << std::endl;
 
-  DelPointer(fHis);
   DelPointer(fHisCanvas);
-  DelPointer(fGr);
+  DelPointer(fHis);
   DelPointer(fGrCanvas);
+  DelPointer(fGr);
 
   return 0;
 }
@@ -234,44 +236,38 @@ int SampleMonitor::daq_run()
     std::cerr << "*** SampleMonitor::run" << std::endl;
   }
 
-  while (1) {
-    unsigned int recv_byte_size = read_InPort();
-    if (recv_byte_size == 0) {  // Timeout
-      return 0;
-    }
-
-    // check_header_footer(m_in_data, recv_byte_size);  // check header and
-    // footer unsigned int event_byte_size = get_event_size(recv_byte_size);
-    m_event_byte_size = get_event_size(recv_byte_size);
-
-    /////////////  Write component main logic here. /////////////
-    // online_analyze();
-    /////////////////////////////////////////////////////////////
-
-    memcpy(&m_recv_data[0], &m_in_data.data[HEADER_BYTE_SIZE],
-           m_event_byte_size);
-
-    fill_data(&m_recv_data[0], m_event_byte_size);
-
-    if (m_monitor_update_rate == 0) m_monitor_update_rate = 1000;
-
-    unsigned long sequence_num = get_sequence_num();
-    if ((sequence_num % m_monitor_update_rate) == 0) {
-      fHisCanvas->cd();
-      fHis->Draw();
-      fHisCanvas->Update();
-
-      fGrCanvas->cd();
-      fGr->Draw();
-      fGrCanvas->Update();
-    }
-
-    inc_sequence_num();                      // increase sequence num.
-    inc_total_data_size(m_event_byte_size);  // increase total data byte size
-
-    // Taking data till the one hit is finished
-    if (recv_byte_size < kMaxPacketSize) break;
+  unsigned int recv_byte_size = read_InPort();
+  if (recv_byte_size == 0) {  // Timeout
+    return 0;
   }
+
+  check_header_footer(m_in_data, recv_byte_size);  // check header and footer
+  // unsigned int event_byte_size = get_event_size(recv_byte_size);
+  m_event_byte_size = get_event_size(recv_byte_size);
+
+  /////////////  Write component main logic here. /////////////
+  // online_analyze();
+  /////////////////////////////////////////////////////////////
+
+  memcpy(&m_recv_data[0], &m_in_data.data[HEADER_BYTE_SIZE], m_event_byte_size);
+
+  fill_data(&m_recv_data[0], m_event_byte_size);
+
+  if (m_monitor_update_rate == 0) m_monitor_update_rate = 1000;
+
+  unsigned long sequence_num = get_sequence_num();
+  if ((sequence_num % m_monitor_update_rate) == 0) {
+    fHisCanvas->cd();
+    fHis->Draw();
+    fHisCanvas->Update();
+
+    fGrCanvas->cd();
+    fGr->Draw();
+    fGrCanvas->Update();
+  }
+
+  inc_sequence_num();                      // increase sequence num.
+  inc_total_data_size(m_event_byte_size);  // increase total data byte size
 
   return 0;
 }
