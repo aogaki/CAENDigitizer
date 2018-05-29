@@ -10,6 +10,8 @@
 #include "SampleData.h"
 #include "SampleReader.h"
 
+#include <TRandom3.h>
+
 using DAQMW::FatalType::DATAPATH_DISCONNECTED;
 using DAQMW::FatalType::OUTPORT_ERROR;
 using DAQMW::FatalType::USER_DEFINED_ERROR1;
@@ -45,8 +47,7 @@ SampleReader::SampleReader(RTC::Manager *manager)
       m_sock(nullptr),
       m_recv_byte_size(0),
       m_out_status(BUF_SUCCESS),
-      m_debug(true),
-      fDigitizer(nullptr)
+      m_debug(true)
 {
   // Registration: InPort/OutPort/Service
 
@@ -56,9 +57,11 @@ SampleReader::SampleReader(RTC::Manager *manager)
   init_command_port();
   init_state_table();
   set_comp_name("SAMPLEREADER");
+
+  fDummyData.reset(new unsigned char[fNHits * ONE_HIT_SIZE]);
 }
 
-SampleReader::~SampleReader() { delete fDigitizer; }
+SampleReader::~SampleReader() {}
 
 RTC::ReturnCode_t SampleReader::onInitialize()
 {
@@ -85,9 +88,6 @@ int SampleReader::daq_configure()
   ::NVList *paramList;
   paramList = m_daq_service0.getCompParams();
   parse_params(paramList);
-
-  fDigitizer = new TWaveRecord(CAEN_DGTZ_USB, 0);
-  fDigitizer->Initialize();
 
   return 0;
 }
@@ -134,8 +134,6 @@ int SampleReader::daq_unconfigure()
 {
   std::cerr << "*** SampleReader::unconfigure" << std::endl;
 
-  delete fDigitizer;
-
   return 0;
 }
 
@@ -151,17 +149,12 @@ int SampleReader::daq_start()
     fatal_error_report(DATAPATH_DISCONNECTED);
   }
 
-  fDigitizer->StartAcquisition();
-
   return 0;
 }
 
 int SampleReader::daq_stop()
 {
   std::cerr << "*** SampleReader::stop" << std::endl;
-
-  fDigitizer->StopAcquisition();
-  fDigitizer->ReadEvents();
 
   return 0;
 }
@@ -234,9 +227,12 @@ int SampleReader::daq_run()
     // previous OutPort.write() successfully done
     // Stupid! rewrite it!
     // fDigitizer->SendSWTrigger();
-    fDigitizer->ReadEvents();
-    auto dataArray = fDigitizer->GetDataArray();
-    const int nHit = fDigitizer->GetNEvents();
+
+    // auto dataArray = fDigitizer->GetDataArray();
+    // const int nHit = fDigitizer->GetNEvents();
+    MakeDummyData();
+    auto dataArray = fDummyData.get();
+    const int nHit = fNHits;
     if (m_debug && nHit > 0) std::cout << nHit << std::endl;
 
     for (unsigned int iHit = 0, iData = 0; iHit < nHit; iHit++) {
@@ -250,7 +246,6 @@ int SampleReader::daq_run()
       if (m_recv_byte_size > sizeTh) {
         set_data(m_recv_byte_size);  // set data to OutPort Buffer
         if (write_OutPort() < 0) {
-          std::cout << "time out" << std::endl;
           ;                    // Timeout. do nothing.
         } else {               // OutPort write successfully done
           inc_sequence_num();  // increase sequence num.
@@ -273,7 +268,38 @@ int SampleReader::daq_run()
     }
   }
 
+  usleep(1000);
+
   return 0;
+}
+
+void SampleReader::MakeDummyData()
+{
+  SampleData data;
+  for (auto i = 0; i < fNHits; i++) {
+    data.ModNumber = 0;
+    data.ChNumber = 0;
+    data.TimeStamp = gRandom->Poisson(1024);
+    data.ADC = gRandom->Poisson(511);
+    for (int j = 0; j < kNSamples; j++)
+      data.Waveform[j] = gRandom->Gaus(8000, 100);
+
+    auto index = i * ONE_HIT_SIZE;
+    fDummyData[index++] = data.ModNumber;
+    fDummyData[index++] = data.ChNumber;
+
+    constexpr auto timeSize = sizeof(data.TimeStamp);
+    memcpy(&fDummyData[index], &data.TimeStamp, timeSize);
+    index += timeSize;
+
+    constexpr auto adcSize = sizeof(data.ADC);
+    memcpy(&fDummyData[index], &data.ADC, adcSize);
+    index += adcSize;
+
+    constexpr auto waveSize = sizeof(data.Waveform[0]) * kNSamples;
+    memcpy(&fDummyData[index], data.Waveform, waveSize);
+    index += waveSize;
+  }
 }
 
 extern "C" {

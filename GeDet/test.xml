@@ -17,7 +17,7 @@
           <hostAddr>127.0.0.1</hostAddr>
           <hostPort>50000</hostPort>
           <instName>SampleReader0.rtc</instName>
-          <execPath>/home/aogaki/DAQ/CAENDigitizer/test1/Components/SampleReaderComp</execPath>
+          <execPath>/home/aogaki/DAQ/CAENDigitizer/GeDet/Components/SampleReaderComp</execPath>
           <confFile>/tmp/daqmw/rtc.conf</confFile>
           <startOrd>4</startOrd>
           <inPorts>
@@ -34,7 +34,7 @@
           <hostAddr>127.0.0.1</hostAddr>
           <hostPort>50000</hostPort>
           <instName>SampleDispatcher0.rtc</instName>
-          <execPath>/home/aogaki/DAQ/CAENDigitizer/test1/Components/SampleDispatcherComp</execPath>
+          <execPath>/home/aogaki/DAQ/CAENDigitizer/GeDet/Components/SampleDispatcherComp</execPath>
           <confFile>/tmp/daqmw/rtc.conf</confFile>
           <startOrd>3</startOrd>
           <inPorts>
@@ -51,11 +51,12 @@
           <hostAddr>127.0.0.1</hostAddr>
           <hostPort>50000</hostPort>
           <instName>SampleMonitor0.rtc</instName>
-          <execPath>/home/aogaki/DAQ/CAENDigitizer/test1/Components/SampleMonitorComp</execPath>
+          <execPath>/home/aogaki/DAQ/CAENDigitizer/GeDet/Components/SampleMonitorComp</execPath>
           <confFile>/tmp/daqmw/rtc.conf</confFile>
           <startOrd>2</startOrd>
           <inPorts>
-            <inPort from="SampleDispatcher0:sampledispatcher_out1">samplemonitor_in</inPort>
+            <inPort from="SampleDispatcher0:sampledispatcher_out1"
+              buffer_length="1024">samplemonitor_in</inPort>
           </inPorts>
           <outPorts>
           </outPorts>
@@ -67,11 +68,12 @@
           <hostAddr>127.0.0.1</hostAddr>
           <hostPort>50000</hostPort>
           <instName>SampleLogger0.rtc</instName>
-          <execPath>/home/aogaki/DAQ/CAENDigitizer/test1/Components/SampleLoggerComp</execPath>
+          <execPath>/home/aogaki/DAQ/CAENDigitizer/GeDet/Components/SampleLoggerComp</execPath>
           <confFile>/tmp/daqmw/rtc.conf</confFile>
           <startOrd>1</startOrd>
           <inPorts>
-            <inPort from="SampleDispatcher0:sampledispatcher_out2">samplelogger_in</inPort>
+            <inPort from="SampleDispatcher0:sampledispatcher_out2"
+              buffer_length="1024">samplelogger_in</inPort>
           </inPorts>
           <outPorts>
           </outPorts>

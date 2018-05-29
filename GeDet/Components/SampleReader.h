@@ -10,10 +10,10 @@
 #ifndef SAMPLEREADER_H
 #define SAMPLEREADER_H
 
+#include <memory>
 #include <vector>
 
 #include "DaqComponentBase.h"
-#include "TWaveRecord.hpp"
 
 #include "SampleData.h"
 
@@ -65,7 +65,9 @@ class SampleReader : public DAQMW::DaqComponentBase
   int m_srcPort;
   std::string m_srcAddr;
 
-  TWaveRecord *fDigitizer;
+  void MakeDummyData();
+  static constexpr int fNHits = 10;
+  std::unique_ptr<unsigned char[]> fDummyData;
 };
 
 extern "C" {

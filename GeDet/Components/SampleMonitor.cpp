@@ -112,7 +112,7 @@ int SampleMonitor::daq_configure()
   fHisCanvas = new TCanvas("HisCanvas", "test");
 
   DelPointer(fHis);
-  fHis = new TH1D("hist", "test", 20000, 0., 20000.);
+  fHis = new TH1D("hist", "test", 1000, 0., 1000.);
 
   DelPointer(fGrCanvas);
   fGrCanvas = new TCanvas("GrCanvas", "test");
