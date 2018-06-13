@@ -1,0 +1,55 @@
+@startuml
+
+actor DAQ
+==Initialize==
+
+DAQ -> Digitizer: Open device (CAEN_DGTZ_OpenDigitizer)
+
+activate Digitizer
+
+DAQ -> Digitizer: ReadBoardInfo (CAEN_DGTZ_GetInfo)
+
+DAQ -> DAQ: Check the BoardInfo
+
+DAQ -> ParameterClass: BoardInfo
+activate ParameterClass
+ParameterClass -> XML: Read parameters
+ParameterClass -> ParameterClass: Generate other parameters
+
+ParameterClass -> DAQ: Parameters
+deactivate ParameterClass
+
+==Config==
+==Board settings==
+DAQ -> Digitizer: Reset (CAEN_DGTZ_Reset)
+DAQ -> Digitizer: Set channel mask (CAEN_DGTZ_SetChannelEnableMask)
+DAQ -> Digitizer: Fun speed (Register only for desktop)
+DAQ -> Digitizer: Set acq mode (CAEN_DGTZ_SetDPPAcquisitionMode)
+DAQ -> Digitizer: Enable extra word (Register)
+DAQ -> Digitizer: Set trgout bit (Register)
+DAQ -> Digitizer: Enable auto-flush (Register)
+DAQ -> Digitizer: Set waveform length (CAEN_DGTZ_SetRecordLength)
+DAQ -> Digitizer: Set NIM or TTL (CAEN_DGTZ_SetIOLevel)
+DAQ -> Digitizer: Some SYNC mode settings (skip its now)
+DAQ -> Digitizer: CAEN_DGTZ_SetDPPEventAggregation
+DAQ -> Digitizer: CAEN_DGTZ_SetMaxNumAggregatesBLT
+
+==Channel settings==
+DAQ -> Digitizer: CAEN_DGTZ_SetChannelDCOffset
+DAQ -> Digitizer: CAEN_DGTZ_SetDPPPreTriggerSize
+DAQ -> Digitizer: Set parameters of PHA (Register)
+'note right: CAEN provides setter function of PHA parameters.  But, it is not enough.  And digiTES uses registers
+DAQ -> Digitizer: Set discr mode settings (Self trigger?)
+DAQ -> DAQ: Check charge sensitivity parameters
+
+DAQ -> Digitizer: Set parameters (Register)
+
+==Board settings again==
+DAQ -> Digitizer: Calibration ADC (Register)
+DAQ -> Digitizer: Set virtual probes (Register)
+
+==End of run==
+DAQ -> Digitizer: Close device
+deactivate Digitizer
+
+@enduml
