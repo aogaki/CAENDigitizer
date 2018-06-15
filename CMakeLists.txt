@@ -19,16 +19,10 @@ file(GLOB sources ${PROJECT_SOURCE_DIR}/src/*.cpp)
 file(GLOB headers ${PROJECT_SOURCE_DIR}/include/*.hpp)
 
 #----------------------------------------------------------------------------
-# Add the executable, and link it to the Geant4 libraries
+# Add the executable, and link it to libraries
 #
 add_executable(digi main.cpp ${sources} ${headers})
 target_link_libraries(digi ${ROOT_LIBRARIES} CAENDigitizer)
 
-add_executable(dpp dpp.cpp ${sources} ${headers})
-target_link_libraries(dpp ${ROOT_LIBRARIES} CAENDigitizer)
-
-add_executable(PHA PHA.cpp ${sources} ${headers})
-target_link_libraries(PHA ${ROOT_LIBRARIES} CAENDigitizer)
-
-add_executable(sync sync.cpp ${sources} ${headers})
-target_link_libraries(sync ${ROOT_LIBRARIES} CAENDigitizer)
+add_executable(test test.cpp ${sources} ${headers})
+target_link_libraries(test ${ROOT_LIBRARIES} CAENDigitizer)
