@@ -41,6 +41,7 @@ int main(int argc, char **argv)
   // auto digi = new TDigitizer();
   int link = 0;
   auto digi = new TDigitizer("Ge0", CAEN_DGTZ_USB, link);
+  digi->ConfigDevice();
   delete digi;
   return 0;
 }
