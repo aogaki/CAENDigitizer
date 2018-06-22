@@ -22,13 +22,40 @@ class TDigitizer
 
   void ConfigDevice();
 
+  // Acquisition controll
+  void SendSWTrigger();
+  void StartAcquisition();
+  void StopAcquisition();
+
+  // Reading event
+  void ReadEvent();
+  const uint &GetNEvent() { return fNEvents; };
+  unsigned char *GetDataArray() { return fDataArray; };
+
  private:
   bool fDebugMode;
   std::string fDeviceID;
   int fHandler;
   CAEN_DGTZ_BoardInfo_t fDeviceInfo;
 
-  TDigiPar *fParameters;
+  TDigiPar *fpParameters;
+
+  // For acquisition
+  void AllocateMemory();
+  void FreeMemory();
+  char *fpReadoutBuffer;                         // readout buffer
+  CAEN_DGTZ_DPP_PHA_Event_t **fppPHAEvents;      // events buffer
+  CAEN_DGTZ_DPP_PHA_Waveforms_t *fpPHAWaveform;  // waveforms buffer
+
+  // Some digitizer info
+  uint fNChs;
+  uint fTimeSample;
+
+  uint fNEvents;
+  unsigned char *fDataArray;
+  std::vector<uint64_t> fTimeOffset;
+  std::vector<uint64_t> fPreviousTime;
+  std::vector<uint64_t> fTime;
 
   // Functions for devicie controll
   void ResetDevice();
@@ -64,8 +91,8 @@ class TDigitizer
   void SetDiscr(uint ch, uint val);
   void SetDynamicRange(uint ch, uint val);
   void SetExtraWord(uint ch, uint val = 2);
-  // void Set(uint ch, uint val);
-  // void Set(uint ch, uint val);
+  void CalibrationADC();
+  void LockTempCalibration_x730(uint ch);
 
   // Called from constructor
   void OpenDevice(CAEN_DGTZ_ConnectionType type, int link, int node,
@@ -75,6 +102,10 @@ class TDigitizer
   // Called from destructor
   void CloseDevice();
 
+  CAEN_DGTZ_ErrorCode WriteSPIRegister(uint32_t ch, uint32_t address,
+                                       uint32_t value);
+  CAEN_DGTZ_ErrorCode ReadSPIRegister(uint32_t ch, uint32_t address,
+                                      uint32_t &value);
   CAEN_DGTZ_ErrorCode RegisterSetBits(uint16_t addr, int start_bit, int end_bit,
                                       int val);
 

@@ -38,10 +38,71 @@ int kbhit(void)
 
 int main(int argc, char **argv)
 {
+  TApplication app("testApp", &argc, argv);
   // auto digi = new TDigitizer();
   int link = 0;
   auto digi = new TDigitizer("Ge0", CAEN_DGTZ_USB, link);
   digi->ConfigDevice();
+  digi->StartAcquisition();
+
+  TH1D *hisCharge = new TH1D("hisCharge", "test", 20000, 0, 20000);
+  TCanvas *canvas = new TCanvas();
+  TGraph *grWave = new TGraph();
+  // grWave->SetMaximum(20000);
+  // grWave->SetMinimum(0);
+  TCanvas *canvas2 = new TCanvas();
+  canvas->cd();
+  hisCharge->Draw();
+  std::cout << hisCharge->GetEntries() << std::endl;
+  while (true) {
+    for (auto i = 0; i < 1000; i++) digi->SendSWTrigger();
+    digi->ReadEvent();
+    const int nHit = digi->GetNEvent();
+    auto dataArray = digi->GetDataArray();
+    std::cout << nHit << std::endl;
+
+    for (int i = 0; i < nHit; i++) {
+      auto index = (i * ONE_HIT_SIZE);
+      auto offset = 0;
+      SampleData data;
+
+      data.ModNumber = dataArray[index + offset];
+      offset += sizeof(data.ModNumber);
+
+      data.ChNumber = dataArray[index + offset];
+      offset += sizeof(data.ChNumber);
+
+      memcpy(&data.TimeStamp, &dataArray[index + offset],
+             sizeof(data.TimeStamp));
+      offset += sizeof(data.TimeStamp);
+
+      memcpy(&data.ADC, &dataArray[index + offset], sizeof(data.ADC));
+      offset += sizeof(data.ADC);
+      if (data.ChNumber == 0) {
+        // hisCharge->Fill(data.ADC);
+
+        for (int iSample = 0; iSample < kNSamples; iSample++) {
+          unsigned short pulse;
+          memcpy(&pulse, &dataArray[index + offset], sizeof(pulse));
+          offset += sizeof(pulse);
+
+          grWave->SetPoint(iSample, iSample * 2, pulse);  // one sample 2 ns
+        }
+      }
+    }
+    canvas2->cd();
+    grWave->Draw("AL");
+    canvas2->Update();
+
+    canvas->cd();
+    hisCharge->Draw();
+    canvas->Update();
+    usleep(10000);
+    if (kbhit()) break;
+  }
+
+  digi->StopAcquisition();
+
   delete digi;
   return 0;
 }

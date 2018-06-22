@@ -4,7 +4,12 @@ cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
 project(digi)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.9)
+message("You need clang compiler or GCC version 5 or later")
+set(CMAKE_CXX_COMPILER clang++)
+endif()
 add_definitions("-std=c++11 -march=native -mtune=native")
+
 include(FindROOT.cmake)
 
 #----------------------------------------------------------------------------

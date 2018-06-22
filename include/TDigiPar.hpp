@@ -45,6 +45,7 @@ class TDigiPar
 
   // AHHHHHHHHHH, I wanna write auto generator of Gettersssssssssssss.
   const uint &GetNCh() { return fNCh; };
+  const uint &GetTimeSample() { return fTimeSample; };
   const uint &GetDigiModel() { return fDigiModel; };
   const DPPType &GetDPPType() { return fDPPType; };
   const uint &GetRecordLength() { return fRecordLength; };
