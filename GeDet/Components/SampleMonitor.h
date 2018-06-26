@@ -10,10 +10,10 @@
 #ifndef SAMPLEMONITOR_H
 #define SAMPLEMONITOR_H
 
-#include <TApplication.h>
 #include <TCanvas.h>
 #include <TGraph.h>
 #include <TH1.h>
+#include <THttpServer.h>
 #include <TStyle.h>
 
 #include "DaqComponentBase.h"
@@ -62,10 +62,9 @@ class SampleMonitor : public DAQMW::DaqComponentBase
   int decode_data(const unsigned char *mydata);
   int fill_data(const unsigned char *mydata, const int size);
 
-  TCanvas *fHisCanvas;
   TH1D *fHis;
-  TCanvas *fGrCanvas;
   TGraph *fGr;
+  TCanvas *fCanvas;
 
   int m_bin;
   double m_min;
@@ -74,6 +73,9 @@ class SampleMonitor : public DAQMW::DaqComponentBase
   unsigned char m_recv_data[BUFFER_SIZE];
   unsigned int m_event_byte_size;
   struct SampleData m_sampleData;
+
+  // For online monitoring
+  THttpServer *fServ;
 };
 
 extern "C" {

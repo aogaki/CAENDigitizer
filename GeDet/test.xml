@@ -26,8 +26,6 @@
             <outPort>samplereader_out</outPort>
           </outPorts>
           <params>
-            <param pid="srcAddr">127.0.0.1</param>
-            <param pid="srcPort">2222</param>
           </params>
         </component>
         <component cid="SampleDispatcher0">
@@ -38,7 +36,7 @@
           <confFile>/tmp/daqmw/rtc.conf</confFile>
           <startOrd>3</startOrd>
           <inPorts>
-            <inPort from="SampleReader0:samplereader_out">sampledispatcher_in</inPort>
+            <inPort from="SampleReader0:samplereader_out" buffer_length="1024">sampledispatcher_in</inPort>
           </inPorts>
           <outPorts>
             <outPort>sampledispatcher_out1</outPort>

@@ -8,7 +8,7 @@ void DelPointer(T *&pointer)
   pointer = nullptr;
 }
 
-constexpr unsigned int kNSamples = 1024;
+constexpr unsigned int kNSamples = 1024;  // It should be set by parameter table
 struct SampleData {
   unsigned char ModNumber;
   unsigned char ChNumber;

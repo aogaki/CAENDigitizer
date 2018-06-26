@@ -8,6 +8,8 @@
  */
 #include <arpa/inet.h>
 
+#include <TSystem.h>
+
 #include "SampleMonitor.h"
 
 using DAQMW::FatalType::DATAPATH_DISCONNECTED;
@@ -15,13 +17,6 @@ using DAQMW::FatalType::FOOTER_DATA_MISMATCH;
 using DAQMW::FatalType::HEADER_DATA_MISMATCH;
 using DAQMW::FatalType::INPORT_ERROR;
 using DAQMW::FatalType::USER_DEFINED_ERROR1;
-
-template <class T>
-void DelPointer(T *&pointer)
-{
-  delete pointer;
-  pointer = nullptr;
-}
 
 // Module specification
 // Change following items to suit your component's spec.
@@ -52,15 +47,14 @@ SampleMonitor::SampleMonitor(RTC::Manager *manager)
       m_InPort("samplemonitor_in", m_in_data),
       m_in_status(BUF_SUCCESS),
       m_debug(true),
-      fHisCanvas(nullptr),
       fHis(nullptr),
-      fGrCanvas(nullptr),
       fGr(nullptr),
       m_bin(0),
       m_min(0),
       m_max(0),
       m_monitor_update_rate(300),
-      m_event_byte_size(0)
+      m_event_byte_size(0),
+      fServ(nullptr)
 {
   // Registration: InPort/OutPort/Service
 
@@ -70,6 +64,21 @@ SampleMonitor::SampleMonitor(RTC::Manager *manager)
   init_command_port();
   init_state_table();
   set_comp_name("SAMPLEMONITOR");
+
+  fHis = new TH1D("hist", "test", 1000, 0., 1000.);
+  fGr = new TGraph();
+  for (auto i = 0; i < 1024; i++) fGr->SetPoint(i, i + 1, 8000);
+  fGr->SetTitle("Graph");
+  fGr->SetMinimum(7000);
+  fGr->SetMaximum(9000);
+  fCanvas = new TCanvas();
+  fGr->Draw("AL");
+
+  fServ = new THttpServer("http:8080?monitoring=5000;rw;noglobal");
+  // DelPointer(fServ);
+  fServ->SetDefaultPage("index.html");
+  fServ->Register("/", fHis);
+  fServ->Register("/graph", fCanvas);
 }
 
 SampleMonitor::~SampleMonitor() {}
@@ -92,10 +101,7 @@ RTC::ReturnCode_t SampleMonitor::onExecute(RTC::UniqueId ec_id)
 
 int SampleMonitor::daq_dummy()
 {
-  if (fHisCanvas) {
-    fHisCanvas->Update();
-    sleep(1);
-  }
+  gSystem->ProcessEvents();
 
   return 0;
 }
@@ -107,20 +113,6 @@ int SampleMonitor::daq_configure()
   ::NVList *paramList;
   paramList = m_daq_service0.getCompParams();
   parse_params(paramList);
-
-  DelPointer(fHisCanvas);
-  fHisCanvas = new TCanvas("HisCanvas", "test");
-
-  DelPointer(fHis);
-  fHis = new TH1D("hist", "test", 1000, 0., 1000.);
-
-  DelPointer(fGrCanvas);
-  fGrCanvas = new TCanvas("GrCanvas", "test");
-
-  DelPointer(fGr);
-  fGr = new TGraph();
-  fGr->SetMinimum(7000);
-  fGr->SetMaximum(9000);
 
   return 0;
 }
@@ -145,10 +137,7 @@ int SampleMonitor::daq_unconfigure()
 {
   std::cerr << "*** SampleMonitor::unconfigure" << std::endl;
 
-  DelPointer(fHisCanvas);
-  DelPointer(fHis);
-  DelPointer(fGrCanvas);
-  DelPointer(fGr);
+  fHis->Reset();
 
   return 0;
 }
@@ -165,14 +154,7 @@ int SampleMonitor::daq_start()
 int SampleMonitor::daq_stop()
 {
   std::cerr << "*** SampleMonitor::stop" << std::endl;
-
-  fHisCanvas->cd();
-  fHis->Draw();
-  fHisCanvas->Update();
-
-  fGrCanvas->cd();
-  fGr->Draw();
-  fGrCanvas->Update();
+  gSystem->ProcessEvents();
 
   reset_InPort();
 
@@ -257,13 +239,7 @@ int SampleMonitor::daq_run()
 
   unsigned long sequence_num = get_sequence_num();
   if ((sequence_num % m_monitor_update_rate) == 0) {
-    fHisCanvas->cd();
-    fHis->Draw();
-    fHisCanvas->Update();
-
-    fGrCanvas->cd();
-    fGr->Draw();
-    fGrCanvas->Update();
+    gSystem->ProcessEvents();
   }
 
   inc_sequence_num();                      // increase sequence num.

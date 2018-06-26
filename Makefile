@@ -39,10 +39,10 @@ cmake_force:
 SHELL = /bin/sh
 
 # The CMake executable.
-CMAKE_COMMAND = /usr/bin/cmake
+CMAKE_COMMAND = /usr/local/bin/cmake
 
 # The command to remove a file.
-RM = /usr/bin/cmake -E remove -f
+RM = /usr/local/bin/cmake -E remove -f
 
 # Escaping for special characters.
 EQUALS = =
@@ -56,27 +56,27 @@ CMAKE_BINARY_DIR = /home/aogaki/DAQ/CAENDigitizer
 #=============================================================================
 # Targets provided globally by CMake.
 
-# Special rule for the target edit_cache
-edit_cache:
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake cache editor..."
-	/usr/bin/ccmake -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
-.PHONY : edit_cache
-
-# Special rule for the target edit_cache
-edit_cache/fast: edit_cache
-
-.PHONY : edit_cache/fast
-
 # Special rule for the target rebuild_cache
 rebuild_cache:
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake to regenerate build system..."
-	/usr/bin/cmake -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
+	/usr/local/bin/cmake -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
 .PHONY : rebuild_cache
 
 # Special rule for the target rebuild_cache
 rebuild_cache/fast: rebuild_cache
 
 .PHONY : rebuild_cache/fast
+
+# Special rule for the target edit_cache
+edit_cache:
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake cache editor..."
+	/usr/local/bin/ccmake -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
+.PHONY : edit_cache
+
+# Special rule for the target edit_cache
+edit_cache/fast: edit_cache
+
+.PHONY : edit_cache/fast
 
 # The main all target
 all: cmake_check_build_system
@@ -111,19 +111,6 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named digi
-
-# Build rule for target.
-digi: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 digi
-.PHONY : digi
-
-# fast build rule for target.
-digi/fast:
-	$(MAKE) -f CMakeFiles/digi.dir/build.make CMakeFiles/digi.dir/build
-.PHONY : digi/fast
-
-#=============================================================================
 # Target rules for targets named test
 
 # Build rule for target.
@@ -135,6 +122,19 @@ test: cmake_check_build_system
 test/fast:
 	$(MAKE) -f CMakeFiles/test.dir/build.make CMakeFiles/test.dir/build
 .PHONY : test/fast
+
+#=============================================================================
+# Target rules for targets named digi
+
+# Build rule for target.
+digi: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 digi
+.PHONY : digi
+
+# fast build rule for target.
+digi/fast:
+	$(MAKE) -f CMakeFiles/digi.dir/build.make CMakeFiles/digi.dir/build
+.PHONY : digi/fast
 
 main.o: main.cpp.o
 
@@ -169,8 +169,8 @@ src/MyFunctions.o: src/MyFunctions.cpp.o
 
 # target to build an object file
 src/MyFunctions.cpp.o:
-	$(MAKE) -f CMakeFiles/digi.dir/build.make CMakeFiles/digi.dir/src/MyFunctions.cpp.o
 	$(MAKE) -f CMakeFiles/test.dir/build.make CMakeFiles/test.dir/src/MyFunctions.cpp.o
+	$(MAKE) -f CMakeFiles/digi.dir/build.make CMakeFiles/digi.dir/src/MyFunctions.cpp.o
 .PHONY : src/MyFunctions.cpp.o
 
 src/MyFunctions.i: src/MyFunctions.cpp.i
@@ -179,8 +179,8 @@ src/MyFunctions.i: src/MyFunctions.cpp.i
 
 # target to preprocess a source file
 src/MyFunctions.cpp.i:
-	$(MAKE) -f CMakeFiles/digi.dir/build.make CMakeFiles/digi.dir/src/MyFunctions.cpp.i
 	$(MAKE) -f CMakeFiles/test.dir/build.make CMakeFiles/test.dir/src/MyFunctions.cpp.i
+	$(MAKE) -f CMakeFiles/digi.dir/build.make CMakeFiles/digi.dir/src/MyFunctions.cpp.i
 .PHONY : src/MyFunctions.cpp.i
 
 src/MyFunctions.s: src/MyFunctions.cpp.s
@@ -189,8 +189,8 @@ src/MyFunctions.s: src/MyFunctions.cpp.s
 
 # target to generate assembly for a file
 src/MyFunctions.cpp.s:
-	$(MAKE) -f CMakeFiles/digi.dir/build.make CMakeFiles/digi.dir/src/MyFunctions.cpp.s
 	$(MAKE) -f CMakeFiles/test.dir/build.make CMakeFiles/test.dir/src/MyFunctions.cpp.s
+	$(MAKE) -f CMakeFiles/digi.dir/build.make CMakeFiles/digi.dir/src/MyFunctions.cpp.s
 .PHONY : src/MyFunctions.cpp.s
 
 src/TDigiPar.o: src/TDigiPar.cpp.o
@@ -199,8 +199,8 @@ src/TDigiPar.o: src/TDigiPar.cpp.o
 
 # target to build an object file
 src/TDigiPar.cpp.o:
-	$(MAKE) -f CMakeFiles/digi.dir/build.make CMakeFiles/digi.dir/src/TDigiPar.cpp.o
 	$(MAKE) -f CMakeFiles/test.dir/build.make CMakeFiles/test.dir/src/TDigiPar.cpp.o
+	$(MAKE) -f CMakeFiles/digi.dir/build.make CMakeFiles/digi.dir/src/TDigiPar.cpp.o
 .PHONY : src/TDigiPar.cpp.o
 
 src/TDigiPar.i: src/TDigiPar.cpp.i
@@ -209,8 +209,8 @@ src/TDigiPar.i: src/TDigiPar.cpp.i
 
 # target to preprocess a source file
 src/TDigiPar.cpp.i:
-	$(MAKE) -f CMakeFiles/digi.dir/build.make CMakeFiles/digi.dir/src/TDigiPar.cpp.i
 	$(MAKE) -f CMakeFiles/test.dir/build.make CMakeFiles/test.dir/src/TDigiPar.cpp.i
+	$(MAKE) -f CMakeFiles/digi.dir/build.make CMakeFiles/digi.dir/src/TDigiPar.cpp.i
 .PHONY : src/TDigiPar.cpp.i
 
 src/TDigiPar.s: src/TDigiPar.cpp.s
@@ -219,8 +219,8 @@ src/TDigiPar.s: src/TDigiPar.cpp.s
 
 # target to generate assembly for a file
 src/TDigiPar.cpp.s:
-	$(MAKE) -f CMakeFiles/digi.dir/build.make CMakeFiles/digi.dir/src/TDigiPar.cpp.s
 	$(MAKE) -f CMakeFiles/test.dir/build.make CMakeFiles/test.dir/src/TDigiPar.cpp.s
+	$(MAKE) -f CMakeFiles/digi.dir/build.make CMakeFiles/digi.dir/src/TDigiPar.cpp.s
 .PHONY : src/TDigiPar.cpp.s
 
 src/TDigitizer.o: src/TDigitizer.cpp.o
@@ -229,8 +229,8 @@ src/TDigitizer.o: src/TDigitizer.cpp.o
 
 # target to build an object file
 src/TDigitizer.cpp.o:
-	$(MAKE) -f CMakeFiles/digi.dir/build.make CMakeFiles/digi.dir/src/TDigitizer.cpp.o
 	$(MAKE) -f CMakeFiles/test.dir/build.make CMakeFiles/test.dir/src/TDigitizer.cpp.o
+	$(MAKE) -f CMakeFiles/digi.dir/build.make CMakeFiles/digi.dir/src/TDigitizer.cpp.o
 .PHONY : src/TDigitizer.cpp.o
 
 src/TDigitizer.i: src/TDigitizer.cpp.i
@@ -239,8 +239,8 @@ src/TDigitizer.i: src/TDigitizer.cpp.i
 
 # target to preprocess a source file
 src/TDigitizer.cpp.i:
-	$(MAKE) -f CMakeFiles/digi.dir/build.make CMakeFiles/digi.dir/src/TDigitizer.cpp.i
 	$(MAKE) -f CMakeFiles/test.dir/build.make CMakeFiles/test.dir/src/TDigitizer.cpp.i
+	$(MAKE) -f CMakeFiles/digi.dir/build.make CMakeFiles/digi.dir/src/TDigitizer.cpp.i
 .PHONY : src/TDigitizer.cpp.i
 
 src/TDigitizer.s: src/TDigitizer.cpp.s
@@ -249,8 +249,8 @@ src/TDigitizer.s: src/TDigitizer.cpp.s
 
 # target to generate assembly for a file
 src/TDigitizer.cpp.s:
-	$(MAKE) -f CMakeFiles/digi.dir/build.make CMakeFiles/digi.dir/src/TDigitizer.cpp.s
 	$(MAKE) -f CMakeFiles/test.dir/build.make CMakeFiles/test.dir/src/TDigitizer.cpp.s
+	$(MAKE) -f CMakeFiles/digi.dir/build.make CMakeFiles/digi.dir/src/TDigitizer.cpp.s
 .PHONY : src/TDigitizer.cpp.s
 
 test.o: test.cpp.o
@@ -286,10 +286,10 @@ help:
 	@echo "... all (the default if no target is provided)"
 	@echo "... clean"
 	@echo "... depend"
-	@echo "... edit_cache"
 	@echo "... rebuild_cache"
-	@echo "... digi"
 	@echo "... test"
+	@echo "... edit_cache"
+	@echo "... digi"
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"

@@ -280,8 +280,8 @@ void TDigitizer::SetIOLevel(CAEN_DGTZ_IOLevel_t level)
 
 void TDigitizer::SetDeviceBuffer()
 {
-  auto DPPType = fpParameters->GetDPPType();
-  if (DPPType != DPPType::STD_730) {  // for DPP
+  auto type = fpParameters->GetDPPType();
+  if (type != DPPType::STD_730) {  // for DPP
     // 0 means automatic mode
     auto err = CAEN_DGTZ_SetDPPEventAggregation(fHandler, 0, 0);
     PrintError(err, "SetDPPEventAggregation");

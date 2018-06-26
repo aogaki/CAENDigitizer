@@ -1,6 +1,6 @@
 #ifndef SampleData_h
 #define SampleData_h 1
 
-#include "TStdData.hpp"
+#include "../include/MyFunctions.hpp"
 
 #endif

@@ -58,10 +58,14 @@ SampleReader::SampleReader(RTC::Manager *manager)
   init_state_table();
   set_comp_name("SAMPLEREADER");
 
-  fDummyData.reset(new unsigned char[fNHits * ONE_HIT_SIZE]);
+  int link = 0;
+  fpDigitizer = nullptr;
+  // fpDigitizer = new TDigitizer("Ge0", CAEN_DGTZ_USB, link);
+
+  fDummyData.reset(new unsigned char[fMaxHit * ONE_HIT_SIZE]);
 }
 
-SampleReader::~SampleReader() {}
+SampleReader::~SampleReader() { DelPointer(fpDigitizer); }
 
 RTC::ReturnCode_t SampleReader::onInitialize()
 {
@@ -85,50 +89,10 @@ int SampleReader::daq_configure()
 {
   std::cerr << "*** SampleReader::configure" << std::endl;
 
-  ::NVList *paramList;
-  paramList = m_daq_service0.getCompParams();
-  parse_params(paramList);
-
   return 0;
 }
 
-int SampleReader::parse_params(::NVList *list)
-{
-  bool srcAddrSpecified = false;
-  bool srcPortSpecified = false;
-
-  std::cerr << "param list length:" << (*list).length() << std::endl;
-
-  int len = (*list).length();
-  for (int i = 0; i < len; i += 2) {
-    std::string sname = (std::string)(*list)[i].value;
-    std::string svalue = (std::string)(*list)[i + 1].value;
-
-    std::cerr << "sname: " << sname << "  ";
-    std::cerr << "value: " << svalue << std::endl;
-
-    if (sname == "srcAddr") {
-      srcAddrSpecified = true;
-      m_srcAddr = svalue;
-    } else if (sname == "srcPort") {
-      srcPortSpecified = true;
-      // char *offset;
-      // m_srcPort = (int)strtol(svalue.c_str(), &offset, 10);
-      // delete offset;
-      m_srcPort = (int)strtol(svalue.c_str(), nullptr, 10);
-    }
-  }
-
-  if (!srcAddrSpecified) {
-    fatal_error_report(USER_DEFINED_ERROR1, "NO SRC ADDRESS");
-  }
-
-  if (!srcPortSpecified) {
-    fatal_error_report(USER_DEFINED_ERROR2, "NO SRC PORT");
-  }
-
-  return 0;
-}
+int SampleReader::parse_params(::NVList *list) { return 0; }
 
 int SampleReader::daq_unconfigure()
 {
@@ -232,7 +196,7 @@ int SampleReader::daq_run()
     // const int nHit = fDigitizer->GetNEvents();
     MakeDummyData();
     auto dataArray = fDummyData.get();
-    const int nHit = fNHits;
+    const int nHit = fMaxHit;
     if (m_debug && nHit > 0) std::cout << nHit << std::endl;
 
     for (unsigned int iHit = 0, iData = 0; iHit < nHit; iHit++) {
@@ -276,7 +240,7 @@ int SampleReader::daq_run()
 void SampleReader::MakeDummyData()
 {
   SampleData data;
-  for (auto i = 0; i < fNHits; i++) {
+  for (auto i = 0; i < fMaxHit; i++) {
     data.ModNumber = 0;
     data.ChNumber = 0;
     data.TimeStamp = gRandom->Poisson(1024);

@@ -30,6 +30,19 @@ enum class DPPType {  // copy from digiTES.h
   DPP_nPHA_724 = 0x0006,
   STD_730 = 0x1000,
 };
+// For supporting SL7
+// gcc4.8 don't support DPPType::DPP_CI as above
+// namespace DPPType
+// {  // copy from digiTES.h
+// constexpr uint DPP_CI = 0x0000;
+// constexpr uint DPP_PSD_720 = 0x0001;
+// constexpr uint DPP_PSD_751 = 0x0002;
+// constexpr uint DPP_PSD_730 = 0x0003;
+// constexpr uint DPP_PHA_724 = 0x0004;
+// constexpr uint DPP_PHA_730 = 0x0005;
+// constexpr uint DPP_nPHA_724 = 0x0006;
+// constexpr uint STD_730 = 0x1000;
+// };  // namespace DPPType
 
 class TDigiPar
 {

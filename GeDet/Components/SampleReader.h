@@ -19,6 +19,8 @@
 
 #include <daqmw/Sock.h>
 
+#include "TDigitizer.hpp"
+
 using namespace RTC;
 
 class SampleReader : public DAQMW::DaqComponentBase
@@ -49,7 +51,7 @@ class SampleReader : public DAQMW::DaqComponentBase
   int daq_pause();
   int daq_resume();
 
-  int parse_params(::NVList *list);
+  int parse_params(::NVList *lis);
   // int read_data_from_detectors();
   int set_data(unsigned int data_byte_size);
   int write_OutPort();
@@ -62,11 +64,10 @@ class SampleReader : public DAQMW::DaqComponentBase
   BufferStatus m_out_status;
   bool m_debug;
 
-  int m_srcPort;
-  std::string m_srcAddr;
+  TDigitizer *fpDigitizer;
 
   void MakeDummyData();
-  static constexpr int fNHits = 10;
+  static constexpr int fMaxHit = 10;
   std::unique_ptr<unsigned char[]> fDummyData;
 };
 
