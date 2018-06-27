@@ -320,6 +320,7 @@ void TDigitizer::SetChParameter()
     auto trapNorm = fpParameters->GetTrapNorm();
     for (auto iCh = 0; iCh < fNChs; iCh++) {
       auto err = CAEN_DGTZ_SetChannelDCOffset(fHandler, iCh, offset[iCh]);
+      cout << offset[iCh] << endl;
       PrintError(err, "SetChannelDCOffset");
 
       err = CAEN_DGTZ_SetDPPPreTriggerSize(fHandler, iCh, preTrigger[iCh]);

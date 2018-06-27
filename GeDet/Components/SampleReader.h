@@ -64,7 +64,7 @@ class SampleReader : public DAQMW::DaqComponentBase
   BufferStatus m_out_status;
   bool m_debug;
 
-  TDigitizer *fpDigitizer;
+  TDigitizer *fDigitizer;
 
   void MakeDummyData();
   static constexpr int fMaxHit = 10;

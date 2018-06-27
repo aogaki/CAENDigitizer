@@ -176,6 +176,7 @@ void TDigiPar::GenParameter()
 void TDigiPar::LoadRecordLength()
 {
   auto length = fXML.get_optional<uint>("RecordLength");
+  std::cout << *length << std::endl;
   if (length)
     fRecordLength = *length;
   else {
@@ -211,6 +212,7 @@ void TDigiPar::LoadChPar(std::string key, std::array<T, kgMaxCh> &array)
     if (auto val = child.second.get_optional<T>(key)) {
       counter++;
       array[*id] = *val;
+      // std::cout << "key: " << key << "\tval: " << *val << std::endl;
     }
   }
 
@@ -254,6 +256,7 @@ void TDigiPar::LoadDCOffset()
       offset = 100 - offset;
 
     fDCOffset[iCh] = offset * ((1 << 16) - 1) / 100;
+    cout << fPolarity[iCh] << "\t" << offset << "\t" << fDCOffset[iCh] << endl;
   }
 }
 

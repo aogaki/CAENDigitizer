@@ -59,13 +59,13 @@ SampleReader::SampleReader(RTC::Manager *manager)
   set_comp_name("SAMPLEREADER");
 
   int link = 0;
-  fpDigitizer = nullptr;
-  // fpDigitizer = new TDigitizer("Ge0", CAEN_DGTZ_USB, link);
+  fDigitizer = nullptr;
+  fDigitizer = new TDigitizer("Ge0", CAEN_DGTZ_USB, link);
 
   fDummyData.reset(new unsigned char[fMaxHit * ONE_HIT_SIZE]);
 }
 
-SampleReader::~SampleReader() { DelPointer(fpDigitizer); }
+SampleReader::~SampleReader() { DelPointer(fDigitizer); }
 
 RTC::ReturnCode_t SampleReader::onInitialize()
 {
@@ -88,6 +88,8 @@ int SampleReader::daq_dummy() { return 0; }
 int SampleReader::daq_configure()
 {
   std::cerr << "*** SampleReader::configure" << std::endl;
+
+  fDigitizer->ConfigDevice();
 
   return 0;
 }
@@ -113,12 +115,16 @@ int SampleReader::daq_start()
     fatal_error_report(DATAPATH_DISCONNECTED);
   }
 
+  fDigitizer->StartAcquisition();
+
   return 0;
 }
 
 int SampleReader::daq_stop()
 {
   std::cerr << "*** SampleReader::stop" << std::endl;
+
+  fDigitizer->StopAcquisition();
 
   return 0;
 }
@@ -189,14 +195,16 @@ int SampleReader::daq_run()
 
   if (m_out_status == BUF_SUCCESS) {
     // previous OutPort.write() successfully done
-    // Stupid! rewrite it!
-    // fDigitizer->SendSWTrigger();
 
-    // auto dataArray = fDigitizer->GetDataArray();
-    // const int nHit = fDigitizer->GetNEvents();
-    MakeDummyData();
-    auto dataArray = fDummyData.get();
-    const int nHit = fMaxHit;
+    // Stupid! rewrite it!
+    for (auto i = 0; i < 10; i++) fDigitizer->SendSWTrigger();
+
+    fDigitizer->ReadEvent();
+    auto dataArray = fDigitizer->GetDataArray();
+    const int nHit = fDigitizer->GetNEvent();
+    // MakeDummyData();
+    // auto dataArray = fDummyData.get();
+    // const int nHit = fMaxHit;
     if (m_debug && nHit > 0) std::cout << nHit << std::endl;
 
     for (unsigned int iHit = 0, iData = 0; iHit < nHit; iHit++) {

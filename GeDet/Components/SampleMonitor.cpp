@@ -69,8 +69,8 @@ SampleMonitor::SampleMonitor(RTC::Manager *manager)
   fGr = new TGraph();
   for (auto i = 0; i < 1024; i++) fGr->SetPoint(i, i + 1, 8000);
   fGr->SetTitle("Graph");
-  fGr->SetMinimum(7000);
-  fGr->SetMaximum(9000);
+  fGr->SetMinimum(0);
+  fGr->SetMaximum(18000);
   fCanvas = new TCanvas();
   fGr->Draw("AL");
 
