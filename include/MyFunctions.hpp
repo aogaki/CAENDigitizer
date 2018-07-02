@@ -13,7 +13,7 @@ struct SampleData {
   unsigned char ModNumber;
   unsigned char ChNumber;
   unsigned long TimeStamp;
-  short ADC;
+  unsigned short ADC;
   unsigned short Waveform[kNSamples];
 };
 

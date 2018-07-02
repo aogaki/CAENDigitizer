@@ -65,7 +65,7 @@ SampleMonitor::SampleMonitor(RTC::Manager *manager)
   init_state_table();
   set_comp_name("SAMPLEMONITOR");
 
-  fHis = new TH1D("hist", "test", 1000, 0., 1000.);
+  fHis = new TH1D("hist", "test", 20000, 0., 20000.);
   fGr = new TGraph();
   for (auto i = 0; i < 1024; i++) fGr->SetPoint(i, i + 1, 8000);
   fGr->SetTitle("Graph");
@@ -220,6 +220,8 @@ int SampleMonitor::daq_run()
 
   unsigned int recv_byte_size = read_InPort();
   if (recv_byte_size == 0) {  // Timeout
+    std::cout << "0 size" << std::endl;
+    gSystem->ProcessEvents();
     return 0;
   }
 
@@ -237,10 +239,10 @@ int SampleMonitor::daq_run()
 
   if (m_monitor_update_rate == 0) m_monitor_update_rate = 1000;
 
-  unsigned long sequence_num = get_sequence_num();
-  if ((sequence_num % m_monitor_update_rate) == 0) {
-    gSystem->ProcessEvents();
-  }
+  // unsigned long sequence_num = get_sequence_num();
+  // if ((sequence_num % m_monitor_update_rate) == 0) {
+  gSystem->ProcessEvents();
+  // }
 
   inc_sequence_num();                      // increase sequence num.
   inc_total_data_size(m_event_byte_size);  // increase total data byte size

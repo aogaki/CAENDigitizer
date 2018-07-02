@@ -119,12 +119,14 @@ int SampleLogger::daq_start()
 
   m_in_status = BUF_SUCCESS;
 
-  fFile = new TFile("/Data/DAQ/test.root", "RECREATE");
-  fTree = new TTree("StdFirmwareData", "test data");
+  auto runNo = get_run_number();
+  auto fileName = TString::Format("run%d.root", runNo);
+  fFile = new TFile("/Data/DAQ/" + fileName, "RECREATE");
+  fTree = new TTree("GeDet", "PHA");
   fTree->Branch("ModNumber", &m_sampleData.ModNumber, "ModNumber/b");
   fTree->Branch("ChNumber", &m_sampleData.ChNumber, "ChNumber/b");
   fTree->Branch("TimeStamp", &m_sampleData.TimeStamp, "TimeStamp/l");
-  fTree->Branch("ADC", &m_sampleData.ADC, "ADC/I");
+  fTree->Branch("ADC", &m_sampleData.ADC, "ADC/s");
   fTree->Branch("NSamples", (int *)&kNSamples, "NSamples/I");
   fTree->Branch("Waveform", m_sampleData.Waveform, "Waveform[NSamples]/s");
 
@@ -243,7 +245,7 @@ int SampleLogger::decode_data(const unsigned char *mydata)
   m_sampleData.TimeStamp = timeStamp;
   index += sizeof(timeStamp);
 
-  unsigned int adc = *(unsigned int *)&mydata[index];
+  unsigned short adc = *(unsigned short *)&mydata[index];
   m_sampleData.ADC = adc;
   index += sizeof(adc);
 

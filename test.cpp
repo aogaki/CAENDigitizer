@@ -48,18 +48,18 @@ int main(int argc, char **argv)
   TH1D *hisCharge = new TH1D("hisCharge", "test", 20000, 0, 20000);
   TCanvas *canvas = new TCanvas();
   TGraph *grWave = new TGraph();
-  // grWave->SetMaximum(20000);
-  // grWave->SetMinimum(0);
+  grWave->SetMaximum(18000);
+  grWave->SetMinimum(0);
   TCanvas *canvas2 = new TCanvas();
   canvas->cd();
   hisCharge->Draw();
   std::cout << hisCharge->GetEntries() << std::endl;
   while (true) {
-    for (auto i = 0; i < 1000; i++) digi->SendSWTrigger();
+    // for (auto i = 0; i < 1000; i++) digi->SendSWTrigger();
     digi->ReadEvent();
     const int nHit = digi->GetNEvent();
     auto dataArray = digi->GetDataArray();
-    std::cout << nHit << std::endl;
+    std::cout << nHit << " hits" << std::endl;
 
     for (int i = 0; i < nHit; i++) {
       auto index = (i * ONE_HIT_SIZE);
@@ -79,7 +79,7 @@ int main(int argc, char **argv)
       memcpy(&data.ADC, &dataArray[index + offset], sizeof(data.ADC));
       offset += sizeof(data.ADC);
       if (data.ChNumber == 0) {
-        // hisCharge->Fill(data.ADC);
+        hisCharge->Fill(data.ADC);
 
         for (int iSample = 0; iSample < kNSamples; iSample++) {
           unsigned short pulse;

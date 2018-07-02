@@ -58,9 +58,7 @@ SampleReader::SampleReader(RTC::Manager *manager)
   init_state_table();
   set_comp_name("SAMPLEREADER");
 
-  int link = 0;
   fDigitizer = nullptr;
-  fDigitizer = new TDigitizer("Ge0", CAEN_DGTZ_USB, link);
 
   fDummyData.reset(new unsigned char[fMaxHit * ONE_HIT_SIZE]);
 }
@@ -89,6 +87,9 @@ int SampleReader::daq_configure()
 {
   std::cerr << "*** SampleReader::configure" << std::endl;
 
+  int link = 0;
+  fDigitizer = new TDigitizer("Ge0", CAEN_DGTZ_USB, link);
+
   fDigitizer->ConfigDevice();
 
   return 0;
@@ -99,6 +100,8 @@ int SampleReader::parse_params(::NVList *list) { return 0; }
 int SampleReader::daq_unconfigure()
 {
   std::cerr << "*** SampleReader::unconfigure" << std::endl;
+
+  DelPointer(fDigitizer);
 
   return 0;
 }
@@ -197,7 +200,7 @@ int SampleReader::daq_run()
     // previous OutPort.write() successfully done
 
     // Stupid! rewrite it!
-    for (auto i = 0; i < 10; i++) fDigitizer->SendSWTrigger();
+    // for (auto i = 0; i < 1000; i++) fDigitizer->SendSWTrigger();
 
     fDigitizer->ReadEvent();
     auto dataArray = fDigitizer->GetDataArray();
