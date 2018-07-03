@@ -81,7 +81,7 @@ int main(int argc, char **argv)
       if (data.ChNumber == 0) {
         hisCharge->Fill(data.ADC);
 
-        for (int iSample = 0; iSample < kNSamples; iSample++) {
+        for (int iSample = 0; iSample < kNSample; iSample++) {
           unsigned short pulse;
           memcpy(&pulse, &dataArray[index + offset], sizeof(pulse));
           offset += sizeof(pulse);

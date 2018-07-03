@@ -7,7 +7,6 @@ for ($iModule = 0; $iModule < 8; $iModule++) {
     $modules->setAttribute("FW", "PHA");
     $modules->setAttribute("ID", "Ge$iModule");
 
-    // $RecordLength = $xml->createElement("RecordLength", "1024");
     $RecordLength = $xml->createElement("RecordLength", $_POST['RecordLength']);
     $modules->appendChild($RecordLength);
 

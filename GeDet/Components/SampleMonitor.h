@@ -13,6 +13,7 @@
 #include <TCanvas.h>
 #include <TGraph.h>
 #include <TH1.h>
+#include <TH2.h>
 #include <THttpServer.h>
 #include <TStyle.h>
 
@@ -63,6 +64,7 @@ class SampleMonitor : public DAQMW::DaqComponentBase
   int fill_data(const unsigned char *mydata, const int size);
 
   TH1D *fHis;
+  TH2D *fHisInput;
   TGraph *fGr;
   TCanvas *fCanvas;
 

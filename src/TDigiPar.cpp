@@ -25,7 +25,7 @@ TDigiPar::~TDigiPar() {}
 void TDigiPar::InitPar()
 {
   fNCh = 0;
-  fRecordLength = 1024;
+  fRecordLength = kNSample;
 
   for (auto iCh = 0; iCh < kgMaxCh; iCh++) {
     fChFlag[iCh] = false;

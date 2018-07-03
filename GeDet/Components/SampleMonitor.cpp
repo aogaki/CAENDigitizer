@@ -48,6 +48,7 @@ SampleMonitor::SampleMonitor(RTC::Manager *manager)
       m_in_status(BUF_SUCCESS),
       m_debug(true),
       fHis(nullptr),
+      fHisInput(nullptr),
       fGr(nullptr),
       m_bin(0),
       m_min(0),
@@ -65,9 +66,12 @@ SampleMonitor::SampleMonitor(RTC::Manager *manager)
   init_state_table();
   set_comp_name("SAMPLEMONITOR");
 
-  fHis = new TH1D("hist", "test", 20000, 0., 20000.);
+  fHis = new TH1D("His", "Energy distribution", 20000, 0., 20000.);
+  fHisInput = new TH2D("HisInput", "Integral of input signal", kNSample / 10,
+                       0.5, kNSample + 0.5, 1800, 0.5, 18000.5);
+
   fGr = new TGraph();
-  for (auto i = 0; i < 1024; i++) fGr->SetPoint(i, i + 1, 8000);
+  for (auto i = 0; i < kNSample; i++) fGr->SetPoint(i, i + 1, 8000);
   fGr->SetTitle("Graph");
   fGr->SetMinimum(0);
   fGr->SetMaximum(18000);
@@ -75,9 +79,9 @@ SampleMonitor::SampleMonitor(RTC::Manager *manager)
   fGr->Draw("AL");
 
   fServ = new THttpServer("http:8080?monitoring=5000;rw;noglobal");
-  // DelPointer(fServ);
   fServ->SetDefaultPage("index.html");
   fServ->Register("/", fHis);
+  fServ->Register("/", fHisInput);
   fServ->Register("/graph", fCanvas);
 }
 
@@ -256,8 +260,10 @@ int SampleMonitor::fill_data(const unsigned char *mydata, const int size)
     decode_data(mydata);
     if (m_sampleData.ChNumber == 0) {
       fHis->Fill(m_sampleData.ADC);
-      for (int i = 0; i < kNSamples; i++)
+      for (int i = 0; i < kNSample; i++) {
         fGr->SetPoint(i, i, m_sampleData.Waveform[i]);
+        fHisInput->Fill(i, m_sampleData.Waveform[i]);
+      }
     }
     mydata += ONE_HIT_SIZE;
   }
@@ -279,7 +285,7 @@ int SampleMonitor::decode_data(const unsigned char *mydata)
   m_sampleData.ADC = adc;
   index += sizeof(adc);
 
-  for (int i = 0; i < kNSamples; i++) {
+  for (int i = 0; i < kNSample; i++) {
     unsigned short pulse = *(unsigned short *)&mydata[index];
     m_sampleData.Waveform[i] = pulse;
     index += sizeof(pulse);

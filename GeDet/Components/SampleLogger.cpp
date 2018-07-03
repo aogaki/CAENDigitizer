@@ -127,7 +127,7 @@ int SampleLogger::daq_start()
   fTree->Branch("ChNumber", &m_sampleData.ChNumber, "ChNumber/b");
   fTree->Branch("TimeStamp", &m_sampleData.TimeStamp, "TimeStamp/l");
   fTree->Branch("ADC", &m_sampleData.ADC, "ADC/s");
-  fTree->Branch("NSamples", (int *)&kNSamples, "NSamples/I");
+  fTree->Branch("NSamples", (int *)&kNSample, "NSamples/i");
   fTree->Branch("Waveform", m_sampleData.Waveform, "Waveform[NSamples]/s");
 
   return 0;
@@ -241,7 +241,7 @@ int SampleLogger::decode_data(const unsigned char *mydata)
   m_sampleData.ModNumber = mydata[index++];
   m_sampleData.ChNumber = mydata[index++];
 
-  unsigned long timeStamp = *(unsigned int *)&mydata[index];
+  unsigned long timeStamp = *(unsigned long *)&mydata[index];
   m_sampleData.TimeStamp = timeStamp;
   index += sizeof(timeStamp);
 
@@ -249,7 +249,7 @@ int SampleLogger::decode_data(const unsigned char *mydata)
   m_sampleData.ADC = adc;
   index += sizeof(adc);
 
-  for (int i = 0; i < kNSamples; i++) {
+  for (int i = 0; i < kNSample; i++) {
     unsigned short pulse = *(unsigned short *)&mydata[index];
     m_sampleData.Waveform[i] = pulse;
     index += sizeof(pulse);

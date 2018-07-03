@@ -588,7 +588,7 @@ void TDigitizer::ReadEvent()
 
       // std::cout << fppPHAEvents[iCh][iEve].ChargeLong << std::endl;
 
-      constexpr auto waveSize = sizeof(fpPHAWaveform->Trace1[0]) * kNSamples;
+      constexpr auto waveSize = sizeof(fpPHAWaveform->Trace1[0]) * kNSample;
       memcpy(&fDataArray[index], fpPHAWaveform->Trace1, waveSize);
 
       fNEvents++;

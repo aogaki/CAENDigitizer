@@ -256,7 +256,7 @@ void SampleReader::MakeDummyData()
     data.ChNumber = 0;
     data.TimeStamp = gRandom->Poisson(1024);
     data.ADC = gRandom->Poisson(511);
-    for (int j = 0; j < kNSamples; j++)
+    for (int j = 0; j < kNSample; j++)
       data.Waveform[j] = gRandom->Gaus(8000, 100);
 
     auto index = i * ONE_HIT_SIZE;
@@ -271,7 +271,7 @@ void SampleReader::MakeDummyData()
     memcpy(&fDummyData[index], &data.ADC, adcSize);
     index += adcSize;
 
-    constexpr auto waveSize = sizeof(data.Waveform[0]) * kNSamples;
+    constexpr auto waveSize = sizeof(data.Waveform[0]) * kNSample;
     memcpy(&fDummyData[index], data.Waveform, waveSize);
     index += waveSize;
   }

@@ -14,6 +14,8 @@
 #include <CAENDigitizer.h>
 #include <CAENDigitizerType.h>
 
+#include "MyFunctions.hpp"
+
 // #define MAX_NCH 32  // max. number of channels (physical+virtual)
 // #define MAX_GW 20   // max. number of generic write commads
 
