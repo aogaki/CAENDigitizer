@@ -11,6 +11,7 @@
 #define SAMPLEMONITOR_H
 
 #include <TCanvas.h>
+#include <TF1.h>
 #include <TGraph.h>
 #include <TH1.h>
 #include <TH2.h>
@@ -63,10 +64,11 @@ class SampleMonitor : public DAQMW::DaqComponentBase
   int decode_data(const unsigned char *mydata);
   int fill_data(const unsigned char *mydata, const int size);
 
-  TH1D *fHis;
-  TH2D *fHisInput;
-  TGraph *fGr;
-  TCanvas *fCanvas;
+  static constexpr uint kNCh = 8;
+  TH1D *fHis[kNCh];
+  TH2D *fHisInput[kNCh];
+  TGraph *fGr[kNCh];
+  TCanvas *fCanvas[kNCh];
 
   int m_bin;
   double m_min;
@@ -75,6 +77,14 @@ class SampleMonitor : public DAQMW::DaqComponentBase
   unsigned char m_recv_data[BUFFER_SIZE];
   unsigned int m_event_byte_size;
   struct SampleData m_sampleData;
+
+  // Fitting
+  void FitHis();
+  void FirstFit(TH1D *his, TF1 *f);
+  void RangeFit(TH1D *his, TF1 *f);
+  bool fFirstFitFlag;
+  TCanvas *fFitCan;
+  TF1 *fFitFnc[kNCh];
 
   // For online monitoring
   THttpServer *fServ;

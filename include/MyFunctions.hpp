@@ -8,7 +8,9 @@ void DelPointer(T *&pointer)
   pointer = nullptr;
 }
 
-constexpr unsigned int kNSample = 4096;  // It should be set by parameter table
+// constexpr unsigned int kNSample = 4096;  // It should be set by parameter
+// table
+constexpr unsigned int kNSample = 8192;  // It should be set by parameter table
 struct SampleData {
   unsigned char ModNumber;
   unsigned char ChNumber;

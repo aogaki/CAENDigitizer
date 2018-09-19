@@ -223,7 +223,14 @@ void TDigiPar::LoadChPar(std::string key, std::array<T, kgMaxCh> &array)
 
 void TDigiPar::LoadChFlag() { LoadChPar("Using", fChFlag); }
 
-void TDigiPar::LoadPreTrigger() { LoadChPar("PreTrigger", fPreTrigger); }
+void TDigiPar::LoadPreTrigger()
+{
+  LoadChPar("PreTrigger", fPreTrigger);
+  for (auto &val : fPreTrigger) {
+    val /= fTimeSample;  // ns -> samples
+    val /= 4;            // samples -> register val
+  }
+}
 
 void TDigiPar::LoadPolarity()
 {
@@ -249,15 +256,19 @@ void TDigiPar::LoadDCOffset()
 {
   // This uses polarity information
   // LoadPolarity();
+  // LoadChPar("DCOffset", fDCOffset);
+  // for (auto iCh = 0; iCh < fNCh; iCh++) {
+  //   auto offset = fDCOffset[iCh];
+  //   if (fPolarity[iCh] == CAEN_DGTZ_PulsePolarityPositive)
+  //     offset = 100 - offset;
+  //
+  //   fDCOffset[iCh] = offset * ((1 << 16) - 1) / 100;
+  //   cout << fPolarity[iCh] << "\t" << offset << "\t" << fDCOffset[iCh] <<
+  //   endl;
+  // }
   LoadChPar("DCOffset", fDCOffset);
-  for (auto iCh = 0; iCh < fNCh; iCh++) {
-    auto offset = fDCOffset[iCh];
-    if (fPolarity[iCh] == CAEN_DGTZ_PulsePolarityPositive)
-      offset = 100 - offset;
-
-    fDCOffset[iCh] = offset * ((1 << 16) - 1) / 100;
-    cout << fPolarity[iCh] << "\t" << offset << "\t" << fDCOffset[iCh] << endl;
-  }
+  for (auto iCh = 0; iCh < fNCh; iCh++)
+    fDCOffset[iCh] = fDCOffset[iCh] * 0xFFFF / 100;
 }
 
 void TDigiPar::LoadDecimation()
@@ -311,7 +322,7 @@ void TDigiPar::LoadTrgHoldOff()
   // Stupid coding!!!!  8 means stu in digiTES.
   // What is this?
   LoadChPar("TrgHoldOff", fTrgHoldOff);
-  auto stu = 8;
+  auto stu = 8;  // For 730.  16 for 725
   for (auto iCh = 0; iCh < kgMaxCh; iCh++) fTrgHoldOff[iCh] /= stu;
 }
 

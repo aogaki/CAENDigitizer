@@ -1,0 +1,40 @@
+@startuml
+
+actor User
+
+User -> UI: Open URL
+activate UI
+UI -> Server: Request par list
+Server -> Server: Gen par list
+Server --> UI: Send par list
+
+UI -> UI: Generate par list menu
+
+User -> UI: Choose
+UI -> UI: Submit
+==First step==
+
+
+UI -> Server: Request user selected par
+Server -> Server: Reading XML
+Server -> Server: Converting to DOM
+Server --> UI: Send the par as DOM
+
+UI -> UI: Generate module list
+
+User -> UI: Select module
+UI -> UI: Generate ch check boxes
+User -> UI: Check using chs
+UI -> UI: Display selected chs
+==Second step==
+
+User -> UI: Set parameters
+User -> UI: Submit
+
+==Third step==
+
+UI -> Server: Send par as DOM
+Server -> Server: Save par as XML file
+
+
+@enduml

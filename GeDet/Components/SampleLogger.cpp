@@ -121,7 +121,7 @@ int SampleLogger::daq_start()
 
   auto runNo = get_run_number();
   auto fileName = TString::Format("run%d.root", runNo);
-  fFile = new TFile("/Data/DAQ/" + fileName, "RECREATE");
+  fFile = new TFile("/Data/DAQ/Outputs/" + fileName, "RECREATE");
   fTree = new TTree("GeDet", "PHA");
   fTree->Branch("ModNumber", &m_sampleData.ModNumber, "ModNumber/b");
   fTree->Branch("ChNumber", &m_sampleData.ChNumber, "ChNumber/b");
