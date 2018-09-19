@@ -88,8 +88,8 @@ for ($iModule = 0; $iModule < 8; $iModule++) {
 $xml->appendChild($root);
 
 $xml->preserveWhiteSpace = false;
-$xml->formatOutput = true;
-$xml->save("/Data/DAQ/Parameters/parameters.xml");
+$xml->formatOutput = false;
+$xml->save("./test.xml");
 $content = $xml->saveXML();
 header("Content-Type: text/xml; charset=utf-8");
 echo $content;

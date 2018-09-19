@@ -10,3 +10,4 @@ all:
 
 clean:
 	make -C Components clean
+	rm -f ../src/*.o

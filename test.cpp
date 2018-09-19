@@ -53,9 +53,10 @@ int main(int argc, char **argv)
   TCanvas *canvas2 = new TCanvas();
   canvas->cd();
   hisCharge->Draw();
-  std::cout << hisCharge->GetEntries() << std::endl;
+
   while (true) {
-    // for (auto i = 0; i < 1000; i++) digi->SendSWTrigger();
+    // for (auto i = 0; i < 10; i++) digi->SendSWTrigger();
+
     digi->ReadEvent();
     const int nHit = digi->GetNEvent();
     auto dataArray = digi->GetDataArray();

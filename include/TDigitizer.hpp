@@ -70,6 +70,7 @@ class TDigitizer
   // Some functions for channel parameter setting
   // Only for readable
   void SetTrapNorm(uint ch, uint val);
+  void SetEneFineGain(uint ch, uint val);
   void SetPreTrigger(uint ch, uint val);
   void SetTTFSmoothing(uint ch, uint val);
   void SetTTFDelay(uint ch, uint val);
