@@ -318,6 +318,8 @@ void TDigitizer::SetChParameter()
     auto dynamicRange = fpParameters->GetDynamicRange();
 
     auto trapNorm = fpParameters->GetTrapNorm();
+    auto fineGain = fpParameters->GetEneFineGain();
+
     for (auto iCh = 0; iCh < fNChs; iCh++) {
       auto err = CAEN_DGTZ_SetChannelDCOffset(fHandler, iCh, offset[iCh]);
       cout << offset[iCh] << endl;
@@ -327,7 +329,9 @@ void TDigitizer::SetChParameter()
       PrintError(err, "SetDPPPreTriggerSize");
 
       SetTrapNorm(iCh, trapNorm[iCh]);
-      SetPreTrigger(iCh, preTrigger[iCh] / 4);  // Really needed?
+      // auto gain = uint(fineGain[iCh] * 1000);
+      // SetEneFineGain(iCh, gain);
+      // SetPreTrigger(iCh, preTrigger[iCh]);
       SetTTFSmoothing(iCh, TTFSmoothing[iCh]);
       SetTTFDelay(iCh, TTFDelay[iCh]);
       SetTrapRiseTime(iCh, trapRiseTime[iCh]);
@@ -353,9 +357,20 @@ void TDigitizer::SetChParameter()
     cout << "Now only support x730 series with PHA FW." << endl;
     exit(0);
   }
+
+  for (auto iCh = 0; iCh < fNChs; iCh++) {
+    CAEN_DGTZ_PulsePolarity_t pol;
+    auto err = CAEN_DGTZ_GetChannelPulsePolarity(fHandler, iCh, &pol);
+    cout << err << "\t" << pol << endl;
+  }
 }
 
 void TDigitizer::SetTrapNorm(uint ch, uint val)
+{
+  auto err = CAEN_DGTZ_WriteRegister(fHandler, 0x10C4 + (ch << 8), val);
+  PrintError(err, "SetTrapNorm");
+}
+void TDigitizer::SetEneFineGain(uint ch, uint val)
 {
   auto err = CAEN_DGTZ_WriteRegister(fHandler, 0x10C4 + (ch << 8), val);
   PrintError(err, "SetTrapNorm");
@@ -432,7 +447,9 @@ void TDigitizer::SetNSPeak(uint ch, uint val)
 }
 void TDigitizer::SetPolarity(uint ch, uint val)
 {
-  auto err = RegisterSetBits(0x1080 + (ch << 8), 16, 16, val);
+  // auto err = RegisterSetBits(0x1080 + (ch << 8), 16, 16, val);
+  CAEN_DGTZ_PulsePolarity_t pol = CAEN_DGTZ_PulsePolarity_t(val);
+  auto err = CAEN_DGTZ_SetChannelPulsePolarity(fHandler, ch, pol);
   PrintError(err, "SetPolarity");
 }
 void TDigitizer::SetTrapNSBaseline(uint ch, uint val)
@@ -456,11 +473,11 @@ void TDigitizer::SetDiscr(uint ch, uint val)
   // But used in digiTES.  Why?
   // CAEN_DGTZ_WriteRegister(fHandler, 0x10D0 + (ch << 8), ZeroVoltLevel);
   auto err = RegisterSetBits(0x1080 + (ch << 8), 6, 6, 0);
-  PrintError(err, "SetDicr");
+  PrintError(err, "SetDiscr");
   err = RegisterSetBits(0x1080 + (ch << 8), 17, 17, 1);
-  PrintError(err, "SetDicr");
+  PrintError(err, "SetDiscr");
   err = RegisterSetBits(0x10A0 + (ch << 8), 12, 13, val);
-  PrintError(err, "SetDicr");
+  PrintError(err, "SetDiscr");
 }
 void TDigitizer::SetDynamicRange(uint ch, uint val)
 {

@@ -105,6 +105,7 @@ class TDigiPar
   uint fNBit;
   uint fDigiModel;
   DPPType fDPPType;
+  uint fTrapStep;
 
   // Board parameters
   uint fRecordLength;

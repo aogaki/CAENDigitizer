@@ -503,7 +503,10 @@ void SampleMonitor::FirstFit(TH1D *his, TF1 *f)
   auto FWHM = sigma * facFWHM;
   f->SetRange(mean - FWHM / 2, mean + FWHM / 2);
 
+  fFitCan->cd();
   his->Fit(f, "R");
+  fFitCan->Modified();
+  fFitCan->Update();
 
   RangeFit(his, f);
   RangeFit(his, f);
