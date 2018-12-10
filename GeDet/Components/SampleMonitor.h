@@ -85,6 +85,7 @@ class SampleMonitor : public DAQMW::DaqComponentBase
   bool fFirstFitFlag;
   TCanvas *fFitCan;
   TF1 *fFitFnc[kNCh];
+  void UploadResults();
 
   // For online monitoring
   THttpServer *fServ;
