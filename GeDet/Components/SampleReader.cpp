@@ -87,7 +87,7 @@ int SampleReader::daq_configure()
 {
   std::cerr << "*** SampleReader::configure" << std::endl;
 
-  int link = 0;
+  int link = 1;
   fDigitizer = new TDigitizer("Ge0", CAEN_DGTZ_USB, link);
 
   fDigitizer->ConfigDevice();

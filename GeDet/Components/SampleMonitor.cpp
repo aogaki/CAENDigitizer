@@ -8,6 +8,7 @@
  */
 #include <arpa/inet.h>
 
+#include <TFile.h>
 #include <TStyle.h>
 #include <TSystem.h>
 
@@ -435,7 +436,8 @@ int SampleMonitor::decode_data(const unsigned char *mydata)
 
 void SampleMonitor::FitHis()
 {
-  for (auto iCh = 0; iCh < kNCh; iCh++) {
+  // for (auto iCh = 0; iCh < kNCh; iCh++) {
+  for (auto iCh = 0; iCh <= 0; iCh++) {
     if (fHis[iCh]->GetEntries() == 0) continue;
     fFitCan->cd();
     auto his = fHis[iCh];
@@ -544,8 +546,15 @@ void SampleMonitor::UploadResults()
   // I expect noone do at same time
   // But such the expection is done by only the fool
   auto fileName = TString(Form("fit-%ld.jpg", time(nullptr)));
-  auto fullPath = "/home/aogaki/DAQ/Outputs/images/" + fileName;
-  if (fFitCan) fFitCan->Print(fullPath, "jpg");
+  auto imagePath = "/home/aogaki/DAQ/Outputs/images/" + fileName;
+  if (fFitCan) fFitCan->Print(imagePath, "jpg");
+
+  auto rootPath = "/home/aogaki/DAQ/Outputs/" + fileName + ".root";  // stupid!
+  TFile file(rootPath, "RECREATE");
+  for (auto &&his : fHis) {
+    if (his) his->Write();
+  }
+  file.Close();
 
   // Connect to Mongo DB
   // mongocxx::instance *inst{};
