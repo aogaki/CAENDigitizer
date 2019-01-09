@@ -21,7 +21,8 @@ constexpr int ONE_HIT_SIZE = sizeof(unsigned char) + sizeof(unsigned char) +
                              sizeof(unsigned long) + sizeof(short) +
                              (sizeof(unsigned short) * kNSample);
 
-constexpr int kMaxPacketSize = 2000000 - ONE_HIT_SIZE;
+constexpr int kMaxPacketSize =
+    2000000 - ONE_HIT_SIZE;  // 1024 * 1024 * 2 is max?
 
 // For data transfer buffer
 constexpr int BUFFER_SIZE = kNSample * 1024 * 2 * 16;
