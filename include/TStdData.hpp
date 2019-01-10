@@ -43,6 +43,7 @@ constexpr int ONE_HIT_SIZE = sizeof(unsigned char) + sizeof(unsigned char) +
 constexpr int kMaxPacketSize = 2000000 - ONE_HIT_SIZE;
 
 // For data transfer buffer
-constexpr int BUFFER_SIZE = 1024 * 1024 * 2 * 16;
+// constexpr int BUFFER_SIZE = 1024 * 1024 * 2 * 16;
+constexpr int BUFFER_SIZE = 1024 * 2 * 16;
 
 #endif
