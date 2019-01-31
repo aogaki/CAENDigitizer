@@ -1,0 +1,14 @@
+Use config file test.xml
+Use /usr/share/daqmw/conf/config.xsd for XML schema
+Use /usr/libexec/daqmw/DaqOperatorComp for DAQ-Operator
+Conf file validated: test.xml
+start new naming service... done
+Local Comps booting... done
+Now booting the DAQ-Operator... done
+Use config file test.xml
+Use /usr/share/daqmw/conf/config.xsd for XML schema
+Use /usr/libexec/daqmw/DaqOperatorComp for DAQ-Operator
+Conf file validated: test.xml
+start new naming service... done
+Local Comps booting... done
+Now booting the DAQ-Operator... done

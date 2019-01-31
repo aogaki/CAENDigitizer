@@ -39,7 +39,7 @@ int main(int argc, char **argv)
 {
   TApplication app("testApp", &argc, argv);
 
-  int link = 1;
+  int link = 0;
   auto digi = new TWaveRecord(CAEN_DGTZ_USB, link);
 
   digi->Initialize();
@@ -56,16 +56,16 @@ int main(int argc, char **argv)
   hisCharge->Draw();
 
   for (int i = 0; true; i++) {
-    //   // if (i > 10) break;
-    std::cout << i << std::endl;
+     //   // if (i > 10) break;
+     std::cout << i << std::endl;
 
-    // for (int j = 0; j < 10; j++) digi->SendSWTrigger();
-    digi->ReadEvents();
+     // for (int j = 0; j < 10; j++) digi->SendSWTrigger();
+     digi->ReadEvents();
 
-    auto dataArray = digi->GetDataArray();
-    const int nHit = digi->GetNEvents();
-    std::cout << nHit << std::endl;
-    for (int i = 0; i < nHit; i++) {
+     auto dataArray = digi->GetDataArray();
+     const int nHit = digi->GetNEvents();
+     std::cout << nHit << std::endl;
+     for (int i = 0; i < nHit; i++) {
       auto index = (i * ONE_HIT_SIZE);
       auto offset = 0;
       SampleData data;

@@ -1,0 +1,134 @@
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>test</title>
+</head>
+
+<body>
+  <form action="write.php" method="post">
+    <p>
+      Record Length
+      <input type="number" name="RecordLength" value="4096" min="4096" max="4096"> samples<br>
+    </p>
+    <p>
+      IO Level
+      <input type="radio" name="IOLevel" value="NIM" checked="checked">NIM
+      <input type="radio" name="IOLevel" value="TTL">TTL
+      <br>
+    </p>
+    <p>
+      DC Offset
+      <input type="number" name="DCOffset" value="10" min="0" max="100"> %<br>
+    </p>
+    <p>
+      Signal Polarity
+      <input type="radio" name="Polarity" value="Positive" checked="checked">Positive
+      <input type="radio" name="Polarity" value="Negative">Negative
+      <br>
+    </p>
+    <p>
+      Pre-Trigger Size
+      <input type="number" name="PreTrigger" value="200" min="0" max="1024"> samples<br>
+    </p>
+    <p>
+      Decimation
+      <select name="Decimation">
+        <option value="0" selected>Disabled</option>
+        <option value="1">2 samples (50 MS/s)</option>
+        <option value="2">4 samples (25 MS/s)</option>
+        <option value="3">8 samples (12.5 MS/s)</option>
+      </select>
+    </p>
+    <p>
+      TrapPoleZero
+      <input type="number" name="TrapPoleZero" value="50000" min="0" max="100000"> ns<br>
+    </p>
+    <p>
+      TrapFlatTop
+      <input type="number" name="TrapFlatTop" value="1000" min="0" max="100000"> ns<br>
+    </p>
+    <p>
+      TrapRiseTime
+      <input type="number" name="TrapRiseTime" value="5000" min="0" max="100000"> ns<br>
+    </p>
+    <p>
+      PeakingTime
+      <input type="number" name="PeakingTime" value="800" min="0" max="100000"> ns<br>
+    </p>
+    <p>
+      TTFDelay
+      <input type="number" name="TTFDelay" value="200" min="0" max="100000"> ns<br>
+    </p>
+    <p>
+      TTFSmoothing
+      <select name="TTFSmoothing">
+        <option value="0">Disabled</option>
+        <option value="1" selected>2 samples</option>
+        <option value="2">4 samples</option>
+        <option value="3">8 samples</option>
+        <option value="4">16 samples</option>
+      </select>
+    </p>
+    <p>
+      Threshold
+      <input type="number" name="Threshold" value="300" min="0" max="10000"> ADC channel<br>
+    </p>
+    <p>
+      TrgHoldOff
+      <input type="number" name="TrgHoldOff" value="1" min="0" max="10"> ?<br>
+    </p>
+    <p>
+      EneCoarseGain
+      <input type="number" name="EneCoarseGain" value="1.0" min="0.0" max="10.0" step="0.1"> ?<br>
+    </p>
+    <p>
+      EneFineGain
+      <input type="number" name="EneFineGain" value="1.0" min="0.0" max="10.0" step="0.1"> ?<br>
+    </p>
+    <p>
+      NSPeak
+      <select name="NSPeak">
+        <option value="0" selected>1 sample</option>
+        <option value="1">4 samples</option>
+        <option value="2">16 samples</option>
+        <option value="3">64 samples</option>
+      </select>
+    </p>
+    <p>
+      TrapNSBaseline
+      <select name="TrapNSBaseline">
+        <option value="0">0 sample</option>
+        <option value="1">16 samples</option>
+        <option value="2">64 samples</option>
+        <option value="3" selected>256 samples</option>
+        <option value="4">1024 samples</option>
+        <option value="5">4096 samples</option>
+        <option value="6">16384 samples</option>
+      </select>
+    </p>
+    <p>
+      FakeEventFlag
+      <!-- What is this? -->
+      <input type="radio" name="FakeEventFlag" value="0">0
+      <input type="radio" name="FakeEventFlag" value="1" checked>1
+    </p>
+    <p>
+      TrapCFDFraction
+      <select name="TrapCFDFraction">
+        <option value="0">25 %</option>
+        <option value="1" selected>50 %</option>
+        <option value="2">75 %</option>
+        <option value="3">100 %</option>
+      </select>
+    </p>
+    <p>
+      DynamicRange
+      <input type="radio" name="DynamicRange" value="0" checked>2Vpp
+      <input type="radio" name="DynamicRange" value="1">0.5Vpp
+    </p>
+    <input type="submit" value="Submit">
+  </form>
+</body>
+
+</html>
