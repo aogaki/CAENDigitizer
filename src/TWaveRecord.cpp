@@ -92,7 +92,7 @@ void TWaveRecord::ReadEvents()
 
   // fData->clear();
   TStdData data;
-  for (int32_t iEve = 0; iEve < fNEvents; iEve++) {
+  for (uint iEve = 0; iEve < fNEvents; iEve++) {
     err = CAEN_DGTZ_GetEventInfo(fHandler, fpReadoutBuffer, fBufferSize, iEve,
                                  &fEventInfo, &fpEventPtr);
     PrintError(err, "GetEventInfo");
@@ -108,7 +108,7 @@ void TWaveRecord::ReadEvents()
     err = CAEN_DGTZ_DecodeEvent(fHandler, fpEventPtr, (void **)&fpEventStd);
     PrintError(err, "DecodeEvent");
 
-    for (int iCh = 0; iCh < fNChs; iCh++) {
+    for (uint iCh = 0; iCh < fNChs; iCh++) {
       const uint32_t chSize = fpEventStd->ChSize[iCh];
       // if (chSize != kNSamples) {
       //   std::cout << "No. samples of wave form error" << std::endl;
@@ -119,19 +119,19 @@ void TWaveRecord::ReadEvents()
       // const uint32_t start = 0;
       int32_t start = (chSize * (100 - fPostTriggerSize) / 100) -
                       (fGateSize / fTSample / 2);
-      if (start < 0) start = 0;
+      if (start < 1) start = 1;
       // const uint32_t stop = chSize;
       int32_t stop = (chSize * (100 - fPostTriggerSize) / 100) +
                      (fGateSize / fTSample / 2);
       uint32_t baseSample = 256;
-      if (baseSample > start) baseSample = start - 1;
+      if (baseSample > uint(start)) baseSample = start - 1;
       fBaseLine = 0;
       for (uint32_t i = 0; i < baseSample; i++) {
         fBaseLine += fpEventStd->DataChannel[iCh][i];
       }
       fBaseLine /= baseSample;
 
-      for (uint32_t i = start; i < stop; i++) {
+      for (auto i = start; i < stop; i++) {
         sumCharge += (fBaseLine - fpEventStd->DataChannel[iCh][i]);
         // std::cout << fBaseLine <<"\t"<< fpEventStd->DataChannel[iCh][i] <<
         // std::endl;
@@ -179,6 +179,15 @@ void TWaveRecord::AcquisitionConfig()
   err = CAEN_DGTZ_SetChannelEnableMask(fHandler, mask);
   PrintError(err, "SetChannelEnableMask");
 
+  // Set DC offset
+  fDCOffset = 0.8;
+  auto fac = (1. - fDCOffset);
+  if (fac <= 0. || fac >= 1.) fac = 0.5;
+  uint32_t offset = 0xFFFF * fac;
+  for (uint32_t iCh = 0; iCh < fNChs; iCh++)
+    err = CAEN_DGTZ_SetChannelDCOffset(fHandler, iCh, offset);
+  PrintError(err, "SetChannelDCOffset");
+
   // Set the acquisition mode
   err = CAEN_DGTZ_SetAcquisitionMode(fHandler, CAEN_DGTZ_SW_CONTROLLED);
   PrintError(err, "SetAcquisitionMode");
@@ -194,11 +203,18 @@ void TWaveRecord::TriggerConfig()
 
   // Set the trigger threshold
   // The unit of its are V
-  int32_t th = ((1 << fNBits) / 2) * ((fVth / (fVpp / 2)));
-  uint32_t thVal = (1 << fNBits) / 2;
-  if (thVal == 0) thVal = ((1 << fNBits) / 2);
-  thVal += th;
-  std::cout << "Vth:\t" << thVal << std::endl;
+  // int32_t th = ((1 << fNBits) / 2) * ((fVth / (fVpp / 2)));
+  // uint32_t thVal = (1 << fNBits) / 2;
+  // if (thVal == 0) thVal = ((1 << fNBits) / 2);
+  // thVal += th;
+  // std::cout << "Vth:\t" << thVal << std::endl;
+
+  // Set the trigger threshold
+  // The unit of its are V
+  int32_t th = (1 << fNBits) * (fVth / fVpp);
+  auto offset = (1 << fNBits) * fDCOffset;
+  auto thVal = th + offset;
+  std::cout << "Vth:\t" << thVal << "\t" << fVth << std::endl;
 
   for (uint32_t iCh = 0; iCh < fNChs; iCh++) {
     // Think about multiple channel setting

@@ -32,7 +32,7 @@ class TDigitizer
 
   virtual void ReadEvents() = 0;
 
-  // When the FW is wxpired.  Configuration can be done.
+  // When the FW is expired.  Configuration can be done.
   // But, StartAcquisition can not be done.
   virtual CAEN_DGTZ_ErrorCode StartAcquisition() = 0;
   virtual void StopAcquisition() = 0;
@@ -61,7 +61,8 @@ class TDigitizer
 
   unsigned char *fDataArray;
 
-  int RegisterSetBits(uint16_t addr, int start_bit, int end_bit, int val);
+  CAEN_DGTZ_ErrorCode RegisterSetBits(uint16_t addr, int start_bit, int end_bit,
+                                      int val);
 
  private:
   // Those SPI register functions are copy from digiTES

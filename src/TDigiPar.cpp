@@ -27,7 +27,7 @@ void TDigiPar::InitPar()
   fNCh = 0;
   fRecordLength = kNSamples;
 
-  for (auto iCh = 0; iCh < kgMaxCh; iCh++) {
+  for (uint iCh = 0; iCh < kgMaxCh; iCh++) {
     fChFlag[iCh] = false;
     fPolarity[iCh] = CAEN_DGTZ_PulsePolarityNegative;
     fDCOffset[iCh] = 0;
@@ -236,7 +236,7 @@ void TDigiPar::LoadPolarity()
 {
   std::array<std::string, kgMaxCh> tmp{""};
   LoadChPar("Polarity", tmp);
-  for (auto iCh = 0; iCh < fNCh; iCh++) {
+  for (uint iCh = 0; iCh < fNCh; iCh++) {
     CAEN_DGTZ_PulsePolarity_t pol;
     if (tmp[iCh] == "Positive")
       pol = CAEN_DGTZ_PulsePolarityPositive;
@@ -267,14 +267,14 @@ void TDigiPar::LoadDCOffset()
   //   endl;
   // }
   LoadChPar("DCOffset", fDCOffset);
-  for (auto iCh = 0; iCh < fNCh; iCh++)
+  for (uint iCh = 0; iCh < fNCh; iCh++)
     fDCOffset[iCh] = fDCOffset[iCh] * 0xFFFF / 100;
 }
 
 void TDigiPar::LoadDecimation()
 {
   LoadChPar("Decimation", fDecimation);
-  for (auto iCh = 0; iCh < kgMaxCh; iCh++) {
+  for (uint iCh = 0; iCh < kgMaxCh; iCh++) {
     fTperS[iCh] = fTimeSample * 4 * (1 << fDecimation[iCh]);
   }
 }
@@ -282,25 +282,25 @@ void TDigiPar::LoadDecimation()
 void TDigiPar::LoadTrapPoleZero()
 {
   LoadChPar("TrapPoleZero", fTrapPoleZero);
-  for (auto iCh = 0; iCh < kgMaxCh; iCh++) fTrapPoleZero[iCh] /= fTperS[iCh];
+  for (uint iCh = 0; iCh < kgMaxCh; iCh++) fTrapPoleZero[iCh] /= fTperS[iCh];
 }
 
 void TDigiPar::LoadTrapFlatTop()
 {
   LoadChPar("TrapFlatTop", fTrapFlatTop);
-  for (auto iCh = 0; iCh < kgMaxCh; iCh++) fTrapFlatTop[iCh] /= fTperS[iCh];
+  for (uint iCh = 0; iCh < kgMaxCh; iCh++) fTrapFlatTop[iCh] /= fTperS[iCh];
 }
 
 void TDigiPar::LoadTrapRiseTime()
 {
   LoadChPar("TrapRiseTime", fTrapRiseTime);
-  for (auto iCh = 0; iCh < kgMaxCh; iCh++) fTrapRiseTime[iCh] /= fTperS[iCh];
+  for (uint iCh = 0; iCh < kgMaxCh; iCh++) fTrapRiseTime[iCh] /= fTperS[iCh];
 }
 
 void TDigiPar::LoadPeakingTime()
 {
   LoadChPar("PeakingTime", fPeakingTime);
-  for (auto iCh = 0; iCh < kgMaxCh; iCh++) {
+  for (uint iCh = 0; iCh < kgMaxCh; iCh++) {
     fPeakingTime[iCh] /= fTperS[iCh];
     if (fPeakingTime[iCh] > fTrapFlatTop[iCh])
       fPeakingTime[iCh] = fTrapFlatTop[iCh];
@@ -310,7 +310,7 @@ void TDigiPar::LoadPeakingTime()
 void TDigiPar::LoadTTFDelay()
 {
   LoadChPar("TTFDelay", fTTFDelay);
-  for (auto iCh = 0; iCh < kgMaxCh; iCh++) fTTFDelay[iCh] /= fTimeSample * 4;
+  for (uint iCh = 0; iCh < kgMaxCh; iCh++) fTTFDelay[iCh] /= fTimeSample * 4;
 }
 
 void TDigiPar::LoadTTFSmoothing() { LoadChPar("TTFSmoothing", fTTFSmoothing); }
@@ -322,8 +322,8 @@ void TDigiPar::LoadTrgHoldOff()
   // Stupid coding!!!!  8 means stu in digiTES.
   // What is this?
   LoadChPar("TrgHoldOff", fTrgHoldOff);
-  auto stu = 8;  // For 730.  16 for 725
-  for (auto iCh = 0; iCh < kgMaxCh; iCh++) fTrgHoldOff[iCh] /= stu;
+  uint stu = 8;  // For 730.  16 for 725
+  for (uint iCh = 0; iCh < kgMaxCh; iCh++) fTrgHoldOff[iCh] /= stu;
 }
 
 void TDigiPar::LoadEneCoarseGain()
@@ -354,7 +354,7 @@ void TDigiPar::LoadDynamicRange() { LoadChPar("DynamicRange", fDynamicRange); }
 
 void TDigiPar::CalParameters()
 {
-  for (auto iCh = 0; iCh < kgMaxCh; iCh++) {
+  for (uint iCh = 0; iCh < kgMaxCh; iCh++) {
     auto Tg = (fTrapPoleZero[iCh] * fTrapRiseTime[iCh]) /
               (fEneCoarseGain[iCh] * fEneFineGain[iCh]);
 

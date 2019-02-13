@@ -20,10 +20,6 @@ class TPSD : public TDigitizer
 
   uint32_t GetNEvents() { return fNEvents; };
 
-  void SetMaster();
-  void SetSlave();
-  void StartSyncMode(uint32_t nMods);
-
  private:
   virtual void SetParameters();
 
@@ -36,8 +32,7 @@ class TPSD : public TDigitizer
   uint32_t fPostTriggerSize;
   uint32_t fRecordLength;
 
-  double fVpp;
-  double fVth;
+  // double fVpp;
   uint32_t fBLTEvents;
 
   // Memory
@@ -53,6 +48,12 @@ class TPSD : public TDigitizer
   std::vector<uint64_t> fTime;
 
   uint32_t fNEvents;
+
+  void ReadPar();
+  double fDCOffset;
+  int fVth;
+  uint fChMask;
+  CAEN_DGTZ_PulsePolarity_t fPolarity;
 };
 
 #endif

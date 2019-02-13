@@ -39,18 +39,18 @@ int main(int argc, char **argv)
 {
   TApplication app("testApp", &argc, argv);
 
-  int link = 0;
+  int link = 1;
   auto digi = new TWaveRecord(CAEN_DGTZ_USB, link);
 
   digi->Initialize();
 
   digi->StartAcquisition();
 
-  TH1D *hisCharge = new TH1D("hisCharge", "test", 20000, 0, 20000);
+  TH1D *hisCharge = new TH1D("hisCharge", "test", 20000, 0, 200000);
   TCanvas *canvas = new TCanvas();
   TGraph *grWave = new TGraph();
-  grWave->SetMaximum(9000);
-  grWave->SetMinimum(7000);
+  grWave->SetMaximum(20000);
+  grWave->SetMinimum(0);
   TCanvas *canvas2 = new TCanvas();
   canvas->cd();
   hisCharge->Draw();
@@ -90,7 +90,8 @@ int main(int argc, char **argv)
           memcpy(&pulse, &dataArray[index + offset], sizeof(pulse));
           offset += sizeof(pulse);
 
-          grWave->SetPoint(iSample, iSample * 2, pulse);  // one sample 2 ns
+          //if(iSample >= 200 && iSample < 500) 
+	    grWave->SetPoint(iSample, iSample * 2, pulse);  // one sample 2 ns
         }
       }
     }

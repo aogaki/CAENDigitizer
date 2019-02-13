@@ -1,7 +1,7 @@
 #ifndef TDIGIPAR_HPP
 #define TDIGIPAR_HPP 1
 
-// Parameter class of CAEN digitizer.
+// Parameter class of CAEN digitizer. For PHA FW
 // Generating parameters from BoardInfo as same as digiTES
 // Reading some parameters from XML file or SQL server
 

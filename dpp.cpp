@@ -8,6 +8,7 @@
 #include <TH1.h>
 
 #include "TPSD.hpp"
+#include "TDPP.hpp"
 #include "TWaveRecord.hpp"
 
 int kbhit(void) {
@@ -39,7 +40,8 @@ int main(int argc, char **argv) {
   TApplication app("testApp", &argc, argv);
 
   int link = 0;
-  auto digi = new TPSD(CAEN_DGTZ_OpticalLink, link, 0);
+  auto digi = new TPSD(CAEN_DGTZ_USB, link);
+  //auto digi = new TDPP(CAEN_DGTZ_USB, link);
   digi->Initialize();
   digi->StartAcquisition();
 
@@ -76,7 +78,7 @@ int main(int argc, char **argv) {
       memcpy(&data.TimeStamp, &dataArray[index + offset],
              sizeof(data.TimeStamp));
       offset += sizeof(data.TimeStamp);
-      std::cout << data.TimeStamp << std::endl;
+      //std::cout << data.TimeStamp << std::endl;
 
       memcpy(&data.ADC, &dataArray[index + offset], sizeof(data.ADC));
       offset += sizeof(data.ADC);
@@ -104,7 +106,7 @@ int main(int argc, char **argv) {
     if (kbhit())
       break;
 
-    usleep(10000);
+    usleep(1000);
   }
 
   digi->StopAcquisition();

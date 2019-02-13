@@ -3,14 +3,21 @@
 #include "TDigitizer.hpp"
 
 TDigitizer::TDigitizer()
-    : fHandler(-1), fModNumber(127), fDigitizerModel(0), fNChs(0), fTSample(0),
-      fNBits(0) {}
+    : fHandler(-1),
+      fModNumber(127),
+      fDigitizerModel(0),
+      fNChs(0),
+      fTSample(0),
+      fNBits(0)
+{
+}
 
 TDigitizer::~TDigitizer(){};
 
 void TDigitizer::PrintError(const CAEN_DGTZ_ErrorCode &err,
-                            const std::string &funcName) {
-  if (err < 0) { // 0 is success
+                            const std::string &funcName)
+{
+  if (err < 0) {  // 0 is success
     std::cout << "In " << funcName << ", error code = " << err << std::endl;
     // CAEN_DGTZ_CloseDigitizer(fHandler);
     // throw err;
@@ -18,7 +25,8 @@ void TDigitizer::PrintError(const CAEN_DGTZ_ErrorCode &err,
 }
 
 void TDigitizer::Open(CAEN_DGTZ_ConnectionType type, int link, int node,
-                      uint32_t VMEadd) {
+                      uint32_t VMEadd)
+{
   auto err = CAEN_DGTZ_OpenDigitizer(type, link, node, VMEadd, &fHandler);
   PrintError(err, "OpenDigitizer");
   fModNumber = (unsigned int)node;
@@ -32,22 +40,26 @@ void TDigitizer::Open(CAEN_DGTZ_ConnectionType type, int link, int node,
   }
 }
 
-void TDigitizer::Close() {
+void TDigitizer::Close()
+{
   auto err = CAEN_DGTZ_CloseDigitizer(fHandler);
   PrintError(err, "CloseDigitizer");
 }
 
-void TDigitizer::Reset() {
+void TDigitizer::Reset()
+{
   auto err = CAEN_DGTZ_Reset(fHandler);
   PrintError(err, "Reset");
 }
 
-void TDigitizer::SendSWTrigger() {
+void TDigitizer::SendSWTrigger()
+{
   auto err = CAEN_DGTZ_SendSWtrigger(fHandler);
   PrintError(err, "SendSWTrigger");
 }
 
-void TDigitizer::GetBoardInfo() {
+void TDigitizer::GetBoardInfo()
+{
   CAEN_DGTZ_BoardInfo_t info;
   auto err = CAEN_DGTZ_GetInfo(fHandler, &info);
   PrintError(err, "GetInfo");
@@ -99,7 +111,7 @@ void TDigitizer::GetBoardInfo() {
     fDigitizerModel = 720;
     fTSample = 4;
     fNBits = 12;
-  } else if (info.FamilyCode == 999) { // temporary code for Hexagon
+  } else if (info.FamilyCode == 999) {  // temporary code for Hexagon
     fDigitizerModel = 5000;
     fTSample = 10;
     fNBits = 14;
@@ -108,10 +120,10 @@ void TDigitizer::GetBoardInfo() {
   }
 
   uint32_t majorNumber = atoi(info.AMC_FirmwareRel);
-  if (fDigitizerModel == 5000) {       // Hexagon
-    fFirmware = FirmWareCode::DPP_PHA; // It will be never used at ELI?
+  if (fDigitizerModel == 5000) {        // Hexagon
+    fFirmware = FirmWareCode::DPP_PHA;  // It will be never used at ELI?
   } else if (majorNumber == 128) {
-    fFirmware = FirmWareCode::DPP_PHA; // It will be never used at ELI?
+    fFirmware = FirmWareCode::DPP_PHA;  // It will be never used at ELI?
   } else if (majorNumber == 130) {
     fFirmware = FirmWareCode::DPP_CI;
   } else if (majorNumber == 131) {
@@ -119,9 +131,9 @@ void TDigitizer::GetBoardInfo() {
   } else if (majorNumber == 132) {
     fFirmware = FirmWareCode::DPP_PSD;
   } else if (majorNumber == 136) {
-    fFirmware = FirmWareCode::DPP_PSD; // NOTE: valid also for x725
+    fFirmware = FirmWareCode::DPP_PSD;  // NOTE: valid also for x725
   } else if (majorNumber == 139) {
-    fFirmware = FirmWareCode::DPP_PHA; // NOTE: valid also for x725
+    fFirmware = FirmWareCode::DPP_PHA;  // NOTE: valid also for x725
   } else {
     fFirmware = FirmWareCode::STD;
   }
@@ -131,7 +143,8 @@ void TDigitizer::GetBoardInfo() {
             << "Firmware code:\t" << int(fFirmware) << std::endl;
 }
 
-void TDigitizer::BoardCalibration() {
+void TDigitizer::BoardCalibration()
+{
   if ((fDigitizerModel == 730) || (fDigitizerModel == 725)) {
     // Copy from digiTes
     // Honestly, I do not know what is this.
@@ -151,7 +164,7 @@ void TDigitizer::BoardCalibration() {
 
       // enable lock
       ret |= ReadSPIRegister(iCh, 0xA4, ctrl);
-      ctrl |= 0x4; // set bit 2
+      ctrl |= 0x4;  // set bit 2
       ret |= WriteSPIRegister(iCh, 0xA4, ctrl);
 
       ret |= ReadSPIRegister(iCh, 0xA4, ctrl);
@@ -164,7 +177,8 @@ void TDigitizer::BoardCalibration() {
 }
 
 CAEN_DGTZ_ErrorCode TDigitizer::WriteSPIRegister(uint32_t ch, uint32_t address,
-                                                 uint32_t value) {
+                                                 uint32_t value)
+{
   uint32_t SPIBusy = 1;
   int32_t ret = CAEN_DGTZ_Success;
 
@@ -190,9 +204,9 @@ CAEN_DGTZ_ErrorCode TDigitizer::WriteSPIRegister(uint32_t ch, uint32_t address,
   return CAEN_DGTZ_Success;
 }
 
-CAEN_DGTZ_ErrorCode
-TDigitizer::ReadSPIRegister(uint32_t ch, uint32_t address,
-                            uint32_t &value) { // Copy from digiTES
+CAEN_DGTZ_ErrorCode TDigitizer::ReadSPIRegister(uint32_t ch, uint32_t address,
+                                                uint32_t &value)
+{  // Copy from digiTES
   uint32_t SPIBusy = 1;
   int32_t ret = CAEN_DGTZ_Success;
   uint32_t SPIBusyAddr = 0x1088 + (ch << 8);
@@ -217,31 +231,30 @@ TDigitizer::ReadSPIRegister(uint32_t ch, uint32_t address,
   return CAEN_DGTZ_Success;
 }
 
-int TDigitizer::RegisterSetBits(uint16_t addr, int start_bit, int end_bit,
-                                int val) { // copy from digiTes
+CAEN_DGTZ_ErrorCode TDigitizer::RegisterSetBits(uint16_t addr, int start_bit,
+                                                int end_bit, int val)
+{  // copy from digiTes
   uint32_t mask = 0, reg;
   int ret;
   int i;
 
   if (((addr & 0xFF00) == 0x8000) && (addr != 0x8000) && (addr != 0x8004) &&
-      (addr != 0x8008)) { // broadcast access to channel individual registers
+      (addr != 0x8008)) {  // broadcast access to channel individual registers
     // (loop over channels)
     uint16_t ch;
     for (ch = 0; ch < fNChs; ch++) {
       ret = CAEN_DGTZ_ReadRegister(fHandler, 0x1000 | (addr & 0xFF) | (ch << 8),
                                    &reg);
-      for (i = start_bit; i <= end_bit; i++)
-        mask |= 1 << i;
-      reg = reg & ~mask | ((val << start_bit) & mask);
+      for (i = start_bit; i <= end_bit; i++) mask |= 1 << i;
+      reg = (reg & ~mask) | ((val << start_bit) & mask);
       ret |= CAEN_DGTZ_WriteRegister(fHandler,
                                      0x1000 | (addr & 0xFF) | (ch << 8), reg);
     }
-  } else { // access to channel individual register or mother board register
+  } else {  // access to channel individual register or mother board register
     ret = CAEN_DGTZ_ReadRegister(fHandler, addr, &reg);
-    for (i = start_bit; i <= end_bit; i++)
-      mask |= 1 << i;
-    reg = reg & ~mask | ((val << start_bit) & mask);
+    for (i = start_bit; i <= end_bit; i++) mask |= 1 << i;
+    reg = (reg & ~mask) | ((val << start_bit) & mask);
     ret |= CAEN_DGTZ_WriteRegister(fHandler, addr, reg);
   }
-  return ret;
+  return CAEN_DGTZ_ErrorCode(ret);
 }

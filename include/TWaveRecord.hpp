@@ -47,6 +47,7 @@ class TWaveRecord : public TDigitizer
   // For trigger setting
   double fVpp;
   double fVth;
+  double fDCOffset;
   CAEN_DGTZ_TriggerMode_t fTriggerMode;
   CAEN_DGTZ_TriggerPolarity_t fPolarity;
   uint32_t fPostTriggerSize;
