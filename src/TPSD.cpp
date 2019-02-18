@@ -60,9 +60,6 @@ void TPSD::Initialize()
   // Buffer setting
   err = CAEN_DGTZ_SetNumEventsPerAggregate(fHandler, fBLTEvents);
   PrintError(err, "SetNumEventsPerAggregate");
-  // 0 means automatically set
-  err = CAEN_DGTZ_SetDPPEventAggregation(fHandler, 0, 0);
-  PrintError(err, "SetDPPEventAggregation");
 
   // Synchronization Mode
   err = CAEN_DGTZ_SetRunSynchronizationMode(fHandler,
@@ -96,12 +93,15 @@ void TPSD::Initialize()
 
   // Set register to use extended 47 bit time stamp
   for (uint i = 0; i < fNChs; i++) RegisterSetBits(0x1084 + (i << 8), 8, 10, 0);
+
+  // 0 means automatically set
+  err = CAEN_DGTZ_SetDPPEventAggregation(fHandler, 0, 0);
+  PrintError(err, "SetDPPEventAggregation");
 }
 
 void TPSD::ReadEvents()
 {
-  fNEvents = 0;  // Event counter
-
+  fNEvents = 0;  // Event counter.  This should be the first of this function
   CAEN_DGTZ_ErrorCode err;
 
   uint32_t bufferSize;
@@ -185,7 +185,7 @@ void TPSD::SetParameters()
   fDCOffset = 0.5;
   fVth = 100;
   fPolarity = CAEN_DGTZ_PulsePolarityNegative;
-  fChMask = 0b00000010;
+  fChMask = 0b00000001;
 
   ReadPar();
 
@@ -210,19 +210,21 @@ void TPSD::SetPSDPar()
     0 -> Disabled
     1 -> Enabled */
     fParPSD.selft[iCh] = 1;
+
     // Trigger configuration:
     //    CAEN_DGTZ_DPP_TriggerMode_Normal ->  Each channel can self-trigger
     //    independently from the other channels
     //    CAEN_DGTZ_DPP_TriggerMode_Coincidence -> A validation signal must
     //    occur inside the shaped trigger coincidence window
-    fParPSD.trgc[iCh] =
-        CAEN_DGTZ_DPP_TriggerConfig_t(CAEN_DGTZ_DPP_TriggerMode_Normal);
+    // fParPSD.trgc[iCh] =
+    //     CAEN_DGTZ_DPP_TriggerConfig_t(CAEN_DGTZ_DPP_TriggerMode_Normal);
+    fParPSD.trgc[iCh] = CAEN_DGTZ_DPP_TriggerConfig_Threshold;
 
     /*Discrimination mode for the event selection
     CAEN_DGTZ_DPP_DISCR_MODE_LED -> Leading Edge Distrimination
     CAEN_DGTZ_DPP_DISCR_MODE_CFD -> Constant Fraction Distrimination*/
-    // fParPSD.discr[iCh] = CAEN_DGTZ_DPP_DISCR_MODE_LED;
-    fParPSD.discr[iCh] = CAEN_DGTZ_DPP_DISCR_MODE_CFD;
+    fParPSD.discr[iCh] = CAEN_DGTZ_DPP_DISCR_MODE_LED;
+    // fParPSD.discr[iCh] = CAEN_DGTZ_DPP_DISCR_MODE_CFD;
 
     /*CFD delay (N*2ns for x730  and N*4ns for x725)  */
     fParPSD.cfdd[iCh] = 4;
@@ -244,11 +246,10 @@ void TPSD::SetPSDPar()
   CAEN_DGTZ_DPP_PSD_PUR_DetectOnly -> Only Detect Pile-Up
   CAEN_DGTZ_DPP_PSD_PUR_Enabled -> Reject Pile-Up */
   fParPSD.purh = CAEN_DGTZ_DPP_PSD_PUR_DetectOnly;
-  fParPSD.purgap =
-      100;  // Purity Gap in LSB units (1LSB = 0.12 mV for 2Vpp Input Range,
-            // 1LSB = 0.03 mV for 0.5 Vpp Input Range )
-  fParPSD.blthr = 3;  // Baseline Threshold
-  fParPSD.trgho = 8;  // Trigger HoldOff
+  fParPSD.purgap = 10;  // Purity Gap in LSB units (1LSB = 0.12 mV for 2Vpp
+                        // Input Range, 1LSB = 0.03 mV for 0.5 Vpp Input Range )
+  fParPSD.blthr = 3;    // Baseline Threshold
+  fParPSD.trgho = 8;    // Trigger HoldOff
 }
 
 void TPSD::AcquisitionConfig()
@@ -282,23 +283,20 @@ void TPSD::TriggerConfig()
   err = CAEN_DGTZ_SetSWTriggerMode(fHandler, fTriggerMode);
   PrintError(err, "SetSWTriggerMode");
 
-  uint32_t samples = fRecordLength * 0.1;
-  for (uint32_t iCh = 0; iCh < fNChs; iCh++) {
-    err = CAEN_DGTZ_SetDPPPreTriggerSize(fHandler, iCh, samples);
-    PrintError(err, "SetDPPPreTriggerSize");
-  }
+  // uint32_t samples = fRecordLength * 0.1;
+  // for (uint32_t iCh = 0; iCh < fNChs; iCh++) {
+  //   err = CAEN_DGTZ_SetDPPPreTriggerSize(fHandler, iCh, samples);
+  //   PrintError(err, "SetDPPPreTriggerSize");
+  // }
+  //
+  // for (uint32_t iCh = 0; iCh < fNChs; iCh++) {
+  //   err = CAEN_DGTZ_SetChannelPulsePolarity(fHandler, iCh, fPolarity);
+  //   PrintError(err, "CAEN_DGTZ_SetChannelPulsePolarity");
+  // }
 
-  for (uint32_t iCh = 0; iCh < fNChs; iCh++) {
-    err = CAEN_DGTZ_SetChannelPulsePolarity(fHandler, iCh, fPolarity);
-    PrintError(err, "CAEN_DGTZ_SetChannelPulsePolarity");
-  }
-
-  if (fFirmware == FirmWareCode::DPP_PSD) {
-    err = CAEN_DGTZ_SetDPPTriggerMode(
-        fHandler,
-        CAEN_DGTZ_DPP_TriggerMode_t::CAEN_DGTZ_DPP_TriggerMode_Normal);
-    PrintError(err, "SetDPPTriggerMode");
-  }
+  err = CAEN_DGTZ_SetDPPTriggerMode(
+      fHandler, CAEN_DGTZ_DPP_TriggerMode_t::CAEN_DGTZ_DPP_TriggerMode_Normal);
+  PrintError(err, "SetDPPTriggerMode");
 }
 
 void TPSD::AllocateMemory()

@@ -20,6 +20,10 @@ class TPSD : public TDigitizer
 
   uint32_t GetNEvents() { return fNEvents; };
 
+  void SetChMask(uint mask) { fChMask = mask; };
+
+  void LoadPSDPar(CAEN_DGTZ_DPP_PSD_Params_t par) { fParPSD = par; };
+
  private:
   virtual void SetParameters();
 

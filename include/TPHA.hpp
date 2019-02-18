@@ -25,7 +25,6 @@ class TPHA : public TDigitizer
   void Initialize() { ConfigDevice(); };
 
   // Acquisition controll
-  // void SendSWTrigger();
   CAEN_DGTZ_ErrorCode StartAcquisition();
   void StopAcquisition();
 
