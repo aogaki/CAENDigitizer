@@ -59,6 +59,7 @@ class TDigitizer
 
   void PrintError(const CAEN_DGTZ_ErrorCode &err, const std::string &funcName);
 
+  uint32_t fNEvents;
   unsigned char *fDataArray;
 
   CAEN_DGTZ_ErrorCode RegisterSetBits(uint16_t addr, int start_bit, int end_bit,

@@ -7,7 +7,7 @@
 #include <TGraph.h>
 #include <TH1.h>
 
-#include "TDigiPHA.hpp"
+//#include "TDigiPHA.hpp"
 #include "TPHA.hpp"
 #include "TWaveRecord.hpp"
 
@@ -42,8 +42,8 @@ int main(int argc, char **argv)
   TApplication app("testApp", &argc, argv);
 
   int link = -1;
-  auto digi = new TDigiPHA("Ge0", CAEN_DGTZ_USB, link);
-  // auto digi = new TPHA(CAEN_DGTZ_USB, link);
+  // auto digi = new TDigiPHA("Ge0", CAEN_DGTZ_USB, link);
+  auto digi = new TPHA("Ge0", CAEN_DGTZ_USB, link);
   // auto digi = new TPHA(CAEN_DGTZ_OpticalLink, link);
 
   digi->Initialize();

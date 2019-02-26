@@ -1,9 +1,11 @@
 #ifndef TPSD_hpp
 #define TPSD_hpp 1
 
-#include "TDigitizer.hpp"
+#include <vector>
 
-class TPSD : public TDigitizer
+#include "TDPP.hpp"
+
+class TPSD : public TDPP
 {
  public:
   TPSD();
@@ -14,11 +16,7 @@ class TPSD : public TDigitizer
   void Initialize();
 
   void ReadEvents();
-
-  CAEN_DGTZ_ErrorCode StartAcquisition();
-  void StopAcquisition();
-
-  uint32_t GetNEvents() { return fNEvents; };
+  void ReadADC(std::vector<uint> &adc);
 
   void SetChMask(uint mask) { fChMask = mask; };
 
@@ -27,8 +25,8 @@ class TPSD : public TDigitizer
  private:
   virtual void SetParameters();
 
-  virtual void AcquisitionConfig();
-  virtual void TriggerConfig();
+  void AcquisitionConfig();
+  void TriggerConfig();
 
   void SetPSDPar();
   CAEN_DGTZ_DPP_PSD_Params_t fParPSD;
@@ -47,12 +45,6 @@ class TPSD : public TDigitizer
   CAEN_DGTZ_DPP_PSD_Waveforms_t *fpPSDWaveform;  // waveforms buffer
 
   // Data
-  std::vector<uint64_t> fTimeOffset;
-  std::vector<uint64_t> fPreviousTime;
-  std::vector<uint64_t> fTime;
-
-  uint32_t fNEvents;
-
   void ReadPar();
   double fDCOffset;
   int fVth;

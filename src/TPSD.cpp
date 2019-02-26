@@ -14,7 +14,7 @@ void DelPointer(T *&pointer)
 }
 
 TPSD::TPSD()
-    : TDigitizer(),
+    : TDPP(),
       fpReadoutBuffer(nullptr),
       fppPSDEvents(nullptr),
       fpPSDWaveform(nullptr)
@@ -92,7 +92,11 @@ void TPSD::Initialize()
   BoardCalibration();
 
   // Set register to use extended 47 bit time stamp
-  for (uint i = 0; i < fNChs; i++) RegisterSetBits(0x1084 + (i << 8), 8, 10, 0);
+  // for (uint i = 0; i < fNChs; i++) RegisterSetBits(0x1084 + (i << 8), 8, 10,
+  // 0);
+
+  // Set register to use extended time stamp flags and fine time stamp
+  for (uint i = 0; i < fNChs; i++) RegisterSetBits(0x1084 + (i << 8), 8, 10, 2);
 
   // 0 means automatically set
   err = CAEN_DGTZ_SetDPPEventAggregation(fHandler, 0, 0);
@@ -116,15 +120,20 @@ void TPSD::ReadEvents()
   PrintError(err, "GetDPPEvents");
 
   for (uint iCh = 0; iCh < fNChs; iCh++) {
+    if (((fChMask >> iCh) & 0b1) != 0b1) continue;
     for (uint iEve = 0; iEve < nEvents[iCh]; iEve++) {
       err = CAEN_DGTZ_DecodeDPPWaveforms(fHandler, &fppPSDEvents[iCh][iEve],
                                          fpPSDWaveform);
       PrintError(err, "DecodeDPPWaveforms");
 
+      // For Extended time stamp
       auto tdc =
           fppPSDEvents[iCh][iEve].TimeTag +
           ((uint64_t)((fppPSDEvents[iCh][iEve].Extras >> 16) & 0xFFFF) << 31);
       if (fTSample > 0) tdc *= fTSample;
+      // Stupid test
+      tdc = (fppPSDEvents[iCh][iEve].Extras & 0xFFFF);
+
       fTime[iCh] = tdc;
 
       auto index = fNEvents * ONE_HIT_SIZE;
@@ -143,6 +152,31 @@ void TPSD::ReadEvents()
       constexpr auto waveSize = sizeof(fpPSDWaveform->Trace1[0]) * kNSamples;
       memcpy(&fDataArray[index], fpPSDWaveform->Trace1, waveSize);
 
+      fNEvents++;
+    }
+  }
+}
+
+void TPSD::ReadADC(std::vector<uint> &adc)
+{
+  fNEvents = 0;  // Event counter.  This should be the first of this function
+  CAEN_DGTZ_ErrorCode err;
+
+  uint32_t bufferSize;
+  err = CAEN_DGTZ_ReadData(fHandler, CAEN_DGTZ_SLAVE_TERMINATED_READOUT_MBLT,
+                           fpReadoutBuffer, &bufferSize);
+  PrintError(err, "ReadData");
+  if (bufferSize == 0) return;  // in the case of 0, GetDPPEvents makes crush
+
+  uint32_t nEvents[fNChs];
+  err = CAEN_DGTZ_GetDPPEvents(fHandler, fpReadoutBuffer, bufferSize,
+                               (void **)fppPSDEvents, nEvents);
+  PrintError(err, "GetDPPEvents");
+
+  for (uint iCh = 0; iCh < fNChs; iCh++) {
+    if (((fChMask >> iCh) & 0b1) != 0b1) continue;
+    for (uint iEve = 0; iEve < nEvents[iCh]; iEve++) {
+      adc.push_back(fppPSDEvents[iCh][iEve].ChargeLong);
       fNEvents++;
     }
   }
@@ -186,6 +220,7 @@ void TPSD::SetParameters()
   fVth = 100;
   fPolarity = CAEN_DGTZ_PulsePolarityNegative;
   fChMask = 0b00000001;
+  // fChMask = 2;
 
   ReadPar();
 
@@ -223,8 +258,8 @@ void TPSD::SetPSDPar()
     /*Discrimination mode for the event selection
     CAEN_DGTZ_DPP_DISCR_MODE_LED -> Leading Edge Distrimination
     CAEN_DGTZ_DPP_DISCR_MODE_CFD -> Constant Fraction Distrimination*/
-    fParPSD.discr[iCh] = CAEN_DGTZ_DPP_DISCR_MODE_LED;
-    // fParPSD.discr[iCh] = CAEN_DGTZ_DPP_DISCR_MODE_CFD;
+    // fParPSD.discr[iCh] = CAEN_DGTZ_DPP_DISCR_MODE_LED;
+    fParPSD.discr[iCh] = CAEN_DGTZ_DPP_DISCR_MODE_CFD;
 
     /*CFD delay (N*2ns for x730  and N*4ns for x725)  */
     fParPSD.cfdd[iCh] = 4;
@@ -334,30 +369,4 @@ void TPSD::FreeMemory()
     PrintError(err, "FreeDPPWaveforms");
     fpPSDWaveform = nullptr;
   }
-}
-
-CAEN_DGTZ_ErrorCode TPSD::StartAcquisition()
-{
-  AllocateMemory();
-
-  CAEN_DGTZ_ErrorCode err;
-  err = CAEN_DGTZ_SWStartAcquisition(fHandler);
-  PrintError(err, "StartAcquisition");
-
-  for (auto &t : fTime) t = 0;
-  for (auto &t : fTimeOffset) t = 0;
-  for (auto &t : fPreviousTime) t = 0;
-
-  return err;
-}
-
-void TPSD::StopAcquisition()
-{
-  CAEN_DGTZ_ErrorCode err;
-  err = CAEN_DGTZ_SWStopAcquisition(fHandler);
-  PrintError(err, "StopAcquisition");
-
-  FreeMemory();
-  // err = CAEN_DGTZ_FreeEvent(fHandler, (void **)&fpEventStd);
-  // PrintError(err, "FreeEvent");
 }

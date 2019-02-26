@@ -17,6 +17,7 @@ TDigitizer::~TDigitizer(){};
 void TDigitizer::PrintError(const CAEN_DGTZ_ErrorCode &err,
                             const std::string &funcName)
 {
+  // if (true) {  // 0 is success
   if (err < 0) {  // 0 is success
     std::cout << "In " << funcName << ", error code = " << err << std::endl;
     // CAEN_DGTZ_CloseDigitizer(fHandler);
@@ -30,9 +31,6 @@ void TDigitizer::Open(CAEN_DGTZ_ConnectionType type, int link, int node,
   auto err = CAEN_DGTZ_OpenDigitizer(type, link, node, VMEadd, &fHandler);
   PrintError(err, "OpenDigitizer");
   fModNumber = (unsigned int)node;
-
-  // if (node >= 0 && node < 256) fModNumber = (unsigned char)node;
-  // else {think it!!}
 
   if (err != CAEN_DGTZ_Success) {
     std::cout << "Can not open the device!" << std::endl;

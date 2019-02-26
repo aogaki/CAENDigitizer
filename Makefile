@@ -315,42 +315,6 @@ src/TDPP.cpp.s:
 	$(MAKE) -f CMakeFiles/digi.dir/build.make CMakeFiles/digi.dir/src/TDPP.cpp.s
 .PHONY : src/TDPP.cpp.s
 
-src/TDigiPHA.o: src/TDigiPHA.cpp.o
-
-.PHONY : src/TDigiPHA.o
-
-# target to build an object file
-src/TDigiPHA.cpp.o:
-	$(MAKE) -f CMakeFiles/sync.dir/build.make CMakeFiles/sync.dir/src/TDigiPHA.cpp.o
-	$(MAKE) -f CMakeFiles/PHA.dir/build.make CMakeFiles/PHA.dir/src/TDigiPHA.cpp.o
-	$(MAKE) -f CMakeFiles/dpp.dir/build.make CMakeFiles/dpp.dir/src/TDigiPHA.cpp.o
-	$(MAKE) -f CMakeFiles/digi.dir/build.make CMakeFiles/digi.dir/src/TDigiPHA.cpp.o
-.PHONY : src/TDigiPHA.cpp.o
-
-src/TDigiPHA.i: src/TDigiPHA.cpp.i
-
-.PHONY : src/TDigiPHA.i
-
-# target to preprocess a source file
-src/TDigiPHA.cpp.i:
-	$(MAKE) -f CMakeFiles/sync.dir/build.make CMakeFiles/sync.dir/src/TDigiPHA.cpp.i
-	$(MAKE) -f CMakeFiles/PHA.dir/build.make CMakeFiles/PHA.dir/src/TDigiPHA.cpp.i
-	$(MAKE) -f CMakeFiles/dpp.dir/build.make CMakeFiles/dpp.dir/src/TDigiPHA.cpp.i
-	$(MAKE) -f CMakeFiles/digi.dir/build.make CMakeFiles/digi.dir/src/TDigiPHA.cpp.i
-.PHONY : src/TDigiPHA.cpp.i
-
-src/TDigiPHA.s: src/TDigiPHA.cpp.s
-
-.PHONY : src/TDigiPHA.s
-
-# target to generate assembly for a file
-src/TDigiPHA.cpp.s:
-	$(MAKE) -f CMakeFiles/sync.dir/build.make CMakeFiles/sync.dir/src/TDigiPHA.cpp.s
-	$(MAKE) -f CMakeFiles/PHA.dir/build.make CMakeFiles/PHA.dir/src/TDigiPHA.cpp.s
-	$(MAKE) -f CMakeFiles/dpp.dir/build.make CMakeFiles/dpp.dir/src/TDigiPHA.cpp.s
-	$(MAKE) -f CMakeFiles/digi.dir/build.make CMakeFiles/digi.dir/src/TDigiPHA.cpp.s
-.PHONY : src/TDigiPHA.cpp.s
-
 src/TDigiPar.o: src/TDigiPar.cpp.o
 
 .PHONY : src/TDigiPar.o
@@ -423,78 +387,6 @@ src/TDigitizer.cpp.s:
 	$(MAKE) -f CMakeFiles/digi.dir/build.make CMakeFiles/digi.dir/src/TDigitizer.cpp.s
 .PHONY : src/TDigitizer.cpp.s
 
-src/TDigitizerCommand.o: src/TDigitizerCommand.cpp.o
-
-.PHONY : src/TDigitizerCommand.o
-
-# target to build an object file
-src/TDigitizerCommand.cpp.o:
-	$(MAKE) -f CMakeFiles/sync.dir/build.make CMakeFiles/sync.dir/src/TDigitizerCommand.cpp.o
-	$(MAKE) -f CMakeFiles/PHA.dir/build.make CMakeFiles/PHA.dir/src/TDigitizerCommand.cpp.o
-	$(MAKE) -f CMakeFiles/dpp.dir/build.make CMakeFiles/dpp.dir/src/TDigitizerCommand.cpp.o
-	$(MAKE) -f CMakeFiles/digi.dir/build.make CMakeFiles/digi.dir/src/TDigitizerCommand.cpp.o
-.PHONY : src/TDigitizerCommand.cpp.o
-
-src/TDigitizerCommand.i: src/TDigitizerCommand.cpp.i
-
-.PHONY : src/TDigitizerCommand.i
-
-# target to preprocess a source file
-src/TDigitizerCommand.cpp.i:
-	$(MAKE) -f CMakeFiles/sync.dir/build.make CMakeFiles/sync.dir/src/TDigitizerCommand.cpp.i
-	$(MAKE) -f CMakeFiles/PHA.dir/build.make CMakeFiles/PHA.dir/src/TDigitizerCommand.cpp.i
-	$(MAKE) -f CMakeFiles/dpp.dir/build.make CMakeFiles/dpp.dir/src/TDigitizerCommand.cpp.i
-	$(MAKE) -f CMakeFiles/digi.dir/build.make CMakeFiles/digi.dir/src/TDigitizerCommand.cpp.i
-.PHONY : src/TDigitizerCommand.cpp.i
-
-src/TDigitizerCommand.s: src/TDigitizerCommand.cpp.s
-
-.PHONY : src/TDigitizerCommand.s
-
-# target to generate assembly for a file
-src/TDigitizerCommand.cpp.s:
-	$(MAKE) -f CMakeFiles/sync.dir/build.make CMakeFiles/sync.dir/src/TDigitizerCommand.cpp.s
-	$(MAKE) -f CMakeFiles/PHA.dir/build.make CMakeFiles/PHA.dir/src/TDigitizerCommand.cpp.s
-	$(MAKE) -f CMakeFiles/dpp.dir/build.make CMakeFiles/dpp.dir/src/TDigitizerCommand.cpp.s
-	$(MAKE) -f CMakeFiles/digi.dir/build.make CMakeFiles/digi.dir/src/TDigitizerCommand.cpp.s
-.PHONY : src/TDigitizerCommand.cpp.s
-
-src/TEveConverter.o: src/TEveConverter.cpp.o
-
-.PHONY : src/TEveConverter.o
-
-# target to build an object file
-src/TEveConverter.cpp.o:
-	$(MAKE) -f CMakeFiles/sync.dir/build.make CMakeFiles/sync.dir/src/TEveConverter.cpp.o
-	$(MAKE) -f CMakeFiles/PHA.dir/build.make CMakeFiles/PHA.dir/src/TEveConverter.cpp.o
-	$(MAKE) -f CMakeFiles/dpp.dir/build.make CMakeFiles/dpp.dir/src/TEveConverter.cpp.o
-	$(MAKE) -f CMakeFiles/digi.dir/build.make CMakeFiles/digi.dir/src/TEveConverter.cpp.o
-.PHONY : src/TEveConverter.cpp.o
-
-src/TEveConverter.i: src/TEveConverter.cpp.i
-
-.PHONY : src/TEveConverter.i
-
-# target to preprocess a source file
-src/TEveConverter.cpp.i:
-	$(MAKE) -f CMakeFiles/sync.dir/build.make CMakeFiles/sync.dir/src/TEveConverter.cpp.i
-	$(MAKE) -f CMakeFiles/PHA.dir/build.make CMakeFiles/PHA.dir/src/TEveConverter.cpp.i
-	$(MAKE) -f CMakeFiles/dpp.dir/build.make CMakeFiles/dpp.dir/src/TEveConverter.cpp.i
-	$(MAKE) -f CMakeFiles/digi.dir/build.make CMakeFiles/digi.dir/src/TEveConverter.cpp.i
-.PHONY : src/TEveConverter.cpp.i
-
-src/TEveConverter.s: src/TEveConverter.cpp.s
-
-.PHONY : src/TEveConverter.s
-
-# target to generate assembly for a file
-src/TEveConverter.cpp.s:
-	$(MAKE) -f CMakeFiles/sync.dir/build.make CMakeFiles/sync.dir/src/TEveConverter.cpp.s
-	$(MAKE) -f CMakeFiles/PHA.dir/build.make CMakeFiles/PHA.dir/src/TEveConverter.cpp.s
-	$(MAKE) -f CMakeFiles/dpp.dir/build.make CMakeFiles/dpp.dir/src/TEveConverter.cpp.s
-	$(MAKE) -f CMakeFiles/digi.dir/build.make CMakeFiles/digi.dir/src/TEveConverter.cpp.s
-.PHONY : src/TEveConverter.cpp.s
-
 src/TPHA.o: src/TPHA.cpp.o
 
 .PHONY : src/TPHA.o
@@ -566,78 +458,6 @@ src/TPSD.cpp.s:
 	$(MAKE) -f CMakeFiles/dpp.dir/build.make CMakeFiles/dpp.dir/src/TPSD.cpp.s
 	$(MAKE) -f CMakeFiles/digi.dir/build.make CMakeFiles/digi.dir/src/TPSD.cpp.s
 .PHONY : src/TPSD.cpp.s
-
-src/TParameters.o: src/TParameters.cpp.o
-
-.PHONY : src/TParameters.o
-
-# target to build an object file
-src/TParameters.cpp.o:
-	$(MAKE) -f CMakeFiles/sync.dir/build.make CMakeFiles/sync.dir/src/TParameters.cpp.o
-	$(MAKE) -f CMakeFiles/PHA.dir/build.make CMakeFiles/PHA.dir/src/TParameters.cpp.o
-	$(MAKE) -f CMakeFiles/dpp.dir/build.make CMakeFiles/dpp.dir/src/TParameters.cpp.o
-	$(MAKE) -f CMakeFiles/digi.dir/build.make CMakeFiles/digi.dir/src/TParameters.cpp.o
-.PHONY : src/TParameters.cpp.o
-
-src/TParameters.i: src/TParameters.cpp.i
-
-.PHONY : src/TParameters.i
-
-# target to preprocess a source file
-src/TParameters.cpp.i:
-	$(MAKE) -f CMakeFiles/sync.dir/build.make CMakeFiles/sync.dir/src/TParameters.cpp.i
-	$(MAKE) -f CMakeFiles/PHA.dir/build.make CMakeFiles/PHA.dir/src/TParameters.cpp.i
-	$(MAKE) -f CMakeFiles/dpp.dir/build.make CMakeFiles/dpp.dir/src/TParameters.cpp.i
-	$(MAKE) -f CMakeFiles/digi.dir/build.make CMakeFiles/digi.dir/src/TParameters.cpp.i
-.PHONY : src/TParameters.cpp.i
-
-src/TParameters.s: src/TParameters.cpp.s
-
-.PHONY : src/TParameters.s
-
-# target to generate assembly for a file
-src/TParameters.cpp.s:
-	$(MAKE) -f CMakeFiles/sync.dir/build.make CMakeFiles/sync.dir/src/TParameters.cpp.s
-	$(MAKE) -f CMakeFiles/PHA.dir/build.make CMakeFiles/PHA.dir/src/TParameters.cpp.s
-	$(MAKE) -f CMakeFiles/dpp.dir/build.make CMakeFiles/dpp.dir/src/TParameters.cpp.s
-	$(MAKE) -f CMakeFiles/digi.dir/build.make CMakeFiles/digi.dir/src/TParameters.cpp.s
-.PHONY : src/TParameters.cpp.s
-
-src/TTestDigi.o: src/TTestDigi.cpp.o
-
-.PHONY : src/TTestDigi.o
-
-# target to build an object file
-src/TTestDigi.cpp.o:
-	$(MAKE) -f CMakeFiles/sync.dir/build.make CMakeFiles/sync.dir/src/TTestDigi.cpp.o
-	$(MAKE) -f CMakeFiles/PHA.dir/build.make CMakeFiles/PHA.dir/src/TTestDigi.cpp.o
-	$(MAKE) -f CMakeFiles/dpp.dir/build.make CMakeFiles/dpp.dir/src/TTestDigi.cpp.o
-	$(MAKE) -f CMakeFiles/digi.dir/build.make CMakeFiles/digi.dir/src/TTestDigi.cpp.o
-.PHONY : src/TTestDigi.cpp.o
-
-src/TTestDigi.i: src/TTestDigi.cpp.i
-
-.PHONY : src/TTestDigi.i
-
-# target to preprocess a source file
-src/TTestDigi.cpp.i:
-	$(MAKE) -f CMakeFiles/sync.dir/build.make CMakeFiles/sync.dir/src/TTestDigi.cpp.i
-	$(MAKE) -f CMakeFiles/PHA.dir/build.make CMakeFiles/PHA.dir/src/TTestDigi.cpp.i
-	$(MAKE) -f CMakeFiles/dpp.dir/build.make CMakeFiles/dpp.dir/src/TTestDigi.cpp.i
-	$(MAKE) -f CMakeFiles/digi.dir/build.make CMakeFiles/digi.dir/src/TTestDigi.cpp.i
-.PHONY : src/TTestDigi.cpp.i
-
-src/TTestDigi.s: src/TTestDigi.cpp.s
-
-.PHONY : src/TTestDigi.s
-
-# target to generate assembly for a file
-src/TTestDigi.cpp.s:
-	$(MAKE) -f CMakeFiles/sync.dir/build.make CMakeFiles/sync.dir/src/TTestDigi.cpp.s
-	$(MAKE) -f CMakeFiles/PHA.dir/build.make CMakeFiles/PHA.dir/src/TTestDigi.cpp.s
-	$(MAKE) -f CMakeFiles/dpp.dir/build.make CMakeFiles/dpp.dir/src/TTestDigi.cpp.s
-	$(MAKE) -f CMakeFiles/digi.dir/build.make CMakeFiles/digi.dir/src/TTestDigi.cpp.s
-.PHONY : src/TTestDigi.cpp.s
 
 src/TWaveRecord.o: src/TWaveRecord.cpp.o
 
@@ -729,33 +549,18 @@ help:
 	@echo "... src/TDPP.o"
 	@echo "... src/TDPP.i"
 	@echo "... src/TDPP.s"
-	@echo "... src/TDigiPHA.o"
-	@echo "... src/TDigiPHA.i"
-	@echo "... src/TDigiPHA.s"
 	@echo "... src/TDigiPar.o"
 	@echo "... src/TDigiPar.i"
 	@echo "... src/TDigiPar.s"
 	@echo "... src/TDigitizer.o"
 	@echo "... src/TDigitizer.i"
 	@echo "... src/TDigitizer.s"
-	@echo "... src/TDigitizerCommand.o"
-	@echo "... src/TDigitizerCommand.i"
-	@echo "... src/TDigitizerCommand.s"
-	@echo "... src/TEveConverter.o"
-	@echo "... src/TEveConverter.i"
-	@echo "... src/TEveConverter.s"
 	@echo "... src/TPHA.o"
 	@echo "... src/TPHA.i"
 	@echo "... src/TPHA.s"
 	@echo "... src/TPSD.o"
 	@echo "... src/TPSD.i"
 	@echo "... src/TPSD.s"
-	@echo "... src/TParameters.o"
-	@echo "... src/TParameters.i"
-	@echo "... src/TParameters.s"
-	@echo "... src/TTestDigi.o"
-	@echo "... src/TTestDigi.i"
-	@echo "... src/TTestDigi.s"
 	@echo "... src/TWaveRecord.o"
 	@echo "... src/TWaveRecord.i"
 	@echo "... src/TWaveRecord.s"
