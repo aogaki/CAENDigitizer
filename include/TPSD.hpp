@@ -21,12 +21,13 @@ class TPSD : public TDPP
   void SetChMask(uint mask) { fChMask = mask; };
 
   void LoadPSDPar(CAEN_DGTZ_DPP_PSD_Params_t par) { fParPSD = par; };
-
- private:
   virtual void SetParameters();
 
+ private:
   void AcquisitionConfig();
   void TriggerConfig();
+
+  void TriggerTest();
 
   void SetPSDPar();
   CAEN_DGTZ_DPP_PSD_Params_t fParPSD;

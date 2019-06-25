@@ -66,11 +66,12 @@ void TPSD::Initialize()
                                             CAEN_DGTZ_RUN_SYNC_Disabled);
   PrintError(err, "SetRunSynchronizationMode");
 
-  SetPSDPar();
+  // SetPSDPar();
   if (fFirmware == FirmWareCode::DPP_PSD) {
     err = CAEN_DGTZ_SetDPPParameters(fHandler, fChMask, &fParPSD);
     PrintError(err, "SetDPPParameters");
   }
+
   // Following for loop is copied from sample.  Shame on me!!!!!!!
   for (uint i = 0; i < fNChs; i++) {
     // Set the number of samples for each waveform (you can set different RL
@@ -87,16 +88,18 @@ void TPSD::Initialize()
 
     uint16_t offset = 0xFFFF * fDCOffset;
     err = CAEN_DGTZ_SetChannelDCOffset(fHandler, i, offset);
+
+    // Set register to use extended 47 bit time stamp
+    // for (uint i = 0; i < fNChs; i++) RegisterSetBits(0x1084 + (i << 8), 8,
+    // 10, 0);
+
+    // Set register to use extended time stamp, flags and fine time stamp
+    RegisterSetBits(0x1084 + (i << 8), 8, 10, 2);
   }
 
+  TriggerTest();
+
   BoardCalibration();
-
-  // Set register to use extended 47 bit time stamp
-  // for (uint i = 0; i < fNChs; i++) RegisterSetBits(0x1084 + (i << 8), 8, 10,
-  // 0);
-
-  // Set register to use extended time stamp flags and fine time stamp
-  for (uint i = 0; i < fNChs; i++) RegisterSetBits(0x1084 + (i << 8), 8, 10, 2);
 
   // 0 means automatically set
   err = CAEN_DGTZ_SetDPPEventAggregation(fHandler, 0, 0);
@@ -132,7 +135,7 @@ void TPSD::ReadEvents()
           ((uint64_t)((fppPSDEvents[iCh][iEve].Extras >> 16) & 0xFFFF) << 31);
       if (fTSample > 0) tdc *= fTSample;
       // Stupid test
-      tdc = (fppPSDEvents[iCh][iEve].Extras & 0xFFFF);
+      tdc = (fppPSDEvents[iCh][iEve].Extras & 0x3FF);
 
       fTime[iCh] = tdc;
 
@@ -224,7 +227,7 @@ void TPSD::SetParameters()
 
   ReadPar();
 
-  void SetPSDPar();
+  SetPSDPar();
 }
 
 void TPSD::SetPSDPar()
@@ -262,20 +265,20 @@ void TPSD::SetPSDPar()
     fParPSD.discr[iCh] = CAEN_DGTZ_DPP_DISCR_MODE_CFD;
 
     /*CFD delay (N*2ns for x730  and N*4ns for x725)  */
-    fParPSD.cfdd[iCh] = 4;
+    fParPSD.cfdd[iCh] = 10;
 
     /*CFD fraction: 0->25%; 1->50%; 2->75%; 3->100% */
-    fParPSD.cfdf[iCh] = 0;
+    fParPSD.cfdf[iCh] = 2;
 
     /* Trigger Validation Acquisition Window */
-    fParPSD.tvaw[iCh] = 50;
+    fParPSD.tvaw[iCh] = 200;
 
     /* Charge sensibility:
                 Options for Input Range 2Vpp: 0->5fC/LSB; 1->20fC/LSB;
        2->80fC/LSB; 3->320fC/LSB; 4->1.28pC/LSB; 5->5.12pC/LSB Options for
        Input Range 0.5Vpp: 0->1.25fC/LSB; 1->5fC/LSB; 2->20fC/LSB;
        3->80fC/LSB; 4->320fC/LSB; 5->1.28pC/LSB */
-    fParPSD.csens[iCh] = 1;
+    fParPSD.csens[iCh] = 0;
   }
   /* Pile-Up rejection Mode
   CAEN_DGTZ_DPP_PSD_PUR_DetectOnly -> Only Detect Pile-Up
@@ -368,5 +371,14 @@ void TPSD::FreeMemory()
     err = CAEN_DGTZ_FreeDPPWaveforms(fHandler, fpPSDWaveform);
     PrintError(err, "FreeDPPWaveforms");
     fpPSDWaveform = nullptr;
+  }
+}
+
+void TPSD::TriggerTest()
+{
+  for (uint i = 0; i < fNChs; i++) {
+    RegisterSetBits(0x1080 + (i << 8), 6, 6, 0);
+    RegisterSetBits(0x1084 + (i << 8), 8, 10, 2);
+    RegisterSetBits(0x1084 + (i << 8), 12, 15, 2);
   }
 }
