@@ -9,11 +9,12 @@ TWaveRecord::TWaveRecord()
       fpEventStd(nullptr),
       fMaxBufferSize(0),
       fBufferSize(0),
-      fNEvents(0),
+      fEveCounter(0),
       fReadSize(0),
       fBLTEvents(0),
       fRecordLength(0),
       fBaseLine(0),
+      fOneHitSize(0),
       fVpp(0.),
       fVth(0.),
       fTriggerMode(CAEN_DGTZ_TRGMODE_ACQ_ONLY),
@@ -23,7 +24,6 @@ TWaveRecord::TWaveRecord()
       fTimeOffset(0),
       fPreviousTime(0)
 {
-  SetParameters();
 }
 
 TWaveRecord::TWaveRecord(CAEN_DGTZ_ConnectionType type, int link, int node,
@@ -44,7 +44,7 @@ TWaveRecord::~TWaveRecord()
   Reset();
   Close();
 
-  delete fDataArray;
+  delete[] fDataArray;
 }
 
 void TWaveRecord::SetParameters()
@@ -85,14 +85,15 @@ void TWaveRecord::ReadEvents()
                            fpReadoutBuffer, &fBufferSize);
   PrintError(err, "ReadData");
 
+  uint32_t nEvents;
   err =
-      CAEN_DGTZ_GetNumEvents(fHandler, fpReadoutBuffer, fBufferSize, &fNEvents);
+      CAEN_DGTZ_GetNumEvents(fHandler, fpReadoutBuffer, fBufferSize, &nEvents);
   PrintError(err, "GetNumEvents");
-  // std::cout << fNEvents << " Events" << std::endl;
+  // std::cout << nEvents << " Events" << std::endl;
 
   // fData->clear();
-  TStdData data;
-  for (uint iEve = 0; iEve < fNEvents; iEve++) {
+  fEveCounter = 0;
+  for (uint iEve = 0; iEve < nEvents; iEve++) {
     err = CAEN_DGTZ_GetEventInfo(fHandler, fpReadoutBuffer, fBufferSize, iEve,
                                  &fEventInfo, &fpEventPtr);
     PrintError(err, "GetEventInfo");
@@ -129,6 +130,7 @@ void TWaveRecord::ReadEvents()
       for (uint32_t i = 0; i < baseSample; i++) {
         fBaseLine += fpEventStd->DataChannel[iCh][i];
       }
+
       fBaseLine /= baseSample;
 
       for (auto i = start; i < stop; i++) {
@@ -166,6 +168,7 @@ void TWaveRecord::ReadEvents()
       // std::cout << "time:\t" << fEventInfo.TriggerTimeTag << "\t" <<
       // timeStamp
       //<< std::endl;
+      fEveCounter++;
     }
   }
 }

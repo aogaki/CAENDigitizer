@@ -39,7 +39,7 @@ TPSD::TPSD(CAEN_DGTZ_ConnectionType type, int link, int node, uint32_t VMEadd)
 TPSD::~TPSD()
 {
   Reset();
-  // FreeMemory();
+  FreeMemory();
   Close();
 }
 

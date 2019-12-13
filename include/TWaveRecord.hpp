@@ -28,7 +28,7 @@ class TWaveRecord : public TDigitizer
   CAEN_DGTZ_ErrorCode StartAcquisition();
   void StopAcquisition();
 
-  uint32_t GetNEvents() { return fNEvents * fNChs; };
+  uint32_t GetNEvents() { return fEveCounter; };
 
  protected:
   // For event readout
@@ -38,11 +38,12 @@ class TWaveRecord : public TDigitizer
   CAEN_DGTZ_UINT16_EVENT_t *fpEventStd;  // for void **Eve
   uint32_t fMaxBufferSize;
   uint32_t fBufferSize;
-  uint32_t fNEvents;
+  uint32_t fEveCounter;
   uint32_t fReadSize;
   uint32_t fBLTEvents;
   uint32_t fRecordLength;
   uint32_t fBaseLine;
+  uint32_t fOneHitSize;
 
   // For trigger setting
   double fVpp;
