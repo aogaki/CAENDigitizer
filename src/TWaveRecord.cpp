@@ -1,4 +1,5 @@
 #include <string.h>
+
 #include <iostream>
 
 #include "TWaveRecord.hpp"
@@ -9,21 +10,17 @@ TWaveRecord::TWaveRecord()
       fpEventStd(nullptr),
       fMaxBufferSize(0),
       fBufferSize(0),
-      fEveCounter(0),
-      fReadSize(0),
       fBLTEvents(0),
       fRecordLength(0),
-      fBaseLine(0),
-      fOneHitSize(0),
       fVpp(0.),
       fVth(0.),
       fTriggerMode(CAEN_DGTZ_TRGMODE_ACQ_ONLY),
       fPolarity(CAEN_DGTZ_TriggerOnRisingEdge),
       fPostTriggerSize(50),
-      fGateSize(0),
       fTimeOffset(0),
       fPreviousTime(0)
 {
+  InitParameters();
 }
 
 TWaveRecord::TWaveRecord(CAEN_DGTZ_ConnectionType type, int link, int node,
@@ -35,6 +32,9 @@ TWaveRecord::TWaveRecord(CAEN_DGTZ_ConnectionType type, int link, int node,
   GetBoardInfo();
 
   fDataArray = new unsigned char[fBLTEvents * ONE_HIT_SIZE * fNChs];
+
+  fData = new std::vector<WaveFormData_t>;
+  fData->reserve(fBLTEvents * fNChs);
 }
 
 TWaveRecord::~TWaveRecord()
@@ -45,20 +45,34 @@ TWaveRecord::~TWaveRecord()
   Close();
 
   delete[] fDataArray;
+
+  delete fData;
 }
 
-void TWaveRecord::SetParameters()
+void TWaveRecord::InitParameters()
 {
   // Reading parameter functions should be implemented!!!!!!!
-  fRecordLength = kNSamples;
+  // fRecordLength = kNSamples;
+  fRecordLength = 512;
   fBLTEvents = 512;
   fVpp = 2.;
   fVth = -0.5;
-  // fVth = -0.001;
+  fDCOffset = 0.8;
   fPolarity = CAEN_DGTZ_TriggerOnFallingEdge;
-  // fTriggerMode = CAEN_DGTZ_TRGMODE_ACQ_AND_EXTOUT;
+  fTriggerMode = CAEN_DGTZ_TRGMODE_ACQ_AND_EXTOUT;
   fPostTriggerSize = 80;
-  fGateSize = 400;  // ns
+}
+
+void TWaveRecord::SetParameter(TWaveRecordPar par)
+{
+  fRecordLength = par.GetRecordLength();
+  fBLTEvents = par.GetBLTEvents();
+  fVpp = par.GetVpp();
+  fVth = par.GetVth();
+  fDCOffset = par.GetDCOffset();
+  fPolarity = par.GetPolarity();
+  fTriggerMode = par.GetTriggerMode();
+  fPostTriggerSize = par.GetPostTriggerSize();
 }
 
 void TWaveRecord::Initialize()
@@ -92,7 +106,7 @@ void TWaveRecord::ReadEvents()
   // std::cout << nEvents << " Events" << std::endl;
 
   // fData->clear();
-  fEveCounter = 0;
+  fData->clear();
   for (uint iEve = 0; iEve < nEvents; iEve++) {
     err = CAEN_DGTZ_GetEventInfo(fHandler, fpReadoutBuffer, fBufferSize, iEve,
                                  &fEventInfo, &fpEventPtr);
@@ -109,66 +123,25 @@ void TWaveRecord::ReadEvents()
     err = CAEN_DGTZ_DecodeEvent(fHandler, fpEventPtr, (void **)&fpEventStd);
     PrintError(err, "DecodeEvent");
 
-    for (uint iCh = 0; iCh < fNChs; iCh++) {
-      const uint32_t chSize = fpEventStd->ChSize[iCh];
-      // if (chSize != kNSamples) {
-      //   std::cout << "No. samples of wave form error" << std::endl;
-      // }
+    uint64_t timeStamp = (fEventInfo.TriggerTimeTag + fTimeOffset) * fTSample;
+    if (timeStamp < fPreviousTime) {
+      constexpr uint32_t maxTime = 0xFFFFFFFF / 2;  // Check manual
+      timeStamp += maxTime * fTSample;
+      fTimeOffset += maxTime;
+    }
+    fPreviousTime = timeStamp;
 
-      int16_t sumCharge = 0.;
-      // for (uint32_t i = 0; i < chSize; i++) {
-      // const uint32_t start = 0;
-      int32_t start = (chSize * (100 - fPostTriggerSize) / 100) -
-                      (fGateSize / fTSample / 2);
-      if (start < 1) start = 1;
-      // const uint32_t stop = chSize;
-      int32_t stop = (chSize * (100 - fPostTriggerSize) / 100) +
-                     (fGateSize / fTSample / 2);
-      uint32_t baseSample = 256;
-      if (baseSample > uint(start)) baseSample = start - 1;
-      fBaseLine = 0;
-      for (uint32_t i = 0; i < baseSample; i++) {
-        fBaseLine += fpEventStd->DataChannel[iCh][i];
-      }
+    // All channels have same time stamp.
+    // Need speed or reduce memory, first think this
+    for (uint32_t iCh = 0; iCh < fNChs; iCh++) {
+      WaveFormData_t dataEle;
+      dataEle.ModNumber = fModNumber;
+      dataEle.ChNumber = iCh;
+      dataEle.TimeStamp = timeStamp;
+      dataEle.RecordLength = fpEventStd->ChSize[iCh];
+      dataEle.WaveForm = fpEventStd->DataChannel[iCh];
 
-      fBaseLine /= baseSample;
-
-      for (auto i = start; i < stop; i++) {
-        sumCharge += (fBaseLine - fpEventStd->DataChannel[iCh][i]);
-        // std::cout << fBaseLine <<"\t"<< fpEventStd->DataChannel[iCh][i] <<
-        // std::endl;
-      }
-
-      // It should be for each channel!
-      uint64_t timeStamp = (fEventInfo.TriggerTimeTag + fTimeOffset) * fTSample;
-      if (timeStamp < fPreviousTime) {
-        constexpr uint32_t maxTime = 0xFFFFFFFF / 2;  // Check manual
-        timeStamp += maxTime * fTSample;
-        fTimeOffset += maxTime;
-      }
-      fPreviousTime = timeStamp;
-
-      int index = (iEve * (fNChs * ONE_HIT_SIZE)) + (iCh * ONE_HIT_SIZE);
-      fDataArray[index++] = fModNumber;  // fModNumber is needed.
-      fDataArray[index++] = iCh;         // int to char.  Dangerous
-
-      constexpr auto timeSize = sizeof(timeStamp);
-      memcpy(&fDataArray[index], &timeStamp, timeSize);
-      index += timeSize;
-
-      constexpr auto adcSize = sizeof(sumCharge);
-      // auto adc = sumCharge;
-      memcpy(&fDataArray[index], &sumCharge, adcSize);
-      index += adcSize;
-
-      constexpr auto waveSize =
-          sizeof(fpEventStd->DataChannel[0][0]) * kNSamples;
-      memcpy(&fDataArray[index], fpEventStd->DataChannel[iCh], waveSize);
-
-      // std::cout << "time:\t" << fEventInfo.TriggerTimeTag << "\t" <<
-      // timeStamp
-      //<< std::endl;
-      fEveCounter++;
+      fData->push_back(dataEle);
     }
   }
 }
@@ -183,7 +156,6 @@ void TWaveRecord::AcquisitionConfig()
   PrintError(err, "SetChannelEnableMask");
 
   // Set DC offset
-  fDCOffset = 0.8;
   auto fac = (1. - fDCOffset);
   if (fac <= 0. || fac >= 1.) fac = 0.5;
   uint32_t offset = 0xFFFF * fac;

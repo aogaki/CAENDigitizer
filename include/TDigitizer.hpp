@@ -4,11 +4,11 @@
 // For the standard fiemware digitizer
 // This will be super class of other firmware and model family
 
-#include <string>
-#include <vector>
-
 #include <CAENDigitizer.h>
 #include <CAENDigitizerType.h>
+
+#include <string>
+#include <vector>
 
 enum class FirmWareCode {
   // I need only theese
@@ -32,12 +32,14 @@ class TDigitizer
 
   virtual void ReadEvents() = 0;
 
+  // virtual void SetParameter() = 0;
+
   // When the FW is expired.  Configuration can be done.
   // But, StartAcquisition can not be done.
   virtual CAEN_DGTZ_ErrorCode StartAcquisition() = 0;
   virtual void StopAcquisition() = 0;
 
-  virtual uint32_t GetNEvents() = 0;
+  const uint32_t GetNEvents() { return fNEvents; };
   unsigned char *GetDataArray() { return fDataArray; };
 
   void SetModNumber(unsigned char n) { fModNumber = n; };

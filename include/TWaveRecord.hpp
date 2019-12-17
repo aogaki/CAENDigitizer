@@ -4,14 +4,16 @@
 // For the standard fiemware digitizer
 // This will be super class of other firmware and model family
 
-#include <string>
-#include <vector>
-
 #include <CAENDigitizer.h>
 #include <CAENDigitizerType.h>
 
+#include <string>
+#include <vector>
+
 #include "TDigitizer.hpp"
 #include "TStdData.hpp"
+#include "TWaveRecordData.hpp"
+#include "TWaveRecordPar.hpp"
 
 class TWaveRecord : public TDigitizer
 {
@@ -28,7 +30,11 @@ class TWaveRecord : public TDigitizer
   CAEN_DGTZ_ErrorCode StartAcquisition();
   void StopAcquisition();
 
-  uint32_t GetNEvents() { return fEveCounter; };
+  // const uint32_t GetNEvents() { return fEveCounter; };
+
+  void SetParameter(TWaveRecordPar par);
+
+  std::vector<WaveFormData_t> *GetData() { return fData; };
 
  protected:
   // For event readout
@@ -38,12 +44,8 @@ class TWaveRecord : public TDigitizer
   CAEN_DGTZ_UINT16_EVENT_t *fpEventStd;  // for void **Eve
   uint32_t fMaxBufferSize;
   uint32_t fBufferSize;
-  uint32_t fEveCounter;
-  uint32_t fReadSize;
   uint32_t fBLTEvents;
   uint32_t fRecordLength;
-  uint32_t fBaseLine;
-  uint32_t fOneHitSize;
 
   // For trigger setting
   double fVpp;
@@ -52,13 +54,14 @@ class TWaveRecord : public TDigitizer
   CAEN_DGTZ_TriggerMode_t fTriggerMode;
   CAEN_DGTZ_TriggerPolarity_t fPolarity;
   uint32_t fPostTriggerSize;
-  int32_t fGateSize;
 
   // Data
+  std::vector<WaveFormData_t> *fData;
+
   uint64_t fTimeOffset;
   uint64_t fPreviousTime;
 
-  void SetParameters();
+  void InitParameters();
 
   void AcquisitionConfig();
   void TriggerConfig();

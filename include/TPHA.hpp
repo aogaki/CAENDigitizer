@@ -30,7 +30,7 @@ class TPHA : public TDigitizer
 
   // Reading event
   void ReadEvents();
-  uint32_t GetNEvents() { return fNEvents; };
+  // const uint32_t GetNEvents() { return fNEvents; };
   unsigned char *GetDataArray() { return fDataArray; };
 
  private:

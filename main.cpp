@@ -1,11 +1,11 @@
-#include <fcntl.h>
-#include <termios.h>
-#include <iostream>
-
 #include <TApplication.h>
 #include <TCanvas.h>
 #include <TGraph.h>
 #include <TH1.h>
+#include <fcntl.h>
+#include <termios.h>
+
+#include <iostream>
 
 #include "TWaveRecord.hpp"
 
@@ -42,6 +42,17 @@ int main(int argc, char **argv)
   int link = 0;
   auto digi = new TWaveRecord(CAEN_DGTZ_USB, link);
 
+  TWaveRecordPar par;
+  par.SetRecordLength(512);
+  par.SetBLTEvents(512);
+  par.SetVpp(2.0);
+  par.SetVth(-0.1);
+  par.SetDCOffset(0.8);
+  par.SetPolarity(CAEN_DGTZ_TriggerOnFallingEdge);
+  par.SetTriggerMode(CAEN_DGTZ_TRGMODE_ACQ_AND_EXTOUT);
+  par.SetPostTriggerSize(80);
+  digi->SetParameter(par);
+
   digi->Initialize();
 
   digi->StartAcquisition();
@@ -56,43 +67,22 @@ int main(int argc, char **argv)
   hisCharge->Draw();
 
   for (int i = 0; true; i++) {
-     //   // if (i > 10) break;
-     std::cout << i << std::endl;
+    //   // if (i > 10) break;
+    std::cout << i << std::endl;
 
-     // for (int j = 0; j < 10; j++) digi->SendSWTrigger();
-     digi->ReadEvents();
+    for (int j = 0; j < 10; j++) digi->SendSWTrigger();
+    digi->ReadEvents();
+    auto data = digi->GetData();
+    // std::cout << data->at(0).TimeStamp << std::endl;
+    // std::cout << data->size() << std::endl;
 
-     auto dataArray = digi->GetDataArray();
-     const int nHit = digi->GetNEvents();
-     std::cout << nHit << std::endl;
-     for (int i = 0; i < nHit; i++) {
-      auto index = (i * ONE_HIT_SIZE);
-      auto offset = 0;
-      SampleData data;
+    const auto kHit = data->size();
+    for (auto iHit = 0; iHit < kHit; iHit++) {
+      auto size = data->at(iHit).RecordLength;
+      auto signal = data->at(iHit).WaveForm;
 
-      data.ModNumber = dataArray[index + offset];
-      offset += sizeof(data.ModNumber);
-
-      data.ChNumber = dataArray[index + offset];
-      offset += sizeof(data.ChNumber);
-
-      memcpy(&data.TimeStamp, &dataArray[index + offset],
-             sizeof(data.TimeStamp));
-      offset += sizeof(data.TimeStamp);
-
-      memcpy(&data.ADC, &dataArray[index + offset], sizeof(data.ADC));
-      offset += sizeof(data.ADC);
-      if (data.ChNumber == 0) {
-        hisCharge->Fill(data.ADC);
-
-        for (int iSample = 0; iSample < kNSamples; iSample++) {
-          unsigned short pulse;
-          memcpy(&pulse, &dataArray[index + offset], sizeof(pulse));
-          offset += sizeof(pulse);
-
-          //if(iSample >= 200 && iSample < 500) 
-	    grWave->SetPoint(iSample, iSample * 2, pulse);  // one sample 2 ns
-        }
+      for (auto i = 0; i < size; i++) {
+        grWave->SetPoint(i, i * 2, signal[i]);
       }
     }
 

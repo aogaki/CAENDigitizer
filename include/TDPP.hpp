@@ -9,7 +9,7 @@ class TDPP : public TDigitizer
   TDPP();
   virtual ~TDPP(){};
 
-  uint32_t GetNEvents() { return fNEvents; };
+  // const uint32_t GetNEvents() { return fNEvents; };
 
   CAEN_DGTZ_ErrorCode StartAcquisition();
   void StopAcquisition();
