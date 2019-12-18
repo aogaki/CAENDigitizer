@@ -51,6 +51,8 @@ class TDigitizer
   void Close();
   void Reset();
 
+  virtual void InitParameters() = 0;
+
   // For board information
   void GetBoardInfo();
   int fDigitizerModel;

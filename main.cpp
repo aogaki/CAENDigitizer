@@ -47,7 +47,7 @@ int main(int argc, char **argv)
   par.SetBLTEvents(512);
   par.SetVpp(2.0);
   par.SetVth(-0.1);
-  par.SetDCOffset(0.8);
+  par.SetDCOffset(0.9);
   par.SetPolarity(CAEN_DGTZ_TriggerOnFallingEdge);
   par.SetTriggerMode(CAEN_DGTZ_TRGMODE_ACQ_AND_EXTOUT);
   par.SetPostTriggerSize(80);

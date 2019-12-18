@@ -44,16 +44,9 @@ class TWaveRecord : public TDigitizer
   CAEN_DGTZ_UINT16_EVENT_t *fpEventStd;  // for void **Eve
   uint32_t fMaxBufferSize;
   uint32_t fBufferSize;
-  uint32_t fBLTEvents;
-  uint32_t fRecordLength;
 
-  // For trigger setting
-  double fVpp;
-  double fVth;
-  double fDCOffset;
-  CAEN_DGTZ_TriggerMode_t fTriggerMode;
-  CAEN_DGTZ_TriggerPolarity_t fPolarity;
-  uint32_t fPostTriggerSize;
+  // Parameters
+  TWaveRecordPar fParameters;
 
   // Data
   std::vector<WaveFormData_t> *fData;

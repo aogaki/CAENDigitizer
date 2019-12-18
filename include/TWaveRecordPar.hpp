@@ -16,6 +16,7 @@ class TWaveRecordPar
     fPolarity = CAEN_DGTZ_TriggerOnFallingEdge;
     fTriggerMode = CAEN_DGTZ_TRGMODE_ACQ_AND_EXTOUT;
     fPostTriggerSize = 80;
+    fChMask = 0b11111111;
   };
   ~TWaveRecordPar(){};
 
@@ -43,6 +44,9 @@ class TWaveRecordPar
   void SetPostTriggerSize(uint32_t val) { fPostTriggerSize = val; }
   uint32_t GetPostTriggerSize() { return fPostTriggerSize; }
 
+  void SetChMask(uint16_t val) { fChMask = val; }
+  uint16_t GetChMask() { return fChMask; }
+
  private:
   uint32_t fRecordLength;
   uint32_t fBLTEvents;
@@ -52,6 +56,7 @@ class TWaveRecordPar
   CAEN_DGTZ_TriggerPolarity_t fPolarity;
   CAEN_DGTZ_TriggerMode_t fTriggerMode;
   uint32_t fPostTriggerSize;
+  uint16_t fChMask;
 };
 
 #endif

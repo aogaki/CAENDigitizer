@@ -4,6 +4,8 @@
 #include <vector>
 
 #include "TDPP.hpp"
+#include "TPSDData.hpp"
+#include "TPSDPar.hpp"
 
 class TPSD : public TDPP
 {
@@ -16,27 +18,17 @@ class TPSD : public TDPP
   void Initialize();
 
   void ReadEvents();
-  void ReadADC(std::vector<uint> &adc);
-
-  void SetChMask(uint mask) { fChMask = mask; };
-
-  void LoadPSDPar(CAEN_DGTZ_DPP_PSD_Params_t par) { fParPSD = par; };
-  virtual void SetParameters();
 
  private:
+  void InitParameters();
+
   void AcquisitionConfig();
   void TriggerConfig();
 
-  void TriggerTest();
-
+  // Parameters
+  TPSDPar fParameters;
   void SetPSDPar();
   CAEN_DGTZ_DPP_PSD_Params_t fParPSD;
-  CAEN_DGTZ_TriggerMode_t fTriggerMode;
-  uint32_t fPostTriggerSize;
-  uint32_t fRecordLength;
-
-  // double fVpp;
-  uint32_t fBLTEvents;
 
   // Memory
   void AllocateMemory();
@@ -44,13 +36,6 @@ class TPSD : public TDPP
   char *fpReadoutBuffer;                         // readout buffer
   CAEN_DGTZ_DPP_PSD_Event_t **fppPSDEvents;      // events buffer
   CAEN_DGTZ_DPP_PSD_Waveforms_t *fpPSDWaveform;  // waveforms buffer
-
-  // Data
-  void ReadPar();
-  double fDCOffset;
-  int fVth;
-  uint fChMask;
-  CAEN_DGTZ_PulsePolarity_t fPolarity;
 };
 
 #endif

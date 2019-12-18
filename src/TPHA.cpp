@@ -510,3 +510,5 @@ void TPHA::ReadEvents()
     }
   }
 }
+
+void TPHA::InitParameters() {}

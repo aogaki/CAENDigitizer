@@ -68,6 +68,7 @@ class TPHA : public TDigitizer
   void SetDeviceBuffer();
   void SetChParameter();
 
+  void InitParameters();
   // Some functions for channel parameter setting
   // Only for readable
   void SetTrapNorm(uint ch, uint val);

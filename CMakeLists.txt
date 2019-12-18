@@ -15,20 +15,29 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}
                     ${CMAKE_CURRENT_SOURCE_DIR}/include
                     ${ROOT_INCLUDE_DIR})
 link_directories(${ROOT_LIBRARY_DIR})
-file(GLOB sources ${PROJECT_SOURCE_DIR}/src/*.cpp)
 file(GLOB headers ${PROJECT_SOURCE_DIR}/include/*.hpp)
+file(GLOB waveRecSources
+  ${PROJECT_SOURCE_DIR}/src/TDigitizer.cpp
+  ${PROJECT_SOURCE_DIR}/src/TWaveRecord.cpp)
+
+file(GLOB psdSources
+  ${PROJECT_SOURCE_DIR}/src/TDigitizer.cpp
+  ${PROJECT_SOURCE_DIR}/src/TDPP.cpp
+  ${PROJECT_SOURCE_DIR}/src/TPSD.cpp)
+
+file(GLOB phaSources
+  ${PROJECT_SOURCE_DIR}/src/TDigitizer.cpp
+  ${PROJECT_SOURCE_DIR}/src/TDPP.cpp
+${PROJECT_SOURCE_DIR}/src/TPHA.cpp)
 
 #----------------------------------------------------------------------------
 # Add the executable, and link it to the Geant4 libraries
 #
-add_executable(digi main.cpp ${sources} ${headers})
+add_executable(digi main.cpp ${waveRecSources} ${headers})
 target_link_libraries(digi ${ROOT_LIBRARIES} CAENDigitizer)
 
-add_executable(dpp dpp.cpp ${sources} ${headers})
-target_link_libraries(dpp ${ROOT_LIBRARIES} CAENDigitizer)
+add_executable(psd dpp.cpp ${psdSources} ${headers})
+target_link_libraries(psd ${ROOT_LIBRARIES} CAENDigitizer)
 
-add_executable(PHA PHA.cpp ${sources} ${headers})
-target_link_libraries(PHA ${ROOT_LIBRARIES} CAENDigitizer)
-
-add_executable(sync sync.cpp ${sources} ${headers})
-target_link_libraries(sync ${ROOT_LIBRARIES} CAENDigitizer)
+add_executable(pha PHA.cpp ${phaSources} ${headers})
+target_link_libraries(pha ${ROOT_LIBRARIES} CAENDigitizer)
